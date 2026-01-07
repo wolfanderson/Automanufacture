@@ -32,7 +32,6 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
     if (!workshop?.children || !contentRef.current) return;
     
     const newPaths: { d: string; type: 'straight' | 'complex' }[] = [];
-    // Use contentRef for coordinate mapping to ensure lines scroll with content
     const containerRect = contentRef.current.getBoundingClientRect();
     const children = workshop.children;
 
@@ -47,36 +46,35 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
         const currRect = currentEl.getBoundingClientRect();
         const nextRect = nextEl.getBoundingClientRect();
 
-        // Coordinates relative to the scrollable content wrapper
         const startX = currRect.right - containerRect.left;
         const startY = currRect.top + currRect.height / 2 - containerRect.top;
         
         const endX = nextRect.left - containerRect.left;
         const endY = nextRect.top + nextRect.height / 2 - containerRect.top;
 
-        // Check if on same row (with tolerance for sub-pixel rendering)
-        const isSameRow = Math.abs(currRect.top - nextRect.top) < 20;
+        // Skip connection if elements are too far apart vertically (different logical zones)
+        if (Math.abs(currRect.top - nextRect.top) > 200) continue;
+
+        const isSameRow = Math.abs(currRect.top - nextRect.top) < 30;
 
         if (isSameRow) {
-          // STRAIGHT CONNECTION
-          // Ensure we don't draw backwards if something glitches
-          if (endX > startX) {
+           if (endX > startX) {
               newPaths.push({
                 d: `M ${startX} ${startY} L ${endX} ${endY}`,
                 type: 'straight'
               });
-          }
+           }
         } else {
-          // ORTHOGONAL WRAP (PCB Style)
+          // Compact PCB style routing
           const padding = 12; 
           const midY = (startY + endY) / 2;
           
           let path = `M ${startX} ${startY}`;
-          path += ` L ${startX + padding} ${startY}`; // Out Right
-          path += ` L ${startX + padding} ${midY}`;   // Down Half
-          path += ` L ${endX - padding} ${midY}`;     // Cross Left
-          path += ` L ${endX - padding} ${endY}`;     // Down Rest
-          path += ` L ${endX} ${endY}`;               // In Right
+          path += ` L ${startX + padding} ${startY}`; 
+          path += ` L ${startX + padding} ${midY}`;   
+          path += ` L ${endX - padding} ${midY}`;     
+          path += ` L ${endX - padding} ${endY}`;     
+          path += ` L ${endX} ${endY}`;               
           
           newPaths.push({
             d: path,
@@ -89,10 +87,7 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
   };
 
   useLayoutEffect(() => {
-    // Initial calc
     calculatePaths();
-
-    // Re-calc on resize
     const observer = new ResizeObserver(() => {
         window.requestAnimationFrame(calculatePaths);
     });
@@ -135,8 +130,6 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
 
       {/* Main Scrollable Area */}
       <div className="flex-1 overflow-y-auto custom-scrollbar bg-industrial-900/20 relative" ref={scrollContainerRef}>
-        
-        {/* Content Wrapper (Relative) ensures SVG scales with scroll content */}
         <div className="relative min-h-full" ref={contentRef}>
             
             {/* SVG Circuit Layer */}
@@ -147,46 +140,26 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
                         <feComposite in="SourceGraphic" in2="blur" operator="over" />
                     </filter>
                 </defs>
-                
                 {paths.map((p, i) => (
                     <g key={`${i}-${p.type}`}>
-                        {/* 1. Base Track (Dim) */}
-                        <path 
-                            d={p.d} 
-                            fill="none" 
-                            stroke="#1f2937" 
-                            strokeWidth="2" 
-                        />
-                        
-                        {/* 2. Data Packet Flow Animation */}
-                        {/* 
-                            For short straight lines, we use a denser dash array to ensure visibility.
-                            Pattern: 4px dash, 4px gap = 8px repeat.
-                        */}
-                        <path 
-                            d={p.d} 
-                            fill="none" 
-                            stroke="#00f0ff"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeDasharray="4 4" 
+                        <path d={p.d} fill="none" stroke="#1f2937" strokeWidth="2" />
+                        <path d={p.d} fill="none" stroke="#00f0ff" strokeWidth="2"
+                            strokeLinecap="round" strokeLinejoin="round" strokeDasharray="4 4" 
                             strokeOpacity={p.type === 'straight' ? "0.9" : "0.7"}
-                            className="animate-flow"
-                            filter="url(#glow-strong)"
-                        />
+                            className="animate-flow" filter="url(#glow-strong)" />
                     </g>
                 ))}
             </svg>
 
             {/* Grid Content */}
             <div className="p-6 pb-32 relative z-10">
-                <div className="grid grid-cols-[repeat(auto-fill,minmax(130px,1fr))] gap-x-8 gap-y-10">
+                {/* Switch from auto-fill to fixed column grid to support col-span */}
+                <div className="grid grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-x-6 gap-y-10 auto-rows-[90px]">
                 {workshop.children?.map((station, index) => {
                     const isSelected = selectedStationId === station.id;
                     const isInactive = station.status === NodeStatus.INACTIVE;
+                    const colSpan = station.meta?.colSpan || 1;
                     
-                    // Determine styling
                     let statusColor = 'bg-gray-700';
                     let borderColor = 'border-gray-800';
                     let shadowClass = '';
@@ -205,6 +178,11 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
                         shadowClass = isSelected ? 'shadow-[0_0_15px_rgba(255,42,42,0.4)]' : '';
                     }
 
+                    // Dynamic col-span classes
+                    const spanClass = colSpan === 2 ? 'col-span-2' : 
+                                      colSpan === 3 ? 'col-span-3' : 
+                                      colSpan >= 4 ? 'col-span-4' : 'col-span-1';
+
                     return (
                         <button
                             key={station.id}
@@ -214,42 +192,48 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
                             }}
                             onClick={() => !isInactive && onSelect(station.id)}
                             className={`
-                                relative flex flex-col justify-between h-22 p-2.5 rounded border text-left transition-all duration-200 group
+                                ${spanClass}
+                                relative flex flex-col justify-between h-full p-3 rounded border text-left transition-all duration-200 group
                                 bg-industrial-800/80 backdrop-blur-sm
-                                ${isSelected ? `scale-105 -translate-y-1 ${shadowClass} z-20 bg-gray-800` : 'hover:border-gray-600 hover:bg-industrial-800 hover:-translate-y-0.5'}
+                                ${isSelected ? `scale-[1.02] -translate-y-1 ${shadowClass} z-20 bg-gray-800` : 'hover:border-gray-600 hover:bg-industrial-800 hover:-translate-y-0.5'}
                                 ${isInactive ? 'opacity-30 grayscale cursor-not-allowed' : ''}
                                 ${borderColor}
                             `}
                         >
-                            {/* INPUT PORT (Left) */}
+                            {/* Connector Nodes (Hidden for full-width lines to look cleaner, or adjusted) */}
                             <div className={`absolute top-1/2 -left-[5px] w-[8px] h-[8px] rounded-full bg-industrial-900 border ${isSelected ? 'border-neon-blue' : 'border-gray-600'} flex items-center justify-center z-30`}>
                                 <div className="w-0.5 h-0.5 rounded-full bg-gray-500"></div>
                             </div>
-
-                            {/* OUTPUT PORT (Right) */}
                             <div className={`absolute top-1/2 -right-[5px] w-[8px] h-[8px] rounded-full bg-industrial-900 border ${isSelected ? 'border-neon-blue' : 'border-gray-600'} flex items-center justify-center z-30`}>
                                 <div className={`w-0.5 h-0.5 rounded-full ${index < (workshop.children?.length || 0) - 1 ? 'bg-neon-blue' : 'bg-gray-500'}`}></div>
                             </div>
 
-                            {/* Top: ID Status Dot */}
+                            {/* Header */}
                             <div className="flex justify-between items-start w-full mb-1">
-                                <span className="text-[9px] font-mono text-gray-500 tracking-wider uppercase truncate">
-                                    {station.id.split('-').pop()}
+                                <span className="text-[9px] font-mono text-gray-500 tracking-wider uppercase truncate max-w-[80%]">
+                                    {station.id.replace('asm-', '').toUpperCase()}
                                 </span>
-                                <div className={`h-2 w-2 rounded-full ${statusColor} shadow-sm`}></div>
+                                <div className={`h-2 w-2 rounded-full ${statusColor} shadow-sm flex-shrink-0`}></div>
                             </div>
 
-                            {/* Middle: Label */}
+                            {/* Label */}
                             <div className="flex-1 flex items-center">
-                                <h3 className={`text-[11px] font-bold leading-tight line-clamp-2 ${isSelected ? 'text-white' : 'text-gray-300'}`}>
+                                 <h3 className={`font-bold leading-tight ${colSpan > 1 ? 'text-lg' : 'text-xs line-clamp-2'} ${isSelected ? 'text-white' : 'text-gray-300'}`}>
                                     {station.label}
-                                </h3>
+                                 </h3>
                             </div>
 
-                            {/* Bottom: Mini Bar */}
-                            <div className="w-full h-[2px] bg-gray-700/50 rounded-full overflow-hidden mt-2">
+                            {/* Footer/Progress */}
+                            <div className="w-full h-[3px] bg-gray-700/50 rounded-full overflow-hidden mt-auto">
                                 <div className={`h-full ${statusColor} w-full opacity-70`}></div>
                             </div>
+                            
+                            {/* Station Count for large blocks */}
+                            {colSpan > 1 && (
+                                <div className="absolute bottom-3 right-3 text-[10px] text-gray-500 font-mono hidden lg:block">
+                                    {station.children?.length || 0} STATIONS
+                                </div>
+                            )}
                         </button>
                     );
                 })}

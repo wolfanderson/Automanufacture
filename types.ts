@@ -25,6 +25,7 @@ export interface NodeMeta {
   lastUpdated?: string;
   metrics?: MetricPoint[]; // For L3 visualization
   imgUrl?: string; // Placeholder for camera feed or snapshot
+  colSpan?: number; // Layout control: 1, 2, 3, 4 etc.
 }
 
 // The recursive structure

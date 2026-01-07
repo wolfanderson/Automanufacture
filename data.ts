@@ -8,7 +8,32 @@ const generateMockMetrics = (count: number, volatility: number) => {
   }));
 };
 
-// Helper to generate many stations
+// Helper to generate stations INSIDE a line (L3 items)
+const generateLineStations = (prefix: string, count: number): ProcessNode[] => {
+  return Array.from({ length: count }, (_, i) => {
+    const r = Math.random();
+    let status = NodeStatus.NORMAL;
+    if (r > 0.96) status = NodeStatus.CRITICAL;
+    else if (r > 0.9) status = NodeStatus.WARNING;
+    
+    // In this model, these are children of the L2 "Line" node.
+    // They are technically L3 but we treat them as individual stations with metrics.
+    return {
+        id: `${prefix}-op-${(i + 1) * 10}`,
+        label: `OP-${(i + 1) * 10} Assembly Task`,
+        type: NodeType.INSPECTION, // Use INSPECTION type so they appear in the right sidebar list
+        status: status,
+        meta: {
+            description: `Automated assembly operation ${(i+1)*10}`,
+            metrics: generateMockMetrics(20, 10),
+            // Randomly assign an image to some
+            imgUrl: r > 0.7 ? 'https://images.unsplash.com/photo-1565043589221-1a6fd9ae45c7?auto=format&fit=crop&w=400&q=80' : undefined
+        }
+    };
+  });
+};
+
+// Helper to generate many stations (legacy L2 style)
 const generateBulkStations = (prefix: string, count: number): ProcessNode[] => {
   return Array.from({ length: count }, (_, i) => {
     const r = Math.random();
@@ -51,18 +76,16 @@ const generateBulkStations = (prefix: string, count: number): ProcessNode[] => {
 export const MOCK_DATA: ProcessNode[] = [
   {
     id: 'ws-stamping',
-    label: 'Stamping', // L1: 车间名称
+    label: 'Stamping', 
     type: NodeType.WORKSHOP,
     status: NodeStatus.NORMAL,
     children: [
-      // --- 在这里新增自定义工位 (L2) ---
       {
-        id: 'st-custom-01', // 唯一ID
-        label: '✨ Manual Quality Check', // 工位显示名称
+        id: 'st-custom-01', 
+        label: '✨ Manual Quality Check', 
         type: NodeType.STATION,
-        status: NodeStatus.NORMAL, // 状态: NORMAL, WARNING, CRITICAL, INACTIVE
+        status: NodeStatus.NORMAL, 
         children: [
-          // --- 在这里新增检测项 (L3) ---
           {
             id: 'insp-visual-01',
             label: 'Surface Scratch Scan',
@@ -70,15 +93,12 @@ export const MOCK_DATA: ProcessNode[] = [
             status: NodeStatus.NORMAL,
             meta: {
               description: 'High-res camera surface analysis.',
-              // 模拟图表数据
               metrics: generateMockMetrics(20, 2),
-              // 可选：图片URL
               imgUrl: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=800&q=80'
             }
           }
         ]
       },
-      // ------------------------------------
       {
         id: 'st-metal-feed',
         label: 'Sheet Metal Feed',
@@ -115,7 +135,7 @@ export const MOCK_DATA: ProcessNode[] = [
           }
         ]
       },
-      ...generateBulkStations('stamp', 18) // Add some bulk for testing
+      ...generateBulkStations('stamp', 18) 
     ]
   },
   {
@@ -187,38 +207,178 @@ export const MOCK_DATA: ProcessNode[] = [
     id: 'ws-assembly',
     label: 'Assembly',
     type: NodeType.WORKSHOP,
-    status: NodeStatus.CRITICAL,
+    status: NodeStatus.NORMAL, // Override critical for now
     children: [
+      // --- Top Row: Sub-assemblies ---
       {
-        id: 'st-engine-mount',
-        label: 'Engine Marriage',
+        id: 'asm-rear-drive',
+        label: 'Rear Drive Sub-Assy', // 后驱分装线
+        type: NodeType.STATION,
+        status: NodeStatus.NORMAL,
+        meta: { colSpan: 1 },
+        children: generateLineStations('rd', 5)
+      },
+      {
+        id: 'asm-front-drive',
+        label: 'Front Drive Sub-Assy', // 前驱分装线
+        type: NodeType.STATION,
+        status: NodeStatus.NORMAL,
+        meta: { colSpan: 1 },
+        children: generateLineStations('fd', 5)
+      },
+      {
+        id: 'asm-powertrain',
+        label: 'Powertrain Line', // 动总分装线
+        type: NodeType.STATION,
+        status: NodeStatus.WARNING,
+        meta: { colSpan: 2 }, // Wider
+        children: generateLineStations('pt', 12)
+      },
+      {
+        id: 'asm-rear-module',
+        label: 'Rear Module Sub', // 后模块分装线
+        type: NodeType.STATION,
+        status: NodeStatus.NORMAL,
+        meta: { colSpan: 1 },
+        children: generateLineStations('rm', 6)
+      },
+       {
+        id: 'asm-chassis-pre',
+        label: 'Chassis Pre-Assy', // 底盘预装线
+        type: NodeType.STATION,
+        status: NodeStatus.NORMAL,
+        meta: { colSpan: 1 },
+        children: generateLineStations('cpre', 8)
+      },
+      // --- Row 2: Chassis Lines (Full width style) ---
+      {
+        id: 'asm-chassis-1',
+        label: 'Chassis Line 1', // 底盘1线
+        type: NodeType.STATION,
+        status: NodeStatus.NORMAL,
+        meta: { colSpan: 4 }, // Takes full row on medium screens
+        children: generateLineStations('cl1', 18)
+      },
+      {
+        id: 'asm-chassis-2',
+        label: 'Chassis Line 2', // 底盘2线
+        type: NodeType.STATION,
+        status: NodeStatus.NORMAL,
+        meta: { colSpan: 4 },
+        children: generateLineStations('cl2', 18)
+      },
+      // --- Row 3: Door & Front ---
+      {
+        id: 'asm-door',
+        label: 'Door Line', // 车门线
+        type: NodeType.STATION,
+        status: NodeStatus.NORMAL,
+        meta: { colSpan: 2 },
+        children: generateLineStations('door', 15)
+      },
+      {
+        id: 'asm-windshield',
+        label: 'Windshield Glazing', // 风挡涂胶
+        type: NodeType.STATION,
+        status: NodeStatus.NORMAL,
+        meta: { colSpan: 1 },
+        children: generateLineStations('wsg', 4)
+      },
+       {
+        id: 'asm-front-4',
+        label: 'Front Assy Line 4', // 前装4线
         type: NodeType.STATION,
         status: NodeStatus.CRITICAL,
-        children: [
-           {
-            id: 'insp-torque',
-            label: 'Bolt Torque Data',
-            type: NodeType.INSPECTION,
-            status: NodeStatus.CRITICAL,
-            meta: {
-              description: 'Automated nutrunner torque values.',
-              metrics: generateMockMetrics(20, 30) 
-            }
-          }
-        ]
+        meta: { colSpan: 3 },
+        children: generateLineStations('fa4', 20)
       },
-      ...generateBulkStations('asm', 148) // HUGE dataset for Assembly
+      // --- Row 4: Front & Sub ---
+      {
+        id: 'asm-roof',
+        label: 'Pano Roof', // 天幕涂胶
+        type: NodeType.STATION,
+        status: NodeStatus.NORMAL,
+        meta: { colSpan: 1 },
+        children: generateLineStations('prf', 3)
+      },
+      {
+        id: 'asm-heat-pump',
+        label: 'Heat Pump', // 热泵分装
+        type: NodeType.STATION,
+        status: NodeStatus.NORMAL,
+        meta: { colSpan: 1 },
+        children: generateLineStations('hp', 5)
+      },
+      {
+        id: 'asm-front-3',
+        label: 'Front Assy Line 3', // 前装3线
+        type: NodeType.STATION,
+        status: NodeStatus.NORMAL,
+        meta: { colSpan: 3 },
+        children: generateLineStations('fa3', 20)
+      },
+      {
+        id: 'asm-ip',
+        label: 'IP Sub-Assy', // IP分装线
+        type: NodeType.STATION,
+        status: NodeStatus.NORMAL,
+        meta: { colSpan: 1 },
+        children: generateLineStations('ip', 8)
+      },
+      // --- Row 5: Front/Rear ---
+      {
+        id: 'asm-front-2',
+        label: 'Front Assy Line 2', // 前装2线
+        type: NodeType.STATION,
+        status: NodeStatus.NORMAL,
+        meta: { colSpan: 3 },
+        children: generateLineStations('fa2', 20)
+      },
+      {
+        id: 'asm-front-1',
+        label: 'Front Assy Line 1', // 前装1线
+        type: NodeType.STATION,
+        status: NodeStatus.NORMAL,
+        meta: { colSpan: 3 },
+        children: generateLineStations('fa1', 20)
+      },
+      // --- Row 6: Rear ---
+      {
+        id: 'asm-rear-1',
+        label: 'Rear Assy Line 1', // 后装1线
+        type: NodeType.STATION,
+        status: NodeStatus.NORMAL,
+        meta: { colSpan: 3 },
+        children: generateLineStations('ra1', 15)
+      },
+      {
+        id: 'asm-rear-2',
+        label: 'Rear Assy Line 2', // 后装2线
+        type: NodeType.STATION,
+        status: NodeStatus.NORMAL,
+        meta: { colSpan: 3 },
+        children: generateLineStations('ra2', 15)
+      },
+      // --- Aux ---
+      {
+        id: 'asm-supply',
+        label: 'Supply Room', // 辅房
+        type: NodeType.STATION,
+        status: NodeStatus.INACTIVE,
+        meta: { colSpan: 6 },
+        children: []
+      }
     ]
   },
   {
     id: 'ws-eol',
-    label: 'EOL Inspection', // 下线检测
+    label: 'EOL Inspection', 
     type: NodeType.WORKSHOP,
     status: NodeStatus.NORMAL,
     children: [
       {
         id: 'st-aging',
-        label: 'Aging Test', // 老化测试
+        label: 'Aging Test', 
         type: NodeType.STATION,
         status: NodeStatus.NORMAL,
         children: [
@@ -233,7 +393,7 @@ export const MOCK_DATA: ProcessNode[] = [
       },
       {
         id: 'st-dyn-road',
-        label: 'Dynamic Road Test', // 动态路试
+        label: 'Dynamic Road Test',
         type: NodeType.STATION,
         status: NodeStatus.NORMAL,
         children: [
@@ -248,7 +408,7 @@ export const MOCK_DATA: ProcessNode[] = [
       },
       {
         id: 'st-intensive-road',
-        label: 'Intensive Road Test', // 强化路试
+        label: 'Intensive Road Test',
         type: NodeType.STATION,
         status: NodeStatus.WARNING,
         children: [
@@ -263,7 +423,7 @@ export const MOCK_DATA: ProcessNode[] = [
       },
       {
         id: 'st-ort',
-        label: 'ORT', // ORT
+        label: 'ORT',
         type: NodeType.STATION,
         status: NodeStatus.NORMAL,
         children: [
@@ -278,7 +438,7 @@ export const MOCK_DATA: ProcessNode[] = [
       },
       {
         id: 'st-pit',
-        label: 'Pit Inspection', // 地沟检测
+        label: 'Pit Inspection', 
         type: NodeType.STATION,
         status: NodeStatus.NORMAL,
         children: [
@@ -293,7 +453,7 @@ export const MOCK_DATA: ProcessNode[] = [
       },
       {
         id: 'st-dark-room',
-        label: 'Light Tunnel', // 小黑屋
+        label: 'Light Tunnel',
         type: NodeType.STATION,
         status: NodeStatus.NORMAL,
         children: [
@@ -308,7 +468,7 @@ export const MOCK_DATA: ProcessNode[] = [
       },
       {
         id: 'st-shower',
-        label: 'Rain Test', // 淋雨线
+        label: 'Rain Test',
         type: NodeType.STATION,
         status: NodeStatus.NORMAL,
         children: [
@@ -323,7 +483,7 @@ export const MOCK_DATA: ProcessNode[] = [
       },
       {
         id: 'st-cp89',
-        label: 'CP8/9', // CP8/9
+        label: 'CP8/9', 
         type: NodeType.STATION,
         status: NodeStatus.NORMAL,
         children: [
