@@ -1,6 +1,6 @@
-import React, { useMemo, useRef, useEffect, useState, useLayoutEffect } from 'react';
+import React, { useMemo, useRef, useState, useLayoutEffect } from 'react';
 import { ProcessNode, NodeStatus } from '../types';
-import { Box, AlertCircle, CheckCircle, Ban, AlertTriangle } from 'lucide-react';
+import { AlertCircle, CheckCircle, Ban, AlertTriangle } from 'lucide-react';
 
 interface StationListProps {
   workshop: ProcessNode | undefined;
@@ -9,7 +9,8 @@ interface StationListProps {
 }
 
 export const StationList: React.FC<StationListProps> = ({ workshop, selectedStationId, onSelect }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
   const itemsRef = useRef<Map<string, HTMLButtonElement>>(new Map());
   const [paths, setPaths] = useState<{ d: string; type: 'straight' | 'complex' }[]>([]);
   
@@ -28,10 +29,11 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
 
   // --- Advanced Circuit Connection Logic ---
   const calculatePaths = () => {
-    if (!workshop?.children || !containerRef.current) return;
+    if (!workshop?.children || !contentRef.current) return;
     
     const newPaths: { d: string; type: 'straight' | 'complex' }[] = [];
-    const containerRect = containerRef.current.getBoundingClientRect();
+    // Use contentRef for coordinate mapping to ensure lines scroll with content
+    const containerRect = contentRef.current.getBoundingClientRect();
     const children = workshop.children;
 
     for (let i = 0; i < children.length - 1; i++) {
@@ -45,26 +47,27 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
         const currRect = currentEl.getBoundingClientRect();
         const nextRect = nextEl.getBoundingClientRect();
 
-        // Coordinates relative to container
-        // Start from Right Edge Center (Account for the small output node protrusion)
+        // Coordinates relative to the scrollable content wrapper
         const startX = currRect.right - containerRect.left;
         const startY = currRect.top + currRect.height / 2 - containerRect.top;
         
-        // End at Left Edge Center
         const endX = nextRect.left - containerRect.left;
         const endY = nextRect.top + nextRect.height / 2 - containerRect.top;
 
-        const isSameRow = Math.abs(currRect.top - nextRect.top) < 30;
+        // Check if on same row (with tolerance for sub-pixel rendering)
+        const isSameRow = Math.abs(currRect.top - nextRect.top) < 20;
 
         if (isSameRow) {
           // STRAIGHT CONNECTION
-          newPaths.push({
-            d: `M ${startX} ${startY} L ${endX} ${endY}`,
-            type: 'straight'
-          });
+          // Ensure we don't draw backwards if something glitches
+          if (endX > startX) {
+              newPaths.push({
+                d: `M ${startX} ${startY} L ${endX} ${endY}`,
+                type: 'straight'
+              });
+          }
         } else {
           // ORTHOGONAL WRAP (PCB Style)
-          // Tighter padding for denser layout
           const padding = 12; 
           const midY = (startY + endY) / 2;
           
@@ -86,12 +89,18 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
   };
 
   useLayoutEffect(() => {
+    // Initial calc
     calculatePaths();
-    const resizeObserver = new ResizeObserver(() => {
-      window.requestAnimationFrame(calculatePaths);
+
+    // Re-calc on resize
+    const observer = new ResizeObserver(() => {
+        window.requestAnimationFrame(calculatePaths);
     });
-    if (containerRef.current) resizeObserver.observe(containerRef.current);
-    return () => resizeObserver.disconnect();
+
+    if (scrollContainerRef.current) observer.observe(scrollContainerRef.current);
+    if (contentRef.current) observer.observe(contentRef.current);
+
+    return () => observer.disconnect();
   }, [workshop, stats]);
 
   if (!workshop) {
@@ -105,157 +114,157 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
   return (
     <div className="h-full flex flex-col bg-industrial-900/30">
       {/* Header */}
-      <div className="p-3 border-b border-gray-800 bg-industrial-900/90 backdrop-blur z-30 flex items-center justify-between shadow-lg relative">
+      <div className="p-2 border-b border-gray-800 bg-industrial-900/95 backdrop-blur z-30 flex items-center justify-between shadow-lg relative h-12 flex-shrink-0">
         <div>
-           <h2 className="text-lg font-bold text-white flex items-center gap-2 tracking-tight">
+           <h2 className="text-sm font-bold text-white flex items-center gap-2 tracking-tight">
              <span className="text-neon-blue">L2</span>
              {workshop.label.toUpperCase()}
            </h2>
-           <p className="text-[10px] text-gray-500 font-mono">PROCESS FLOW VISUALIZATION</p>
         </div>
         <div className="flex gap-2">
-             <div className="flex flex-col items-center px-2 py-0.5 bg-neon-green/10 rounded border border-neon-green/30 min-w-[60px]">
-                <span className="text-[9px] text-neon-green font-mono uppercase">Norm</span>
-                <span className="text-sm font-bold text-neon-green leading-none">{stats.normal}</span>
+             <div className="flex items-center gap-1.5 px-2 py-0.5 bg-neon-green/5 rounded border border-neon-green/20">
+                <span className="w-1.5 h-1.5 rounded-full bg-neon-green animate-pulse"></span>
+                <span className="text-xs font-bold text-neon-green font-mono">{stats.normal}</span>
             </div>
-             <div className="flex flex-col items-center px-2 py-0.5 bg-neon-red/10 rounded border border-neon-red/30 min-w-[60px]">
-                <span className="text-[9px] text-neon-red font-mono uppercase">Crit</span>
-                <span className="text-sm font-bold text-neon-red leading-none">{stats.critical}</span>
+             <div className="flex items-center gap-1.5 px-2 py-0.5 bg-neon-red/5 rounded border border-neon-red/20">
+                <span className="w-1.5 h-1.5 rounded-full bg-neon-red animate-pulse"></span>
+                <span className="text-xs font-bold text-neon-red font-mono">{stats.critical}</span>
             </div>
         </div>
       </div>
 
-      {/* Main Content Area */}
-      <div className="flex-1 overflow-y-auto relative custom-scrollbar" ref={containerRef}>
+      {/* Main Scrollable Area */}
+      <div className="flex-1 overflow-y-auto custom-scrollbar bg-industrial-900/20 relative" ref={scrollContainerRef}>
         
-        {/* SVG Circuit Layer */}
-        <svg className="absolute top-0 left-0 w-full h-full pointer-events-none z-0 overflow-visible">
-            <defs>
-                <filter id="glow-line" x="-20%" y="-20%" width="140%" height="140%">
-                    <feGaussianBlur stdDeviation="1" result="blur" />
-                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                </filter>
-            </defs>
+        {/* Content Wrapper (Relative) ensures SVG scales with scroll content */}
+        <div className="relative min-h-full" ref={contentRef}>
             
-            {paths.map((p, i) => (
-                <g key={i}>
-                    {/* 1. Base Dark Trace */}
-                    <path 
-                        d={p.d} 
-                        fill="none" 
-                        stroke="#1f2937" 
-                        strokeWidth="3" 
-                        strokeLinecap="square"
-                        strokeLinejoin="round"
-                    />
+            {/* SVG Circuit Layer */}
+            <svg className="absolute top-0 left-0 w-full h-full pointer-events-none z-0 overflow-visible">
+                <defs>
+                    <filter id="glow-strong" x="-50%" y="-50%" width="200%" height="200%">
+                        <feGaussianBlur stdDeviation="1.5" result="blur" />
+                        <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                    </filter>
+                </defs>
+                
+                {paths.map((p, i) => (
+                    <g key={`${i}-${p.type}`}>
+                        {/* 1. Base Track (Dim) */}
+                        <path 
+                            d={p.d} 
+                            fill="none" 
+                            stroke="#1f2937" 
+                            strokeWidth="2" 
+                        />
+                        
+                        {/* 2. Data Packet Flow Animation */}
+                        {/* 
+                            For short straight lines, we use a denser dash array to ensure visibility.
+                            Pattern: 4px dash, 4px gap = 8px repeat.
+                        */}
+                        <path 
+                            d={p.d} 
+                            fill="none" 
+                            stroke="#00f0ff"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeDasharray="4 4" 
+                            strokeOpacity={p.type === 'straight' ? "0.9" : "0.7"}
+                            className="animate-flow"
+                            filter="url(#glow-strong)"
+                        />
+                    </g>
+                ))}
+            </svg>
+
+            {/* Grid Content */}
+            <div className="p-6 pb-32 relative z-10">
+                <div className="grid grid-cols-[repeat(auto-fill,minmax(130px,1fr))] gap-x-8 gap-y-10">
+                {workshop.children?.map((station, index) => {
+                    const isSelected = selectedStationId === station.id;
+                    const isInactive = station.status === NodeStatus.INACTIVE;
                     
-                    {/* 2. Flow Animation (Marching Dashes) */}
-                    <path 
-                        d={p.d} 
-                        fill="none" 
-                        stroke="#00f0ff" 
-                        strokeWidth="1.5" 
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeDasharray="4 4" 
-                        strokeOpacity="0.8"
-                        className="animate-flow"
-                        filter="url(#glow-line)"
-                    />
-                </g>
-            ))}
-        </svg>
+                    // Determine styling
+                    let statusColor = 'bg-gray-700';
+                    let borderColor = 'border-gray-800';
+                    let shadowClass = '';
+                    
+                    if (station.status === NodeStatus.NORMAL) {
+                        statusColor = 'bg-neon-green';
+                        borderColor = isSelected ? 'border-neon-green' : 'border-gray-700';
+                        shadowClass = isSelected ? 'shadow-[0_0_15px_rgba(10,255,0,0.3)]' : '';
+                    } else if (station.status === NodeStatus.WARNING) {
+                        statusColor = 'bg-neon-yellow';
+                        borderColor = isSelected ? 'border-neon-yellow' : 'border-gray-700';
+                        shadowClass = isSelected ? 'shadow-[0_0_15px_rgba(252,238,10,0.3)]' : '';
+                    } else if (station.status === NodeStatus.CRITICAL) {
+                        statusColor = 'bg-neon-red';
+                        borderColor = isSelected ? 'border-neon-red' : 'border-gray-700';
+                        shadowClass = isSelected ? 'shadow-[0_0_15px_rgba(255,42,42,0.4)]' : '';
+                    }
 
-        {/* Grid Content - COMPACT LAYOUT */}
-        <div className="p-8 pb-32">
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-x-10 gap-y-12">
-            {workshop.children?.map((station, index) => {
-                const isSelected = selectedStationId === station.id;
-                const isInactive = station.status === NodeStatus.INACTIVE;
-                
-                // Determine styling
-                let statusColor = 'bg-gray-700';
-                let borderColor = 'border-gray-700';
-                let shadowClass = '';
-                let icon = <Ban size={12} />;
-                
-                if (station.status === NodeStatus.NORMAL) {
-                    statusColor = 'bg-neon-green';
-                    borderColor = isSelected ? 'border-neon-green' : 'border-gray-700';
-                    shadowClass = isSelected ? 'shadow-[0_0_15px_rgba(10,255,0,0.4)]' : '';
-                    icon = <CheckCircle size={12} className="text-black" />;
-                } else if (station.status === NodeStatus.WARNING) {
-                    statusColor = 'bg-neon-yellow';
-                    borderColor = isSelected ? 'border-neon-yellow' : 'border-gray-700';
-                    shadowClass = isSelected ? 'shadow-[0_0_15px_rgba(252,238,10,0.4)]' : '';
-                    icon = <AlertCircle size={12} className="text-black" />;
-                } else if (station.status === NodeStatus.CRITICAL) {
-                    statusColor = 'bg-neon-red';
-                    borderColor = isSelected ? 'border-neon-red' : 'border-gray-700';
-                    shadowClass = isSelected ? 'shadow-[0_0_15px_rgba(255,42,42,0.5)]' : '';
-                    icon = <AlertTriangle size={12} className="text-black" />;
-                }
-
-                return (
-                    <button
-                        key={station.id}
-                        ref={el => {
-                            if (el) itemsRef.current.set(station.id, el);
-                            else itemsRef.current.delete(station.id);
-                        }}
-                        onClick={() => !isInactive && onSelect(station.id)}
-                        className={`
-                            relative flex flex-col justify-between h-24 p-3 rounded-lg border text-left transition-all duration-300 group z-10
-                            bg-industrial-800/95 backdrop-blur-md
-                            ${isSelected ? `scale-110 -translate-y-1 ${shadowClass} z-20` : 'hover:border-gray-500 hover:shadow-lg hover:-translate-y-1'}
-                            ${isInactive ? 'opacity-40 grayscale cursor-not-allowed' : ''}
-                            ${borderColor}
-                        `}
-                    >
-                        {/* INPUT PORT (Left) */}
-                        <div className={`absolute top-1/2 -left-[6px] w-[10px] h-[10px] rounded-full bg-industrial-900 border ${isSelected ? 'border-neon-blue' : 'border-gray-600'} flex items-center justify-center z-30`}>
-                            <div className="w-1 h-1 rounded-full bg-gray-500"></div>
-                        </div>
-
-                        {/* OUTPUT PORT (Right) */}
-                        <div className={`absolute top-1/2 -right-[6px] w-[10px] h-[10px] rounded-full bg-industrial-900 border ${isSelected ? 'border-neon-blue' : 'border-gray-600'} flex items-center justify-center z-30`}>
-                             <div className={`w-1 h-1 rounded-full ${index < (workshop.children?.length || 0) - 1 ? 'bg-neon-blue' : 'bg-gray-500'}`}></div>
-                        </div>
-
-                        {/* Top Row: ID & Icon */}
-                        <div className="flex justify-between items-start w-full mb-1">
-                            <span className="text-[9px] font-mono text-gray-500 tracking-widest uppercase">
-                                {station.id.split('-').pop()}
-                            </span>
-                            <div className={`h-4 w-4 rounded flex items-center justify-center ${statusColor}`}>
-                                {icon}
+                    return (
+                        <button
+                            key={station.id}
+                            ref={el => {
+                                if (el) itemsRef.current.set(station.id, el);
+                                else itemsRef.current.delete(station.id);
+                            }}
+                            onClick={() => !isInactive && onSelect(station.id)}
+                            className={`
+                                relative flex flex-col justify-between h-22 p-2.5 rounded border text-left transition-all duration-200 group
+                                bg-industrial-800/80 backdrop-blur-sm
+                                ${isSelected ? `scale-105 -translate-y-1 ${shadowClass} z-20 bg-gray-800` : 'hover:border-gray-600 hover:bg-industrial-800 hover:-translate-y-0.5'}
+                                ${isInactive ? 'opacity-30 grayscale cursor-not-allowed' : ''}
+                                ${borderColor}
+                            `}
+                        >
+                            {/* INPUT PORT (Left) */}
+                            <div className={`absolute top-1/2 -left-[5px] w-[8px] h-[8px] rounded-full bg-industrial-900 border ${isSelected ? 'border-neon-blue' : 'border-gray-600'} flex items-center justify-center z-30`}>
+                                <div className="w-0.5 h-0.5 rounded-full bg-gray-500"></div>
                             </div>
-                        </div>
 
-                        {/* Middle: Label */}
-                        <div className="flex-1 flex items-center">
-                             <h3 className={`text-xs font-bold leading-tight line-clamp-2 ${isSelected ? 'text-white' : 'text-gray-300'}`}>
-                                {station.label}
-                             </h3>
-                        </div>
+                            {/* OUTPUT PORT (Right) */}
+                            <div className={`absolute top-1/2 -right-[5px] w-[8px] h-[8px] rounded-full bg-industrial-900 border ${isSelected ? 'border-neon-blue' : 'border-gray-600'} flex items-center justify-center z-30`}>
+                                <div className={`w-0.5 h-0.5 rounded-full ${index < (workshop.children?.length || 0) - 1 ? 'bg-neon-blue' : 'bg-gray-500'}`}></div>
+                            </div>
 
-                        {/* Bottom: Progress Bar style status */}
-                        <div className="w-full h-0.5 bg-gray-700/50 rounded-full overflow-hidden mt-2">
-                            <div className={`h-full ${statusColor} w-full opacity-80`}></div>
-                        </div>
-                    </button>
-                );
-            })}
+                            {/* Top: ID Status Dot */}
+                            <div className="flex justify-between items-start w-full mb-1">
+                                <span className="text-[9px] font-mono text-gray-500 tracking-wider uppercase truncate">
+                                    {station.id.split('-').pop()}
+                                </span>
+                                <div className={`h-2 w-2 rounded-full ${statusColor} shadow-sm`}></div>
+                            </div>
+
+                            {/* Middle: Label */}
+                            <div className="flex-1 flex items-center">
+                                <h3 className={`text-[11px] font-bold leading-tight line-clamp-2 ${isSelected ? 'text-white' : 'text-gray-300'}`}>
+                                    {station.label}
+                                </h3>
+                            </div>
+
+                            {/* Bottom: Mini Bar */}
+                            <div className="w-full h-[2px] bg-gray-700/50 rounded-full overflow-hidden mt-2">
+                                <div className={`h-full ${statusColor} w-full opacity-70`}></div>
+                            </div>
+                        </button>
+                    );
+                })}
+                </div>
             </div>
         </div>
       </div>
       
       <style>{`
         @keyframes flow {
-            to { stroke-dashoffset: -16; }
+            from { stroke-dashoffset: 8; }
+            to { stroke-dashoffset: 0; }
         }
         .animate-flow {
-            animation: flow 1s linear infinite;
+            animation: flow 0.4s linear infinite;
         }
       `}</style>
     </div>

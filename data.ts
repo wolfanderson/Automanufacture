@@ -51,10 +51,34 @@ const generateBulkStations = (prefix: string, count: number): ProcessNode[] => {
 export const MOCK_DATA: ProcessNode[] = [
   {
     id: 'ws-stamping',
-    label: 'Stamping',
+    label: 'Stamping', // L1: 车间名称
     type: NodeType.WORKSHOP,
     status: NodeStatus.NORMAL,
     children: [
+      // --- 在这里新增自定义工位 (L2) ---
+      {
+        id: 'st-custom-01', // 唯一ID
+        label: '✨ Manual Quality Check', // 工位显示名称
+        type: NodeType.STATION,
+        status: NodeStatus.NORMAL, // 状态: NORMAL, WARNING, CRITICAL, INACTIVE
+        children: [
+          // --- 在这里新增检测项 (L3) ---
+          {
+            id: 'insp-visual-01',
+            label: 'Surface Scratch Scan',
+            type: NodeType.INSPECTION,
+            status: NodeStatus.NORMAL,
+            meta: {
+              description: 'High-res camera surface analysis.',
+              // 模拟图表数据
+              metrics: generateMockMetrics(20, 2),
+              // 可选：图片URL
+              imgUrl: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=800&q=80'
+            }
+          }
+        ]
+      },
+      // ------------------------------------
       {
         id: 'st-metal-feed',
         label: 'Sheet Metal Feed',
@@ -114,7 +138,7 @@ export const MOCK_DATA: ProcessNode[] = [
             meta: {
               description: 'AI Vision system detecting gap variances.',
               metrics: generateMockMetrics(20, 2),
-              imgUrl: 'https://picsum.photos/600/400'
+              imgUrl: 'https://images.unsplash.com/photo-1565043589221-1a6fd9ae45c7?auto=format&fit=crop&w=800&q=80'
             }
           },
           {
@@ -184,6 +208,134 @@ export const MOCK_DATA: ProcessNode[] = [
         ]
       },
       ...generateBulkStations('asm', 148) // HUGE dataset for Assembly
+    ]
+  },
+  {
+    id: 'ws-eol',
+    label: 'EOL Inspection', // 下线检测
+    type: NodeType.WORKSHOP,
+    status: NodeStatus.NORMAL,
+    children: [
+      {
+        id: 'st-aging',
+        label: 'Aging Test', // 老化测试
+        type: NodeType.STATION,
+        status: NodeStatus.NORMAL,
+        children: [
+           {
+            id: 'insp-battery',
+            label: 'Battery Discharge',
+            type: NodeType.INSPECTION,
+            status: NodeStatus.NORMAL,
+            meta: { description: 'HV Battery load test cycle.', metrics: generateMockMetrics(20, 3) }
+           }
+        ]
+      },
+      {
+        id: 'st-dyn-road',
+        label: 'Dynamic Road Test', // 动态路试
+        type: NodeType.STATION,
+        status: NodeStatus.NORMAL,
+        children: [
+          {
+            id: 'insp-nvh',
+            label: 'NVH Analysis',
+            type: NodeType.INSPECTION,
+            status: NodeStatus.NORMAL,
+            meta: { description: 'Noise, vibration, and harshness metrics.', metrics: generateMockMetrics(20, 5) }
+          }
+        ]
+      },
+      {
+        id: 'st-intensive-road',
+        label: 'Intensive Road Test', // 强化路试
+        type: NodeType.STATION,
+        status: NodeStatus.WARNING,
+        children: [
+          {
+            id: 'insp-suspension',
+            label: 'Suspension Check',
+            type: NodeType.INSPECTION,
+            status: NodeStatus.WARNING,
+            meta: { description: 'Shock absorber thermal stress data.', metrics: generateMockMetrics(20, 15) }
+           }
+        ]
+      },
+      {
+        id: 'st-ort',
+        label: 'ORT', // ORT
+        type: NodeType.STATION,
+        status: NodeStatus.NORMAL,
+        children: [
+           {
+            id: 'insp-rel',
+            label: 'Reliability Cycle',
+            type: NodeType.INSPECTION,
+            status: NodeStatus.NORMAL,
+            meta: { description: 'Continuous operation stress testing.', metrics: generateMockMetrics(20, 2) }
+           }
+        ]
+      },
+      {
+        id: 'st-pit',
+        label: 'Pit Inspection', // 地沟检测
+        type: NodeType.STATION,
+        status: NodeStatus.NORMAL,
+        children: [
+           {
+            id: 'insp-leak',
+            label: 'Fluid Leak Check',
+            type: NodeType.INSPECTION,
+            status: NodeStatus.NORMAL,
+            meta: { description: 'Undercarriage visual fluid inspection.', metrics: generateMockMetrics(20, 1) }
+           }
+        ]
+      },
+      {
+        id: 'st-dark-room',
+        label: 'Light Tunnel', // 小黑屋
+        type: NodeType.STATION,
+        status: NodeStatus.NORMAL,
+        children: [
+          {
+            id: 'insp-headlight',
+            label: 'Headlight Aim',
+            type: NodeType.INSPECTION,
+            status: NodeStatus.NORMAL,
+            meta: { description: 'Matrix LED projection alignment.', metrics: generateMockMetrics(20, 2) }
+           }
+        ]
+      },
+      {
+        id: 'st-shower',
+        label: 'Rain Test', // 淋雨线
+        type: NodeType.STATION,
+        status: NodeStatus.NORMAL,
+        children: [
+           {
+            id: 'insp-seal',
+            label: 'Cabin Sealing',
+            type: NodeType.INSPECTION,
+            status: NodeStatus.NORMAL,
+            meta: { description: 'Humidity sensor array reading.', metrics: generateMockMetrics(20, 4) }
+           }
+        ]
+      },
+      {
+        id: 'st-cp89',
+        label: 'CP8/9', // CP8/9
+        type: NodeType.STATION,
+        status: NodeStatus.NORMAL,
+        children: [
+           {
+            id: 'insp-final',
+            label: 'Final Buy-off',
+            type: NodeType.INSPECTION,
+            status: NodeStatus.NORMAL,
+            meta: { description: 'Complete vehicle digital sign-off.', metrics: generateMockMetrics(20, 1) }
+           }
+        ]
+      }
     ]
   }
 ];
