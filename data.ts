@@ -209,7 +209,119 @@ export const MOCK_DATA: ProcessNode[] = [
     type: NodeType.WORKSHOP,
     status: NodeStatus.NORMAL, 
     children: [
-      // 1. 分装集成区 (Zone)
+      // Order: Front -> Chassis -> Rear -> Sub-Assembly (at the end)
+
+      // 1. 前装主线 (Zone)
+      {
+        id: 'zone-front-main',
+        label: '前装主线 (Front Assembly)',
+        type: NodeType.ZONE,
+        status: NodeStatus.CRITICAL,
+        children: [
+           {
+            id: 'asm-front-1',
+            label: '前装 1 线', 
+            type: NodeType.STATION,
+            status: NodeStatus.NORMAL,
+            meta: { colSpan: 2 },
+            children: generateLineStations('fa1', 20)
+          },
+          {
+            id: 'asm-front-2',
+            label: '前装 2 线', 
+            type: NodeType.STATION,
+            status: NodeStatus.NORMAL,
+            meta: { colSpan: 2 },
+            children: generateLineStations('fa2', 20)
+          },
+          {
+            id: 'asm-front-3',
+            label: '前装 3 线', 
+            type: NodeType.STATION,
+            status: NodeStatus.NORMAL,
+            meta: { colSpan: 2 },
+            children: generateLineStations('fa3', 20)
+          },
+          {
+            id: 'asm-front-4',
+            label: '前装 4 线', 
+            type: NodeType.STATION,
+            status: NodeStatus.CRITICAL,
+            meta: { colSpan: 2 },
+            children: generateLineStations('fa4', 20)
+          }
+        ]
+      },
+
+      // 2. 底盘线 (Zone)
+      {
+        id: 'zone-chassis-main',
+        label: '底盘合装线 (Chassis Marriage)',
+        type: NodeType.ZONE,
+        status: NodeStatus.NORMAL,
+        children: [
+           {
+            id: 'asm-chassis-1',
+            label: '底盘 1 线', 
+            type: NodeType.STATION,
+            status: NodeStatus.NORMAL,
+            meta: { colSpan: 4 }, 
+            children: generateLineStations('cl1', 18)
+          },
+          {
+            id: 'asm-chassis-2',
+            label: '底盘 2 线', 
+            type: NodeType.STATION,
+            status: NodeStatus.NORMAL,
+            meta: { colSpan: 4 },
+            children: generateLineStations('cl2', 18)
+          },
+        ]
+      },
+
+      // 3. 后装线 (Zone)
+      {
+        id: 'zone-rear-main',
+        label: '后装主线 (Rear Assembly)',
+        type: NodeType.ZONE,
+        status: NodeStatus.NORMAL,
+        children: [
+          {
+            id: 'asm-door',
+            label: '车门线', 
+            type: NodeType.STATION,
+            status: NodeStatus.NORMAL,
+            meta: { colSpan: 2 },
+            children: generateLineStations('door', 15)
+          },
+          {
+            id: 'asm-rear-1',
+            label: '后装 1 线', 
+            type: NodeType.STATION,
+            status: NodeStatus.NORMAL,
+            meta: { colSpan: 2 },
+            children: generateLineStations('ra1', 15)
+          },
+          {
+            id: 'asm-rear-2',
+            label: '后装 2 线', 
+            type: NodeType.STATION,
+            status: NodeStatus.NORMAL,
+            meta: { colSpan: 2 },
+            children: generateLineStations('ra2', 15)
+          },
+          {
+            id: 'asm-supply',
+            label: '辅房/物料区', 
+            type: NodeType.STATION,
+            status: NodeStatus.INACTIVE,
+            meta: { colSpan: 2 },
+            children: []
+          }
+        ]
+      },
+
+      // 4. 分装集成区 (Zone) - Moved to bottom
       {
         id: 'zone-sub-assembly',
         label: '分装集成区 (Sub-Assembly Area)',
@@ -272,7 +384,6 @@ export const MOCK_DATA: ProcessNode[] = [
             meta: { colSpan: 1 },
             children: generateLineStations('cpre', 8)
           },
-          // Moved here as requested
           {
             id: 'asm-windshield',
             label: '风挡涂胶', 
@@ -293,7 +404,6 @@ export const MOCK_DATA: ProcessNode[] = [
                 }
             ]
           },
-          // Moved here as requested
           {
             id: 'asm-roof',
             label: '天幕涂胶', 
@@ -313,116 +423,6 @@ export const MOCK_DATA: ProcessNode[] = [
                     }
                 }
             ]
-          }
-        ]
-      },
-
-      // 2. 前装主线 (Zone)
-      {
-        id: 'zone-front-main',
-        label: '前装主线 (Front Assembly)',
-        type: NodeType.ZONE,
-        status: NodeStatus.CRITICAL,
-        children: [
-           {
-            id: 'asm-front-1',
-            label: '前装 1 线', 
-            type: NodeType.STATION,
-            status: NodeStatus.NORMAL,
-            meta: { colSpan: 2 },
-            children: generateLineStations('fa1', 20)
-          },
-          {
-            id: 'asm-front-2',
-            label: '前装 2 线', 
-            type: NodeType.STATION,
-            status: NodeStatus.NORMAL,
-            meta: { colSpan: 2 },
-            children: generateLineStations('fa2', 20)
-          },
-          {
-            id: 'asm-front-3',
-            label: '前装 3 线', 
-            type: NodeType.STATION,
-            status: NodeStatus.NORMAL,
-            meta: { colSpan: 2 },
-            children: generateLineStations('fa3', 20)
-          },
-          {
-            id: 'asm-front-4',
-            label: '前装 4 线', 
-            type: NodeType.STATION,
-            status: NodeStatus.CRITICAL,
-            meta: { colSpan: 2 },
-            children: generateLineStations('fa4', 20)
-          }
-        ]
-      },
-
-      // 3. 底盘线 (Zone)
-      {
-        id: 'zone-chassis-main',
-        label: '底盘合装线 (Chassis Marriage)',
-        type: NodeType.ZONE,
-        status: NodeStatus.NORMAL,
-        children: [
-           {
-            id: 'asm-chassis-1',
-            label: '底盘 1 线', 
-            type: NodeType.STATION,
-            status: NodeStatus.NORMAL,
-            meta: { colSpan: 4 }, 
-            children: generateLineStations('cl1', 18)
-          },
-          {
-            id: 'asm-chassis-2',
-            label: '底盘 2 线', 
-            type: NodeType.STATION,
-            status: NodeStatus.NORMAL,
-            meta: { colSpan: 4 },
-            children: generateLineStations('cl2', 18)
-          },
-        ]
-      },
-
-      // 4. 后装线 (Zone)
-      {
-        id: 'zone-rear-main',
-        label: '后装主线 (Rear Assembly)',
-        type: NodeType.ZONE,
-        status: NodeStatus.NORMAL,
-        children: [
-          {
-            id: 'asm-door',
-            label: '车门线', 
-            type: NodeType.STATION,
-            status: NodeStatus.NORMAL,
-            meta: { colSpan: 2 },
-            children: generateLineStations('door', 15)
-          },
-          {
-            id: 'asm-rear-1',
-            label: '后装 1 线', 
-            type: NodeType.STATION,
-            status: NodeStatus.NORMAL,
-            meta: { colSpan: 2 },
-            children: generateLineStations('ra1', 15)
-          },
-          {
-            id: 'asm-rear-2',
-            label: '后装 2 线', 
-            type: NodeType.STATION,
-            status: NodeStatus.NORMAL,
-            meta: { colSpan: 2 },
-            children: generateLineStations('ra2', 15)
-          },
-          {
-            id: 'asm-supply',
-            label: '辅房/物料区', 
-            type: NodeType.STATION,
-            status: NodeStatus.INACTIVE,
-            meta: { colSpan: 2 },
-            children: []
           }
         ]
       }
@@ -461,7 +461,7 @@ export const MOCK_DATA: ProcessNode[] = [
             type: NodeType.INSPECTION,
             status: NodeStatus.NORMAL,
             meta: { description: '噪音、振动与声振粗糙度指标分析。', metrics: generateMockMetrics(20, 5) }
-          }
+           }
         ]
       },
       {

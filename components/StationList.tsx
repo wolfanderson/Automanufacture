@@ -51,14 +51,13 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
     const containerRect = contentRef.current.getBoundingClientRect();
     const children = workshop.children.filter(c => c.type === NodeType.ZONE || c.type === NodeType.STATION);
 
-    // Only draw paths if we are in the "Zone" mode (Assembly) which basically means children are Zones
-    // Or if standard mode, keep standard logic.
-    // For simplicity, we just connect sequential siblings.
-
     for (let i = 0; i < children.length - 1; i++) {
       const currentId = children[i].id;
       const nextId = children[i+1].id;
       
+      // Stop connecting if the next item is the Sub-Assembly zone (it should be isolated)
+      if (nextId === 'zone-sub-assembly') continue;
+
       const currentEl = itemsRef.current.get(currentId);
       const nextEl = itemsRef.current.get(nextId);
 
@@ -227,12 +226,19 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
                 </defs>
                 {paths.map((p, i) => (
                     <g key={`${i}-${p.type}`}>
-                        <path d={p.d} fill="none" stroke="#1f2937" strokeWidth="4" />
+                         {/* Background darker line */}
+                        <path d={p.d} fill="none" stroke="#111827" strokeWidth="6" />
+                        
+                        {/* Static faint blue line */}
+                        <path d={p.d} fill="none" stroke="#00f0ff" strokeWidth="2" strokeOpacity="0.2" />
+
+                        {/* Animated flowing dashed line */}
                         <path d={p.d} fill="none" stroke="#00f0ff" strokeWidth="2"
-                            strokeLinecap="round" strokeLinejoin="round" 
+                            strokeDasharray="10 10"
+                            className="animate-flow" 
+                            filter="url(#glow-strong)" 
                             markerEnd="url(#arrowhead)"
-                            strokeOpacity={p.type === 'straight' ? "0.9" : "0.5"}
-                            filter="url(#glow-strong)" />
+                        />
                     </g>
                 ))}
             </svg>
@@ -254,7 +260,10 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
                                     if(el) itemsRef.current.set(zone.id, el);
                                     else itemsRef.current.delete(zone.id);
                                 }}
-                                className="relative bg-industrial-800/40 border border-gray-700/50 rounded-xl p-6 backdrop-blur-sm"
+                                className={`
+                                    relative bg-industrial-800/40 border border-gray-700/50 rounded-xl p-6 backdrop-blur-sm
+                                    ${zone.id === 'zone-sub-assembly' ? 'mt-12 border-neon-blue/10 bg-industrial-900/60' : ''}
+                                `}
                             >
                                 {/* Zone Header */}
                                 <div className="absolute -top-4 left-6 bg-industrial-900 border border-neon-blue/30 px-4 py-1.5 rounded-full flex items-center gap-2 shadow-[0_0_15px_rgba(0,240,255,0.2)]">
@@ -288,11 +297,11 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
       
       <style>{`
         @keyframes flow {
-            from { stroke-dashoffset: 8; }
+            from { stroke-dashoffset: 20; }
             to { stroke-dashoffset: 0; }
         }
         .animate-flow {
-            animation: flow 0.4s linear infinite;
+            animation: flow 1s linear infinite;
         }
       `}</style>
     </div>
