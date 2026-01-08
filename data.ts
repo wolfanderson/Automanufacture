@@ -301,21 +301,68 @@ export const MOCK_DATA: ProcessNode[] = [
         status: NodeStatus.NORMAL,
         children: [
            {
-            id: 'asm-chassis-1',
-            label: '底盘 1 线', 
+            id: 'asm-chassis-z060',
+            label: '前舱Z060',
             type: NodeType.STATION,
             status: NodeStatus.NORMAL,
-            meta: { colSpan: 4 }, 
-            children: generateLineStations('cl1', 18)
-          },
-          {
-            id: 'asm-chassis-2',
-            label: '底盘 2 线', 
+            meta: { colSpan: 2 },
+            children: [] 
+           },
+           {
+            id: 'asm-chassis-z077',
+            label: '前舱Z077',
             type: NodeType.STATION,
             status: NodeStatus.NORMAL,
-            meta: { colSpan: 4 },
-            children: generateLineStations('cl2', 18)
-          },
+            meta: { colSpan: 2 },
+            children: [
+                {
+                    id: 'insp-z077-harness',
+                    label: '前舱线束检测',
+                    type: NodeType.INSPECTION,
+                    status: NodeStatus.NORMAL,
+                    meta: {
+                        description: '前舱线束布局与连接器状态AI视觉检测。',
+                        metrics: generateMockMetrics(20, 3)
+                    }
+                }
+            ]
+           },
+           // Virtual Stations (Middle fillers)
+           {
+             id: 'asm-chassis-v1',
+             label: '底盘合装工序 A',
+             type: NodeType.STATION,
+             status: NodeStatus.INACTIVE,
+             meta: { colSpan: 1 },
+             children: []
+           },
+           {
+             id: 'asm-chassis-v2',
+             label: '底盘合装工序 B',
+             type: NodeType.STATION,
+             status: NodeStatus.INACTIVE,
+             meta: { colSpan: 1 },
+             children: []
+           },
+           {
+            id: 'asm-chassis-z104',
+            label: '底盘Z104',
+            type: NodeType.STATION,
+            status: NodeStatus.NORMAL,
+            meta: { colSpan: 2 }, 
+            children: [
+                {
+                    id: 'insp-z104-harness',
+                    label: '底盘线束检测',
+                    type: NodeType.INSPECTION,
+                    status: NodeStatus.NORMAL,
+                    meta: {
+                        description: '底盘线束走向及卡扣完整性检测。',
+                        metrics: generateMockMetrics(20, 4)
+                    }
+                }
+            ]
+           },
         ]
       },
 
