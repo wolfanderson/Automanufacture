@@ -8,11 +8,19 @@ interface StationListProps {
   onSelect: (id: string) => void;
 }
 
+type PathVariant = 'default' | 'dimmed' | 'bright';
+
+interface PathData {
+    d: string;
+    type: 'straight' | 'complex';
+    variant: PathVariant;
+}
+
 export const StationList: React.FC<StationListProps> = ({ workshop, selectedStationId, onSelect }) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const itemsRef = useRef<Map<string, HTMLElement>>(new Map());
-  const [paths, setPaths] = useState<{ d: string; type: 'straight' | 'complex' }[]>([]);
+  const [paths, setPaths] = useState<PathData[]>([]);
   
   // Calculate global stats for the header
   const stats = useMemo(() => {
@@ -47,7 +55,7 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
   const calculatePaths = () => {
     if (!workshop?.children || !contentRef.current) return;
     
-    const newPaths: { d: string; type: 'straight' | 'complex' }[] = [];
+    const newPaths: PathData[] = [];
     const containerRect = contentRef.current.getBoundingClientRect();
     const children = workshop.children.filter(c => c.type === NodeType.ZONE || c.type === NodeType.STATION);
 
@@ -92,7 +100,8 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
              path += ` L ${endX} ${Math.round(roundedStartY + (roundedEndY - roundedStartY) / 2)}`;
              path += ` L ${endX} ${roundedEndY}`;
 
-             newPaths.push({ d: path, type: 'complex' });
+             // Use 'default' to match other workshops (consistency)
+             newPaths.push({ d: path, type: 'complex', variant: 'default' });
         } else {
              // Standard left-to-right flow for simple workshops
              const startX = Math.round(currRect.right - containerRect.left);
@@ -101,7 +110,8 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
              const endY = Math.round(nextRect.top + nextRect.height / 2 - containerRect.top);
              
              if (Math.abs(currRect.top - nextRect.top) < 50 && endX > startX) {
-                 newPaths.push({ d: `M ${startX} ${startY} L ${endX} ${endY}`, type: 'straight' });
+                 // Use default (which we will style subtly) for station connections
+                 newPaths.push({ d: `M ${startX} ${startY} L ${endX} ${endY}`, type: 'straight', variant: 'default' });
              }
         }
       }
@@ -128,11 +138,12 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
                         const endX = Math.round(r2.left - containerRect.left);
                         const endY = Math.round(r2.top + r2.height / 2 - containerRect.top);
 
-                        // Prevent backward lines if layout wrapped
                         if (endX > startX) {
+                            // Use default variant for station connections
                             newPaths.push({
                                 d: `M ${startX} ${startY} L ${endX} ${endY}`,
-                                type: 'straight'
+                                type: 'straight',
+                                variant: 'default'
                             });
                         }
                      }
@@ -206,30 +217,30 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
             }}
             className={`
                 ${isSubItem ? spanClass : spanClass}
-                relative flex flex-col justify-between p-3 rounded border text-left transition-all duration-200 group
-                ${isSubItem ? 'h-[80px] bg-industrial-700/50' : 'h-[90px] bg-industrial-800/80 backdrop-blur-sm'}
+                relative flex flex-col justify-between p-4 rounded border text-left transition-all duration-200 group
+                ${isSubItem ? 'h-[100px] bg-industrial-700/50' : 'h-[110px] bg-industrial-800/80 backdrop-blur-sm'}
                 ${isSelected ? `scale-[1.02] -translate-y-1 ${shadowClass} z-20 bg-gray-700` : 'hover:border-gray-500 hover:bg-industrial-700 hover:-translate-y-0.5'}
                 ${isInactive ? 'opacity-40 grayscale' : 'cursor-pointer'}
                 ${borderColor}
             `}
         >
             {/* Header */}
-            <div className="flex justify-between items-start w-full mb-1">
-                <span className="text-[9px] font-mono text-gray-500 tracking-wider uppercase truncate max-w-[80%]">
+            <div className="flex justify-between items-start w-full mb-2">
+                <span className="text-xs font-mono text-gray-400 tracking-wider uppercase truncate max-w-[80%]">
                     {station.id.replace('asm-', '').toUpperCase()}
                 </span>
-                <div className={`h-2 w-2 rounded-full ${statusColor} shadow-sm flex-shrink-0`}></div>
+                <div className={`h-2.5 w-2.5 rounded-full ${statusColor} shadow-sm flex-shrink-0`}></div>
             </div>
 
             {/* Label */}
             <div className="flex-1 flex items-center">
-                    <h3 className={`font-bold leading-tight ${colSpan > 1 ? 'text-sm' : 'text-xs line-clamp-2'} ${isSelected ? 'text-white' : 'text-gray-300'}`}>
+                    <h3 className={`font-bold leading-tight ${colSpan > 1 ? 'text-lg' : 'text-base line-clamp-2'} ${isSelected ? 'text-white' : 'text-gray-200'}`}>
                     {station.label}
                     </h3>
             </div>
 
             {/* Footer/Progress */}
-            <div className="w-full h-[3px] bg-gray-700/50 rounded-full overflow-hidden mt-auto">
+            <div className="w-full h-[4px] bg-gray-700/50 rounded-full overflow-hidden mt-auto">
                 <div className={`h-full ${statusColor} w-full opacity-70`}></div>
             </div>
         </button>
@@ -253,108 +264,41 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
           100% { stroke-dashoffset: 0; }
         }
         .flow-path {
+          animation: flowAnimation 1.5s linear infinite;
+        }
+        .flow-path-bright {
           animation: flowAnimation 0.8s linear infinite;
+        }
+        .flow-path-dim {
+          animation: flowAnimation 3s linear infinite;
         }
       `}</style>
 
       {/* Header */}
-      <div className="p-2 border-b border-gray-800 bg-industrial-900/95 backdrop-blur z-30 flex items-center justify-between shadow-lg relative h-12 flex-shrink-0">
+      <div className="p-4 border-b border-gray-800 bg-industrial-900/95 backdrop-blur z-30 flex items-center justify-between shadow-lg relative h-16 flex-shrink-0">
         <div>
-           <h2 className="text-sm font-bold text-white flex items-center gap-2 tracking-tight">
-             <span className="text-neon-blue">L2</span>
+           <h2 className="text-lg font-bold text-white flex items-center gap-2 tracking-tight">
+             <span className="text-neon-blue mr-1">#</span>
              {workshop.label}
            </h2>
         </div>
-        <div className="flex gap-2">
-             <div className="flex items-center gap-1.5 px-2 py-0.5 bg-neon-green/5 rounded border border-neon-green/20">
-                <span className="w-1.5 h-1.5 rounded-full bg-neon-green animate-pulse"></span>
-                <span className="text-xs font-bold text-neon-green font-mono">{stats.normal}</span>
+        <div className="flex gap-3">
+             <div className="flex items-center gap-2 px-3 py-1 bg-neon-green/5 rounded border border-neon-green/20">
+                <span className="w-2 h-2 rounded-full bg-neon-green animate-pulse"></span>
+                <span className="text-sm font-bold text-neon-green font-mono">{stats.normal} 正常</span>
             </div>
-             <div className="flex items-center gap-1.5 px-2 py-0.5 bg-neon-red/5 rounded border border-neon-red/20">
-                <span className="w-1.5 h-1.5 rounded-full bg-neon-red animate-pulse"></span>
-                <span className="text-xs font-bold text-neon-red font-mono">{stats.critical}</span>
+             <div className="flex items-center gap-2 px-3 py-1 bg-neon-red/5 rounded border border-neon-red/20">
+                <span className="w-2 h-2 rounded-full bg-neon-red animate-pulse"></span>
+                <span className="text-sm font-bold text-neon-red font-mono">{stats.critical} 告警</span>
             </div>
         </div>
       </div>
 
       {/* Main Scrollable Area */}
       <div className="flex-1 overflow-y-auto custom-scrollbar bg-industrial-900/20 relative" ref={scrollContainerRef}>
-        <div className="relative min-h-full pb-20 pt-8 px-6" ref={contentRef}>
+        <div className="relative min-h-full pb-20 pt-8 px-8" ref={contentRef}>
             
-            {/* SVG Circuit Layer */}
-            <svg className="absolute top-0 left-0 w-full h-full pointer-events-none z-0 overflow-visible">
-                {paths.map((p, i) => (
-                    <g key={i}>
-                         {/* 1. Base Rail (Dark background) */}
-                        <path 
-                            d={p.d} 
-                            stroke="#020617" 
-                            strokeWidth="14" 
-                            fill="none" 
-                            strokeLinecap="round"
-                        />
-                        
-                        {/* 2a. Glow Simulation (Stronger & Wider - Ambient) */}
-                         <path 
-                            d={p.d} 
-                            stroke="#00f0ff" 
-                            strokeWidth="30" 
-                            strokeOpacity="0.5" 
-                            fill="none" 
-                            strokeLinecap="round"
-                            style={{ filter: 'blur(12px)' }}
-                        />
-                        
-                        {/* 2b. Secondary Glow (Core) */}
-                         <path 
-                            d={p.d} 
-                            stroke="#00f0ff" 
-                            strokeWidth="10" 
-                            strokeOpacity="0.8" 
-                            fill="none" 
-                            strokeLinecap="round"
-                            style={{ filter: 'blur(4px)' }}
-                        />
-
-                        {/* 3. Inner Rail (Definition) */}
-                         <path 
-                            d={p.d} 
-                            stroke="#1e293b" 
-                            strokeWidth="6" 
-                            fill="none" 
-                            strokeLinecap="round"
-                        />
-                        
-                        {/* 4. Moving Light (Cyan - High Intensity) */}
-                        <path
-                            d={p.d}
-                            stroke="#00f0ff" 
-                            strokeWidth="6"
-                            strokeDasharray="20 20" 
-                            strokeLinecap="round"
-                            fill="none"
-                            className="flow-path"
-                            opacity="1"
-                            style={{ filter: 'drop-shadow(0 0 8px #00f0ff)' }}
-                        />
-
-                         {/* 5. Moving Highlight (White Core - Brightness) */}
-                         <path
-                            d={p.d}
-                            stroke="#ffffff"
-                            strokeWidth="3"
-                            strokeDasharray="20 20" 
-                            strokeLinecap="round"
-                            fill="none"
-                            className="flow-path"
-                            opacity="1"
-                            style={{ filter: 'drop-shadow(0 0 2px #fff)' }}
-                        />
-                    </g>
-                ))}
-            </svg>
-
-            {/* Grid Content */}
+            {/* Grid Content - Rendered first to be below SVG */}
             <div className="relative z-10 space-y-16">
                 {workshop.children && workshop.children[0].type === NodeType.ZONE ? (
                      // Zoned Layout (Assembly)
@@ -367,19 +311,19 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
                                     else itemsRef.current.delete(zone.id);
                                 }}
                                 className={`
-                                    relative bg-industrial-800/40 border border-gray-700/50 rounded-xl p-6 backdrop-blur-sm transition-all duration-300
+                                    relative bg-industrial-800/40 border border-gray-700/50 rounded-xl p-8 backdrop-blur-sm transition-all duration-300
                                     ${zone.id === 'zone-sub-assembly' ? 'mt-12 border-neon-blue/10 bg-industrial-900/60' : ''}
                                 `}
                             >
                                 {/* Zone Header */}
-                                <div className="absolute -top-4 left-6 bg-industrial-900 border border-neon-blue/30 px-4 py-1.5 rounded-full flex items-center gap-2 shadow-[0_0_15px_rgba(0,240,255,0.2)]">
-                                    <Box size={14} className="text-neon-blue" />
-                                    <span className="text-sm font-bold text-gray-100 tracking-wide">{zone.label}</span>
-                                    {zone.status === NodeStatus.CRITICAL && <AlertCircle size={14} className="text-neon-red animate-pulse" />}
+                                <div className="absolute -top-5 left-6 bg-industrial-900 border border-neon-blue/30 px-6 py-2 rounded-full flex items-center gap-2 shadow-[0_0_15px_rgba(0,240,255,0.2)]">
+                                    <Box size={16} className="text-neon-blue" />
+                                    <span className="text-lg font-bold text-gray-100 tracking-wide">{zone.label}</span>
+                                    {zone.status === NodeStatus.CRITICAL && <AlertCircle size={16} className="text-neon-red animate-pulse" />}
                                 </div>
                                 
                                 {/* Zone Children Grid */}
-                                <div className={`mt-4 gap-4 ${
+                                <div className={`mt-6 gap-6 ${
                                     zone.id === 'zone-front-main' 
                                     ? 'grid grid-cols-5' 
                                     : 'grid grid-cols-4 lg:grid-cols-6 xl:grid-cols-8'
@@ -388,20 +332,91 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
                                 </div>
 
                                 {/* Decorative Corner Markers */}
-                                <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-neon-blue/50 rounded-tl"></div>
-                                <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-neon-blue/50 rounded-tr"></div>
-                                <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-neon-blue/50 rounded-bl"></div>
-                                <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-neon-blue/50 rounded-br"></div>
+                                <div className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-neon-blue/50 rounded-tl"></div>
+                                <div className="absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-neon-blue/50 rounded-tr"></div>
+                                <div className="absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-neon-blue/50 rounded-bl"></div>
+                                <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-neon-blue/50 rounded-br"></div>
                             </div>
                         ))}
                      </div>
                 ) : (
                     // Default Flat Layout (Stamping, Welding, etc.)
-                    <div className="grid grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-x-6 gap-y-10 auto-rows-[90px]">
+                    <div className="grid grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-x-8 gap-y-12 auto-rows-[110px]">
                         {workshop.children?.map((station, i) => renderStationCard(station, i, false))}
                     </div>
                 )}
             </div>
+
+            {/* SVG Circuit Layer - Rendered last to be on top */}
+            <svg className="absolute top-0 left-0 w-full h-full pointer-events-none z-20 overflow-visible">
+                {paths.map((p, i) => {
+                    // Style logic based on variant
+                    const isDimmed = p.variant === 'dimmed';
+                    const isBright = p.variant === 'bright';
+                    
+                    // Reduce opacities significantly for better content readability
+                    const baseOpacity = isDimmed ? 0.05 : 0.2;
+                    const glowOpacity = isDimmed ? 0 : (isBright ? 0.4 : 0.2); 
+                    const coreOpacity = isDimmed ? 0.05 : (isBright ? 0.8 : 0.4);
+                    
+                    const glowFilter = isDimmed 
+                        ? 'none' 
+                        : (isBright ? 'blur(8px)' : 'blur(4px)');
+                    
+                    const animClass = isDimmed 
+                        ? 'flow-path-dim' 
+                        : (isBright ? 'flow-path-bright' : 'flow-path');
+
+                    return (
+                        <g key={i}>
+                             {/* 1. Base Rail (Dark background) */}
+                            <path 
+                                d={p.d} 
+                                stroke="#020617" 
+                                strokeWidth="10" 
+                                fill="none" 
+                                strokeLinecap="round"
+                                opacity={baseOpacity}
+                            />
+                            
+                            {/* 2a. Glow Simulation (Reduced) */}
+                            {!isDimmed && (
+                                <path 
+                                    d={p.d} 
+                                    stroke="#00f0ff" 
+                                    strokeWidth={isBright ? "20" : "15"} 
+                                    strokeOpacity={glowOpacity} 
+                                    fill="none" 
+                                    strokeLinecap="round"
+                                    style={{ filter: glowFilter }}
+                                />
+                            )}
+                            
+                            {/* 3. Inner Rail */}
+                             <path 
+                                d={p.d} 
+                                stroke="#1e293b" 
+                                strokeWidth="4" 
+                                fill="none" 
+                                strokeLinecap="round"
+                                opacity={baseOpacity}
+                            />
+                            
+                            {/* 4. Moving Light (Cyan) */}
+                            <path
+                                d={p.d}
+                                stroke="#00f0ff" 
+                                strokeWidth={isBright ? "4" : "2"}
+                                strokeDasharray={isDimmed ? "5 40" : "10 30"}
+                                strokeLinecap="round"
+                                fill="none"
+                                className={animClass}
+                                opacity={coreOpacity}
+                            />
+                        </g>
+                    );
+                })}
+            </svg>
         </div>
       </div>
     </div>

@@ -214,7 +214,7 @@ export const MOCK_DATA: ProcessNode[] = [
       // 1. 前装主线 (Front Assembly) - Updated based on request
       {
         id: 'zone-front-main',
-        label: '前装主线 (Front Assembly)',
+        label: '前装主线',
         type: NodeType.ZONE,
         status: NodeStatus.NORMAL,
         children: [
@@ -296,7 +296,7 @@ export const MOCK_DATA: ProcessNode[] = [
       // 2. 底盘线 (Zone)
       {
         id: 'zone-chassis-main',
-        label: '底盘合装线 (Chassis Marriage)',
+        label: '底盘合装线',
         type: NodeType.ZONE,
         status: NodeStatus.NORMAL,
         children: [
@@ -322,7 +322,7 @@ export const MOCK_DATA: ProcessNode[] = [
       // 3. 后装线 (Zone)
       {
         id: 'zone-rear-main',
-        label: '后装主线 (Rear Assembly)',
+        label: '后装主线',
         type: NodeType.ZONE,
         status: NodeStatus.NORMAL,
         children: [
@@ -364,7 +364,7 @@ export const MOCK_DATA: ProcessNode[] = [
       // 4. 分装集成区 (Zone) - Moved to bottom
       {
         id: 'zone-sub-assembly',
-        label: '分装集成区 (Sub-Assembly Area)',
+        label: '分装集成区',
         type: NodeType.ZONE,
         status: NodeStatus.WARNING,
         children: [
