@@ -97,13 +97,23 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
   };
 
   useLayoutEffect(() => {
+    // Initial calculation
     calculatePaths();
+    
+    // Safety timeout to ensure DOM is fully painted
+    const timer = setTimeout(calculatePaths, 100);
+
     const observer = new ResizeObserver(() => {
         window.requestAnimationFrame(calculatePaths);
     });
+    
     if (scrollContainerRef.current) observer.observe(scrollContainerRef.current);
     if (contentRef.current) observer.observe(contentRef.current);
-    return () => observer.disconnect();
+    
+    return () => {
+        observer.disconnect();
+        clearTimeout(timer);
+    };
   }, [workshop]);
 
   // Helper to render a clickable station card
@@ -212,33 +222,45 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
       <div className="flex-1 overflow-y-auto custom-scrollbar bg-industrial-900/20 relative" ref={scrollContainerRef}>
         <div className="relative min-h-full pb-20 pt-8 px-6" ref={contentRef}>
             
-            {/* SVG Circuit Layer */}
+            {/* SVG Circuit Layer with Native Animation */}
             <svg className="absolute top-0 left-0 w-full h-full pointer-events-none z-0 overflow-visible">
                 <defs>
-                    <filter id="glow-strong" x="-50%" y="-50%" width="200%" height="200%">
-                        <feGaussianBlur stdDeviation="2" result="blur" />
+                    <filter id="line-glow" x="-20%" y="-20%" width="140%" height="140%">
+                        <feGaussianBlur stdDeviation="1.5" result="blur" />
                         <feComposite in="SourceGraphic" in2="blur" operator="over" />
                     </filter>
-                    <marker id="arrowhead" markerWidth="10" markerHeight="7" 
-                    refX="9" refY="3.5" orient="auto">
-                        <polygon points="0 0, 10 3.5, 0 7" fill="#00f0ff" fillOpacity="0.8"/>
-                    </marker>
                 </defs>
                 {paths.map((p, i) => (
                     <g key={`${i}-${p.type}`}>
-                         {/* Background darker line */}
-                        <path d={p.d} fill="none" stroke="#111827" strokeWidth="6" />
-                        
-                        {/* Static faint blue line */}
-                        <path d={p.d} fill="none" stroke="#00f0ff" strokeWidth="2" strokeOpacity="0.2" />
-
-                        {/* Animated flowing dashed line */}
-                        <path d={p.d} fill="none" stroke="#00f0ff" strokeWidth="2"
-                            strokeDasharray="10 10"
-                            className="animate-flow" 
-                            filter="url(#glow-strong)" 
-                            markerEnd="url(#arrowhead)"
+                         {/* 1. Background Rail (Darker, slightly thicker) */}
+                        <path 
+                            d={p.d} 
+                            fill="none" 
+                            stroke="#1f2937" 
+                            strokeWidth="5" 
+                            strokeLinecap="round" 
                         />
+                        
+                        {/* 2. Marching Dashes (The Ants) - Using Native SVG Animate */}
+                        <path
+                            d={p.d}
+                            fill="none"
+                            stroke="#00f0ff"
+                            strokeWidth="3"
+                            strokeDasharray="12 12" // 12px line, 12px gap = 24px cycle
+                            strokeLinecap="round"
+                            filter="url(#line-glow)"
+                            opacity="1"
+                        >
+                            {/* Native SVG Animation for maximum compatibility */}
+                            <animate 
+                                attributeName="stroke-dashoffset" 
+                                from="24" // Match the sum of dasharray (12+12)
+                                to="0" 
+                                dur="0.4s" // Fast speed
+                                repeatCount="indefinite" 
+                            />
+                        </path>
                     </g>
                 ))}
             </svg>
@@ -261,7 +283,7 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
                                     else itemsRef.current.delete(zone.id);
                                 }}
                                 className={`
-                                    relative bg-industrial-800/40 border border-gray-700/50 rounded-xl p-6 backdrop-blur-sm
+                                    relative bg-industrial-800/40 border border-gray-700/50 rounded-xl p-6 backdrop-blur-sm transition-all duration-300
                                     ${zone.id === 'zone-sub-assembly' ? 'mt-12 border-neon-blue/10 bg-industrial-900/60' : ''}
                                 `}
                             >
@@ -294,16 +316,6 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
             </div>
         </div>
       </div>
-      
-      <style>{`
-        @keyframes flow {
-            from { stroke-dashoffset: 20; }
-            to { stroke-dashoffset: 0; }
-        }
-        .animate-flow {
-            animation: flow 1s linear infinite;
-        }
-      `}</style>
     </div>
   );
 };
