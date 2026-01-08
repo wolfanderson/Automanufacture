@@ -207,12 +207,12 @@ export const MOCK_DATA: ProcessNode[] = [
     id: 'ws-assembly',
     label: '总装车间',
     type: NodeType.WORKSHOP,
-    status: NodeStatus.NORMAL, // Override critical for now
+    status: NodeStatus.NORMAL, 
     children: [
       // --- Top Row: Sub-assemblies ---
       {
         id: 'asm-rear-drive',
-        label: '后驱分装线', // 后驱分装线
+        label: '后驱分装线', 
         type: NodeType.STATION,
         status: NodeStatus.NORMAL,
         meta: { colSpan: 1 },
@@ -220,7 +220,7 @@ export const MOCK_DATA: ProcessNode[] = [
       },
       {
         id: 'asm-front-drive',
-        label: '前驱分装线', // 前驱分装线
+        label: '前驱分装线', 
         type: NodeType.STATION,
         status: NodeStatus.NORMAL,
         meta: { colSpan: 1 },
@@ -228,15 +228,15 @@ export const MOCK_DATA: ProcessNode[] = [
       },
       {
         id: 'asm-powertrain',
-        label: '动总分装线', // 动总分装线
+        label: '动总分装线', 
         type: NodeType.STATION,
         status: NodeStatus.WARNING,
-        meta: { colSpan: 2 }, // Wider
+        meta: { colSpan: 2 }, 
         children: generateLineStations('pt', 12)
       },
       {
         id: 'asm-rear-module',
-        label: '后模块分装线', // 后模块分装线
+        label: '后模块分装线', 
         type: NodeType.STATION,
         status: NodeStatus.NORMAL,
         meta: { colSpan: 1 },
@@ -244,7 +244,7 @@ export const MOCK_DATA: ProcessNode[] = [
       },
        {
         id: 'asm-chassis-pre',
-        label: '底盘预装线', // 底盘预装线
+        label: '底盘预装线', 
         type: NodeType.STATION,
         status: NodeStatus.NORMAL,
         meta: { colSpan: 1 },
@@ -253,15 +253,15 @@ export const MOCK_DATA: ProcessNode[] = [
       // --- Row 2: Chassis Lines (Full width style) ---
       {
         id: 'asm-chassis-1',
-        label: '底盘 1 线', // 底盘1线
+        label: '底盘 1 线', 
         type: NodeType.STATION,
         status: NodeStatus.NORMAL,
-        meta: { colSpan: 4 }, // Takes full row on medium screens
+        meta: { colSpan: 4 }, 
         children: generateLineStations('cl1', 18)
       },
       {
         id: 'asm-chassis-2',
-        label: '底盘 2 线', // 底盘2线
+        label: '底盘 2 线', 
         type: NodeType.STATION,
         status: NodeStatus.NORMAL,
         meta: { colSpan: 4 },
@@ -270,7 +270,7 @@ export const MOCK_DATA: ProcessNode[] = [
       // --- Row 3: Door & Front ---
       {
         id: 'asm-door',
-        label: '车门线', // 车门线
+        label: '车门线', 
         type: NodeType.STATION,
         status: NodeStatus.NORMAL,
         meta: { colSpan: 2 },
@@ -278,15 +278,27 @@ export const MOCK_DATA: ProcessNode[] = [
       },
       {
         id: 'asm-windshield',
-        label: '风挡涂胶', // 风挡涂胶
+        label: '风挡涂胶', 
         type: NodeType.STATION,
         status: NodeStatus.NORMAL,
         meta: { colSpan: 1 },
-        children: generateLineStations('wsg', 4)
+        children: [
+            {
+                id: 'insp-wsg-primer',
+                label: '玻璃底涂动作检测',
+                type: NodeType.INSPECTION,
+                status: NodeStatus.NORMAL,
+                meta: {
+                    description: '机械臂自动进行玻璃底涂涂抹动作监控与轨迹分析。',
+                    metrics: generateMockMetrics(20, 2),
+                    imgUrl: 'https://images.unsplash.com/photo-1621905252507-b35492cc7471?auto=format&fit=crop&w=800&q=80'
+                }
+            }
+        ]
       },
        {
         id: 'asm-front-4',
-        label: '前装 4 线', // 前装4线
+        label: '前装 4 线', 
         type: NodeType.STATION,
         status: NodeStatus.CRITICAL,
         meta: { colSpan: 3 },
@@ -295,15 +307,27 @@ export const MOCK_DATA: ProcessNode[] = [
       // --- Row 4: Front & Sub ---
       {
         id: 'asm-roof',
-        label: '天幕涂胶', // 天幕涂胶
+        label: '天幕涂胶', 
         type: NodeType.STATION,
         status: NodeStatus.NORMAL,
         meta: { colSpan: 1 },
-        children: generateLineStations('prf', 3)
+        children: [
+            {
+                id: 'insp-prf-primer',
+                label: '玻璃底涂动作检测',
+                type: NodeType.INSPECTION,
+                status: NodeStatus.NORMAL,
+                meta: {
+                    description: '天幕玻璃底涂动作执行情况实时监控。',
+                    metrics: generateMockMetrics(20, 2),
+                    imgUrl: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=80'
+                }
+            }
+        ]
       },
       {
         id: 'asm-heat-pump',
-        label: '热泵分装', // 热泵分装
+        label: '热泵分装', 
         type: NodeType.STATION,
         status: NodeStatus.NORMAL,
         meta: { colSpan: 1 },
@@ -311,7 +335,7 @@ export const MOCK_DATA: ProcessNode[] = [
       },
       {
         id: 'asm-front-3',
-        label: '前装 3 线', // 前装3线
+        label: '前装 3 线', 
         type: NodeType.STATION,
         status: NodeStatus.NORMAL,
         meta: { colSpan: 3 },
@@ -319,7 +343,7 @@ export const MOCK_DATA: ProcessNode[] = [
       },
       {
         id: 'asm-ip',
-        label: '仪表台分装', // IP分装线
+        label: '仪表台分装', 
         type: NodeType.STATION,
         status: NodeStatus.NORMAL,
         meta: { colSpan: 1 },
@@ -328,7 +352,7 @@ export const MOCK_DATA: ProcessNode[] = [
       // --- Row 5: Front/Rear ---
       {
         id: 'asm-front-2',
-        label: '前装 2 线', // 前装2线
+        label: '前装 2 线', 
         type: NodeType.STATION,
         status: NodeStatus.NORMAL,
         meta: { colSpan: 3 },
@@ -336,7 +360,7 @@ export const MOCK_DATA: ProcessNode[] = [
       },
       {
         id: 'asm-front-1',
-        label: '前装 1 线', // 前装1线
+        label: '前装 1 线', 
         type: NodeType.STATION,
         status: NodeStatus.NORMAL,
         meta: { colSpan: 3 },
@@ -345,7 +369,7 @@ export const MOCK_DATA: ProcessNode[] = [
       // --- Row 6: Rear ---
       {
         id: 'asm-rear-1',
-        label: '后装 1 线', // 后装1线
+        label: '后装 1 线', 
         type: NodeType.STATION,
         status: NodeStatus.NORMAL,
         meta: { colSpan: 3 },
@@ -353,7 +377,7 @@ export const MOCK_DATA: ProcessNode[] = [
       },
       {
         id: 'asm-rear-2',
-        label: '后装 2 线', // 后装2线
+        label: '后装 2 线', 
         type: NodeType.STATION,
         status: NodeStatus.NORMAL,
         meta: { colSpan: 3 },
@@ -362,7 +386,7 @@ export const MOCK_DATA: ProcessNode[] = [
       // --- Aux ---
       {
         id: 'asm-supply',
-        label: '辅房/物料区', // 辅房
+        label: '辅房/物料区', 
         type: NodeType.STATION,
         status: NodeStatus.INACTIVE,
         meta: { colSpan: 6 },
