@@ -219,11 +219,27 @@ export const MOCK_DATA: ProcessNode[] = [
         status: NodeStatus.NORMAL,
         children: [
            {
+            id: 'asm-front-z052',
+            label: '前装Z052', 
+            type: NodeType.STATION,
+            status: NodeStatus.INACTIVE,
+            meta: { colSpan: 1 },
+            children: []
+           },
+           {
+            id: 'asm-front-z053',
+            label: '前装Z053', 
+            type: NodeType.STATION,
+            status: NodeStatus.INACTIVE,
+            meta: { colSpan: 1 },
+            children: []
+           },
+           {
             id: 'asm-front-z054',
             label: '前装Z054', 
             type: NodeType.STATION,
             status: NodeStatus.NORMAL,
-            meta: { colSpan: 4 }, // Make it span wider for better visibility
+            meta: { colSpan: 1 }, // Make it span wider for better visibility
             children: [
                 {
                     id: 'insp-z054-harness',
@@ -257,7 +273,23 @@ export const MOCK_DATA: ProcessNode[] = [
                     }
                 }
             ]
-          }
+          },
+          {
+            id: 'asm-front-z055',
+            label: '前装Z055', 
+            type: NodeType.STATION,
+            status: NodeStatus.INACTIVE,
+            meta: { colSpan: 1 },
+            children: []
+           },
+           {
+            id: 'asm-front-z056',
+            label: '前装Z056', 
+            type: NodeType.STATION,
+            status: NodeStatus.INACTIVE,
+            meta: { colSpan: 1 },
+            children: []
+           },
         ]
       },
 

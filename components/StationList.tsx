@@ -43,7 +43,7 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
     return countNodes(workshop.children);
   }, [workshop]);
 
-  // --- Connection Logic (Zone to Zone) ---
+  // --- Connection Logic ---
   const calculatePaths = () => {
     if (!workshop?.children || !contentRef.current) return;
     
@@ -51,6 +51,7 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
     const containerRect = contentRef.current.getBoundingClientRect();
     const children = workshop.children.filter(c => c.type === NodeType.ZONE || c.type === NodeType.STATION);
 
+    // 1. Zone-to-Zone Connections (Vertical/Complex)
     for (let i = 0; i < children.length - 1; i++) {
       const currentId = children[i].id;
       const nextId = children[i+1].id;
@@ -73,8 +74,6 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
             let endX = nextRect.left + nextRect.width / 2 - containerRect.left;
             const endY = nextRect.top - containerRect.top;
 
-             // Snap to center if very close to avoid jagged lines on near-vertical connections
-             // Using Math.round to ensure pixel-perfect rendering
              if (Math.abs(startX - endX) < 20) {
                  const avgX = Math.round((startX + endX) / 2);
                  startX = avgX;
@@ -101,13 +100,47 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
              const endX = Math.round(nextRect.left - containerRect.left);
              const endY = Math.round(nextRect.top + nextRect.height / 2 - containerRect.top);
              
-             // Only draw if on same row (approx) and moving left-to-right
              if (Math.abs(currRect.top - nextRect.top) < 50 && endX > startX) {
                  newPaths.push({ d: `M ${startX} ${startY} L ${endX} ${endY}`, type: 'straight' });
              }
         }
       }
     }
+
+    // 2. Intra-Zone Connections (Horizontal/Straight for adjacent stations)
+    children.forEach(zone => {
+        if (zone.type === NodeType.ZONE && zone.children && zone.children.length > 1) {
+             for (let j = 0; j < zone.children.length - 1; j++) {
+                 const c1 = zone.children[j];
+                 const c2 = zone.children[j+1];
+                 const el1 = itemsRef.current.get(c1.id);
+                 const el2 = itemsRef.current.get(c2.id);
+
+                 if (el1 && el2) {
+                     const r1 = el1.getBoundingClientRect();
+                     const r2 = el2.getBoundingClientRect();
+
+                     // Connect Right of 1 to Left of 2
+                     // Check if they are roughly on the same row (within 30px vertical alignment)
+                     if (Math.abs(r1.top - r2.top) < 30) {
+                        const startX = Math.round(r1.right - containerRect.left);
+                        const startY = Math.round(r1.top + r1.height / 2 - containerRect.top);
+                        const endX = Math.round(r2.left - containerRect.left);
+                        const endY = Math.round(r2.top + r2.height / 2 - containerRect.top);
+
+                        // Prevent backward lines if layout wrapped
+                        if (endX > startX) {
+                            newPaths.push({
+                                d: `M ${startX} ${startY} L ${endX} ${endY}`,
+                                type: 'straight'
+                            });
+                        }
+                     }
+                 }
+             }
+        }
+    });
+
     setPaths(newPaths);
   };
 
@@ -163,20 +196,20 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
     return (
         <button
             key={station.id}
-            ref={!isSubItem ? (el) => {
+            ref={(el) => {
                  if(el) itemsRef.current.set(station.id, el);
                  else itemsRef.current.delete(station.id);
-            } : undefined}
+            }}
             onClick={(e) => {
                 e.stopPropagation();
-                !isInactive && onSelect(station.id)
+                onSelect(station.id)
             }}
             className={`
                 ${isSubItem ? spanClass : spanClass}
                 relative flex flex-col justify-between p-3 rounded border text-left transition-all duration-200 group
                 ${isSubItem ? 'h-[80px] bg-industrial-700/50' : 'h-[90px] bg-industrial-800/80 backdrop-blur-sm'}
                 ${isSelected ? `scale-[1.02] -translate-y-1 ${shadowClass} z-20 bg-gray-700` : 'hover:border-gray-500 hover:bg-industrial-700 hover:-translate-y-0.5'}
-                ${isInactive ? 'opacity-30 grayscale cursor-not-allowed' : ''}
+                ${isInactive ? 'opacity-40 grayscale' : 'cursor-pointer'}
                 ${borderColor}
             `}
         >
@@ -216,11 +249,11 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
       {/* CSS Animation Injection */}
       <style>{`
         @keyframes flowAnimation {
-          0% { stroke-dashoffset: 20; }
+          0% { stroke-dashoffset: 40; }
           100% { stroke-dashoffset: 0; }
         }
         .flow-path {
-          animation: flowAnimation 1s linear infinite;
+          animation: flowAnimation 0.8s linear infinite;
         }
       `}</style>
 
@@ -249,63 +282,73 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
         <div className="relative min-h-full pb-20 pt-8 px-6" ref={contentRef}>
             
             {/* SVG Circuit Layer */}
-            {/* 
-                REMOVED FILTERS: Standard SVG filters often clip vertical lines (width=0). 
-                Replaced with Multi-Layer Stroke technique for consistent glow on all lines.
-            */}
             <svg className="absolute top-0 left-0 w-full h-full pointer-events-none z-0 overflow-visible">
                 {paths.map((p, i) => (
                     <g key={i}>
                          {/* 1. Base Rail (Dark background) */}
                         <path 
                             d={p.d} 
-                            stroke="#111827" 
-                            strokeWidth="8" 
+                            stroke="#020617" 
+                            strokeWidth="14" 
                             fill="none" 
                             strokeLinecap="round"
                         />
                         
-                        {/* 2. Glow Simulation (Thick static transparent cyan) */}
+                        {/* 2a. Glow Simulation (Stronger & Wider - Ambient) */}
                          <path 
                             d={p.d} 
                             stroke="#00f0ff" 
-                            strokeWidth="12" 
-                            strokeOpacity="0.15" 
+                            strokeWidth="30" 
+                            strokeOpacity="0.5" 
                             fill="none" 
                             strokeLinecap="round"
+                            style={{ filter: 'blur(12px)' }}
                         />
-
-                        {/* 3. Inner Rail (Dark thin line to define track) */}
+                        
+                        {/* 2b. Secondary Glow (Core) */}
                          <path 
                             d={p.d} 
-                            stroke="#1f2937" 
-                            strokeWidth="4" 
+                            stroke="#00f0ff" 
+                            strokeWidth="10" 
+                            strokeOpacity="0.8" 
+                            fill="none" 
+                            strokeLinecap="round"
+                            style={{ filter: 'blur(4px)' }}
+                        />
+
+                        {/* 3. Inner Rail (Definition) */}
+                         <path 
+                            d={p.d} 
+                            stroke="#1e293b" 
+                            strokeWidth="6" 
                             fill="none" 
                             strokeLinecap="round"
                         />
                         
-                        {/* 4. Moving Light (The Flow - Cyan) */}
+                        {/* 4. Moving Light (Cyan - High Intensity) */}
                         <path
                             d={p.d}
-                            stroke="#00f0ff"
-                            strokeWidth="2"
-                            strokeDasharray="10 10" 
+                            stroke="#00f0ff" 
+                            strokeWidth="6"
+                            strokeDasharray="20 20" 
                             strokeLinecap="round"
                             fill="none"
                             className="flow-path"
-                            opacity="0.8"
+                            opacity="1"
+                            style={{ filter: 'drop-shadow(0 0 8px #00f0ff)' }}
                         />
 
-                         {/* 5. Moving Highlight (The Flow - White Core for Contrast) */}
+                         {/* 5. Moving Highlight (White Core - Brightness) */}
                          <path
                             d={p.d}
                             stroke="#ffffff"
-                            strokeWidth="1"
-                            strokeDasharray="10 10" 
+                            strokeWidth="3"
+                            strokeDasharray="20 20" 
                             strokeLinecap="round"
                             fill="none"
                             className="flow-path"
-                            opacity="0.9"
+                            opacity="1"
+                            style={{ filter: 'drop-shadow(0 0 2px #fff)' }}
                         />
                     </g>
                 ))}
@@ -336,7 +379,11 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
                                 </div>
                                 
                                 {/* Zone Children Grid */}
-                                <div className="mt-4 grid grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4">
+                                <div className={`mt-4 gap-4 ${
+                                    zone.id === 'zone-front-main' 
+                                    ? 'grid grid-cols-5' 
+                                    : 'grid grid-cols-4 lg:grid-cols-6 xl:grid-cols-8'
+                                }`}>
                                     {zone.children?.map(station => renderStationCard(station, 0, true))}
                                 </div>
 
