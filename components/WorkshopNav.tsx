@@ -9,10 +9,10 @@ interface WorkshopNavProps {
 }
 
 const getIcon = (label: string) => {
-  if (label.includes('Stamping')) return <Factory size={20} />;
-  if (label.includes('Welding')) return <Activity size={20} />;
-  if (label.includes('Painting')) return <SprayCan size={20} />;
-  if (label.includes('Assembly')) return <Wrench size={20} />;
+  if (label.includes('冲压')) return <Factory size={20} />;
+  if (label.includes('焊装')) return <Activity size={20} />;
+  if (label.includes('涂装')) return <SprayCan size={20} />;
+  if (label.includes('总装')) return <Wrench size={20} />;
   return <Cog size={20} />;
 };
 
@@ -37,7 +37,7 @@ export const WorkshopNav: React.FC<WorkshopNavProps> = ({ workshops, selectedId,
               key={node.id}
               onClick={() => onSelect(node.id)}
               className={`
-                relative group transition-all duration-300 h-16 px-6 min-w-[200px] flex items-center gap-4 rounded-t-md border-b-2
+                relative group transition-all duration-300 h-16 px-6 min-w-[160px] flex items-center gap-4 rounded-t-md border-b-2
                 ${isSelected 
                   ? 'border-neon-blue bg-gradient-to-t from-neon-blue/10 to-transparent text-white' 
                   : 'border-transparent text-gray-500 hover:text-gray-300 hover:bg-white/5'
@@ -48,9 +48,9 @@ export const WorkshopNav: React.FC<WorkshopNavProps> = ({ workshops, selectedId,
                 {getIcon(node.label)}
               </div>
               <div className="flex flex-col items-start">
-                <div className="font-semibold tracking-wide uppercase text-sm">{node.label}</div>
+                <div className="font-semibold tracking-wide text-sm">{node.label}</div>
                 <div className="text-[10px] text-gray-600 font-mono">
-                    {node.children?.length || 0} STATIONS
+                    {node.children?.length || 0} 个工位
                 </div>
               </div>
               
@@ -65,13 +65,13 @@ export const WorkshopNav: React.FC<WorkshopNavProps> = ({ workshops, selectedId,
 
       {/* Right Side Status */}
       <div className="ml-8 pl-8 border-l border-gray-800 h-12 flex flex-col justify-center text-right flex-shrink-0">
-        <div className="text-xs text-gray-500 font-mono mb-1">SYSTEM STATUS</div>
+        <div className="text-xs text-gray-500 font-mono mb-1">系统状态</div>
         <div className="flex items-center gap-2 justify-end">
             <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-neon-green opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-neon-green"></span>
             </span>
-            <span className="text-neon-green font-bold tracking-wider text-sm">ONLINE</span>
+            <span className="text-neon-green font-bold tracking-wider text-sm">在线运行</span>
         </div>
       </div>
     </div>

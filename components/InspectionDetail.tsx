@@ -29,8 +29,8 @@ export const InspectionDetail: React.FC<InspectionDetailProps> = ({ station }) =
          <div className="w-16 h-16 rounded-full bg-gray-800 flex items-center justify-center mb-4">
             <ArrowRight size={24} className="opacity-50" />
          </div>
-         <h3 className="text-lg font-semibold text-gray-400 mb-2">Select a Station</h3>
-         <p className="text-xs text-gray-600 font-mono">Click any tile on the left to view detailed inspection metrics and camera feeds.</p>
+         <h3 className="text-lg font-semibold text-gray-400 mb-2">请选择工位</h3>
+         <p className="text-xs text-gray-600 font-mono">点击左侧任意工位以查看详细检测数据和监控画面。</p>
       </div>
     );
   }
@@ -55,7 +55,7 @@ export const InspectionDetail: React.FC<InspectionDetailProps> = ({ station }) =
       {/* Scrollable Content */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4 scroll-smooth">
           <div className="flex items-center gap-2 text-xs text-gray-500 uppercase font-bold tracking-wider mb-2 px-1">
-             <Activity size={12} /> Inspection Points ({inspections.length})
+             <Activity size={12} /> 检测项 ({inspections.length})
           </div>
 
           {inspections.map((item) => (
@@ -104,14 +104,14 @@ export const InspectionDetail: React.FC<InspectionDetailProps> = ({ station }) =
                           </LineChart>
                       </ResponsiveContainer>
                   ) : (
-                      <div className="h-full flex items-center justify-center text-xs text-gray-600">No Data</div>
+                      <div className="h-full flex items-center justify-center text-xs text-gray-600">暂无数据</div>
                   )}
                </div>
             </div>
           ))}
 
           {inspections.length === 0 && (
-             <div className="text-center py-8 text-gray-600 text-xs">No inspections configured</div>
+             <div className="text-center py-8 text-gray-600 text-xs">该工位未配置检测项</div>
           )}
       </div>
     </div>

@@ -101,7 +101,7 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
   if (!workshop) {
     return (
       <div className="h-full flex items-center justify-center text-gray-600 font-mono text-sm bg-industrial-900/50">
-        SELECT A WORKSHOP
+        请选择车间
       </div>
     );
   }
@@ -113,7 +113,7 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
         <div>
            <h2 className="text-sm font-bold text-white flex items-center gap-2 tracking-tight">
              <span className="text-neon-blue">L2</span>
-             {workshop.label.toUpperCase()}
+             {workshop.label}
            </h2>
         </div>
         <div className="flex gap-2">
@@ -231,7 +231,7 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
                             {/* Station Count for large blocks */}
                             {colSpan > 1 && (
                                 <div className="absolute bottom-3 right-3 text-[10px] text-gray-500 font-mono hidden lg:block">
-                                    {station.children?.length || 0} STATIONS
+                                    {station.children?.length || 0} 工位
                                 </div>
                             )}
                         </button>
