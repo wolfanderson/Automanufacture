@@ -209,188 +209,220 @@ export const MOCK_DATA: ProcessNode[] = [
     type: NodeType.WORKSHOP,
     status: NodeStatus.NORMAL, 
     children: [
-      // --- Top Row: Sub-assemblies ---
+      // 1. 分装集成区 (Zone)
       {
-        id: 'asm-rear-drive',
-        label: '后驱分装线', 
-        type: NodeType.STATION,
-        status: NodeStatus.NORMAL,
-        meta: { colSpan: 1 },
-        children: generateLineStations('rd', 5)
-      },
-      {
-        id: 'asm-front-drive',
-        label: '前驱分装线', 
-        type: NodeType.STATION,
-        status: NodeStatus.NORMAL,
-        meta: { colSpan: 1 },
-        children: generateLineStations('fd', 5)
-      },
-      {
-        id: 'asm-powertrain',
-        label: '动总分装线', 
-        type: NodeType.STATION,
+        id: 'zone-sub-assembly',
+        label: '分装集成区 (Sub-Assembly Area)',
+        type: NodeType.ZONE,
         status: NodeStatus.WARNING,
-        meta: { colSpan: 2 }, 
-        children: generateLineStations('pt', 12)
-      },
-      {
-        id: 'asm-rear-module',
-        label: '后模块分装线', 
-        type: NodeType.STATION,
-        status: NodeStatus.NORMAL,
-        meta: { colSpan: 1 },
-        children: generateLineStations('rm', 6)
-      },
-       {
-        id: 'asm-chassis-pre',
-        label: '底盘预装线', 
-        type: NodeType.STATION,
-        status: NodeStatus.NORMAL,
-        meta: { colSpan: 1 },
-        children: generateLineStations('cpre', 8)
-      },
-      // --- Row 2: Chassis Lines (Full width style) ---
-      {
-        id: 'asm-chassis-1',
-        label: '底盘 1 线', 
-        type: NodeType.STATION,
-        status: NodeStatus.NORMAL,
-        meta: { colSpan: 4 }, 
-        children: generateLineStations('cl1', 18)
-      },
-      {
-        id: 'asm-chassis-2',
-        label: '底盘 2 线', 
-        type: NodeType.STATION,
-        status: NodeStatus.NORMAL,
-        meta: { colSpan: 4 },
-        children: generateLineStations('cl2', 18)
-      },
-      // --- Row 3: Door & Front ---
-      {
-        id: 'asm-door',
-        label: '车门线', 
-        type: NodeType.STATION,
-        status: NodeStatus.NORMAL,
-        meta: { colSpan: 2 },
-        children: generateLineStations('door', 15)
-      },
-      {
-        id: 'asm-windshield',
-        label: '风挡涂胶', 
-        type: NodeType.STATION,
-        status: NodeStatus.NORMAL,
-        meta: { colSpan: 1 },
         children: [
-            {
-                id: 'insp-wsg-primer',
-                label: '玻璃底涂动作检测',
-                type: NodeType.INSPECTION,
-                status: NodeStatus.NORMAL,
-                meta: {
-                    description: '机械臂自动进行玻璃底涂涂抹动作监控与轨迹分析。',
-                    metrics: generateMockMetrics(20, 2),
-                    imgUrl: 'https://images.unsplash.com/photo-1621905252507-b35492cc7471?auto=format&fit=crop&w=800&q=80'
-                }
-            }
+          {
+            id: 'asm-powertrain',
+            label: '动总分装线', 
+            type: NodeType.STATION,
+            status: NodeStatus.WARNING,
+            meta: { colSpan: 2 }, 
+            children: generateLineStations('pt', 12)
+          },
+          {
+            id: 'asm-rear-drive',
+            label: '后驱分装线', 
+            type: NodeType.STATION,
+            status: NodeStatus.NORMAL,
+            meta: { colSpan: 1 },
+            children: generateLineStations('rd', 5)
+          },
+          {
+            id: 'asm-front-drive',
+            label: '前驱分装线', 
+            type: NodeType.STATION,
+            status: NodeStatus.NORMAL,
+            meta: { colSpan: 1 },
+            children: generateLineStations('fd', 5)
+          },
+          {
+            id: 'asm-rear-module',
+            label: '后模块分装线', 
+            type: NodeType.STATION,
+            status: NodeStatus.NORMAL,
+            meta: { colSpan: 1 },
+            children: generateLineStations('rm', 6)
+          },
+          {
+            id: 'asm-heat-pump',
+            label: '热泵分装', 
+            type: NodeType.STATION,
+            status: NodeStatus.NORMAL,
+            meta: { colSpan: 1 },
+            children: generateLineStations('hp', 5)
+          },
+          {
+            id: 'asm-ip',
+            label: '仪表台分装', 
+            type: NodeType.STATION,
+            status: NodeStatus.NORMAL,
+            meta: { colSpan: 1 },
+            children: generateLineStations('ip', 8)
+          },
+          {
+            id: 'asm-chassis-pre',
+            label: '底盘预装线', 
+            type: NodeType.STATION,
+            status: NodeStatus.NORMAL,
+            meta: { colSpan: 1 },
+            children: generateLineStations('cpre', 8)
+          },
         ]
       },
-       {
-        id: 'asm-front-4',
-        label: '前装 4 线', 
-        type: NodeType.STATION,
+
+      // 2. 前装主线 (Zone)
+      {
+        id: 'zone-front-main',
+        label: '前装主线 (Front Assembly)',
+        type: NodeType.ZONE,
         status: NodeStatus.CRITICAL,
-        meta: { colSpan: 3 },
-        children: generateLineStations('fa4', 20)
-      },
-      // --- Row 4: Front & Sub ---
-      {
-        id: 'asm-roof',
-        label: '天幕涂胶', 
-        type: NodeType.STATION,
-        status: NodeStatus.NORMAL,
-        meta: { colSpan: 1 },
         children: [
-            {
-                id: 'insp-prf-primer',
-                label: '玻璃底涂动作检测',
-                type: NodeType.INSPECTION,
-                status: NodeStatus.NORMAL,
-                meta: {
-                    description: '天幕玻璃底涂动作执行情况实时监控。',
-                    metrics: generateMockMetrics(20, 2),
-                    imgUrl: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=80'
+           {
+            id: 'asm-front-1',
+            label: '前装 1 线', 
+            type: NodeType.STATION,
+            status: NodeStatus.NORMAL,
+            meta: { colSpan: 2 },
+            children: generateLineStations('fa1', 20)
+          },
+          {
+            id: 'asm-front-2',
+            label: '前装 2 线', 
+            type: NodeType.STATION,
+            status: NodeStatus.NORMAL,
+            meta: { colSpan: 2 },
+            children: generateLineStations('fa2', 20)
+          },
+          {
+            id: 'asm-front-3',
+            label: '前装 3 线', 
+            type: NodeType.STATION,
+            status: NodeStatus.NORMAL,
+            meta: { colSpan: 2 },
+            children: generateLineStations('fa3', 20)
+          },
+          {
+            id: 'asm-front-4',
+            label: '前装 4 线', 
+            type: NodeType.STATION,
+            status: NodeStatus.CRITICAL,
+            meta: { colSpan: 2 },
+            children: generateLineStations('fa4', 20)
+          },
+          {
+            id: 'asm-windshield',
+            label: '风挡涂胶', 
+            type: NodeType.STATION,
+            status: NodeStatus.NORMAL,
+            meta: { colSpan: 1 },
+            children: [
+                {
+                    id: 'insp-wsg-primer',
+                    label: '玻璃底涂动作检测',
+                    type: NodeType.INSPECTION,
+                    status: NodeStatus.NORMAL,
+                    meta: {
+                        description: '机械臂自动进行玻璃底涂涂抹动作监控与轨迹分析。',
+                        metrics: generateMockMetrics(20, 2),
+                        imgUrl: 'https://images.unsplash.com/photo-1621905252507-b35492cc7471?auto=format&fit=crop&w=800&q=80'
+                    }
                 }
-            }
+            ]
+          },
+          {
+            id: 'asm-roof',
+            label: '天幕涂胶', 
+            type: NodeType.STATION,
+            status: NodeStatus.NORMAL,
+            meta: { colSpan: 1 },
+            children: [
+                {
+                    id: 'insp-prf-primer',
+                    label: '玻璃底涂动作检测',
+                    type: NodeType.INSPECTION,
+                    status: NodeStatus.NORMAL,
+                    meta: {
+                        description: '天幕玻璃底涂动作执行情况实时监控。',
+                        metrics: generateMockMetrics(20, 2),
+                        imgUrl: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=80'
+                    }
+                }
+            ]
+          }
         ]
       },
+
+      // 3. 底盘线 (Zone)
       {
-        id: 'asm-heat-pump',
-        label: '热泵分装', 
-        type: NodeType.STATION,
+        id: 'zone-chassis-main',
+        label: '底盘合装线 (Chassis Marriage)',
+        type: NodeType.ZONE,
         status: NodeStatus.NORMAL,
-        meta: { colSpan: 1 },
-        children: generateLineStations('hp', 5)
+        children: [
+           {
+            id: 'asm-chassis-1',
+            label: '底盘 1 线', 
+            type: NodeType.STATION,
+            status: NodeStatus.NORMAL,
+            meta: { colSpan: 4 }, 
+            children: generateLineStations('cl1', 18)
+          },
+          {
+            id: 'asm-chassis-2',
+            label: '底盘 2 线', 
+            type: NodeType.STATION,
+            status: NodeStatus.NORMAL,
+            meta: { colSpan: 4 },
+            children: generateLineStations('cl2', 18)
+          },
+        ]
       },
+
+      // 4. 后装线 (Zone)
       {
-        id: 'asm-front-3',
-        label: '前装 3 线', 
-        type: NodeType.STATION,
+        id: 'zone-rear-main',
+        label: '后装主线 (Rear Assembly)',
+        type: NodeType.ZONE,
         status: NodeStatus.NORMAL,
-        meta: { colSpan: 3 },
-        children: generateLineStations('fa3', 20)
-      },
-      {
-        id: 'asm-ip',
-        label: '仪表台分装', 
-        type: NodeType.STATION,
-        status: NodeStatus.NORMAL,
-        meta: { colSpan: 1 },
-        children: generateLineStations('ip', 8)
-      },
-      // --- Row 5: Front/Rear ---
-      {
-        id: 'asm-front-2',
-        label: '前装 2 线', 
-        type: NodeType.STATION,
-        status: NodeStatus.NORMAL,
-        meta: { colSpan: 3 },
-        children: generateLineStations('fa2', 20)
-      },
-      {
-        id: 'asm-front-1',
-        label: '前装 1 线', 
-        type: NodeType.STATION,
-        status: NodeStatus.NORMAL,
-        meta: { colSpan: 3 },
-        children: generateLineStations('fa1', 20)
-      },
-      // --- Row 6: Rear ---
-      {
-        id: 'asm-rear-1',
-        label: '后装 1 线', 
-        type: NodeType.STATION,
-        status: NodeStatus.NORMAL,
-        meta: { colSpan: 3 },
-        children: generateLineStations('ra1', 15)
-      },
-      {
-        id: 'asm-rear-2',
-        label: '后装 2 线', 
-        type: NodeType.STATION,
-        status: NodeStatus.NORMAL,
-        meta: { colSpan: 3 },
-        children: generateLineStations('ra2', 15)
-      },
-      // --- Aux ---
-      {
-        id: 'asm-supply',
-        label: '辅房/物料区', 
-        type: NodeType.STATION,
-        status: NodeStatus.INACTIVE,
-        meta: { colSpan: 6 },
-        children: []
+        children: [
+          {
+            id: 'asm-door',
+            label: '车门线', 
+            type: NodeType.STATION,
+            status: NodeStatus.NORMAL,
+            meta: { colSpan: 2 },
+            children: generateLineStations('door', 15)
+          },
+          {
+            id: 'asm-rear-1',
+            label: '后装 1 线', 
+            type: NodeType.STATION,
+            status: NodeStatus.NORMAL,
+            meta: { colSpan: 2 },
+            children: generateLineStations('ra1', 15)
+          },
+          {
+            id: 'asm-rear-2',
+            label: '后装 2 线', 
+            type: NodeType.STATION,
+            status: NodeStatus.NORMAL,
+            meta: { colSpan: 2 },
+            children: generateLineStations('ra2', 15)
+          },
+          {
+            id: 'asm-supply',
+            label: '辅房/物料区', 
+            type: NodeType.STATION,
+            status: NodeStatus.INACTIVE,
+            meta: { colSpan: 2 },
+            children: []
+          }
+        ]
       }
     ]
   },

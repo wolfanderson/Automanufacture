@@ -1,5 +1,6 @@
 export enum NodeType {
   WORKSHOP = 'WORKSHOP',
+  ZONE = 'ZONE', // New type for grouping L2 items (e.g., Chassis Line Area)
   STATION = 'STATION',
   INSPECTION = 'INSPECTION'
 }
