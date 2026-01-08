@@ -87,6 +87,7 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
              const endX = nextRect.left - containerRect.left;
              const endY = nextRect.top + nextRect.height / 2 - containerRect.top;
              
+             // Only draw if on same row (approx) and moving left-to-right
              if (Math.abs(currRect.top - nextRect.top) < 50 && endX > startX) {
                  newPaths.push({ d: `M ${startX} ${startY} L ${endX} ${endY}`, type: 'straight' });
              }
@@ -198,6 +199,21 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
 
   return (
     <div className="h-full flex flex-col bg-industrial-900/30">
+      {/* CSS Animation Injection */}
+      <style>{`
+        @keyframes dash-flow {
+          0% {
+            stroke-dashoffset: 24;
+          }
+          100% {
+            stroke-dashoffset: 0;
+          }
+        }
+        .animate-dash-flow {
+          animation: dash-flow 0.5s linear infinite;
+        }
+      `}</style>
+
       {/* Header */}
       <div className="p-2 border-b border-gray-800 bg-industrial-900/95 backdrop-blur z-30 flex items-center justify-between shadow-lg relative h-12 flex-shrink-0">
         <div>
@@ -222,45 +238,44 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
       <div className="flex-1 overflow-y-auto custom-scrollbar bg-industrial-900/20 relative" ref={scrollContainerRef}>
         <div className="relative min-h-full pb-20 pt-8 px-6" ref={contentRef}>
             
-            {/* SVG Circuit Layer with Native Animation */}
+            {/* SVG Circuit Layer with CSS Animation */}
             <svg className="absolute top-0 left-0 w-full h-full pointer-events-none z-0 overflow-visible">
                 <defs>
                     <filter id="line-glow" x="-20%" y="-20%" width="140%" height="140%">
-                        <feGaussianBlur stdDeviation="1.5" result="blur" />
+                        <feGaussianBlur stdDeviation="2" result="blur" />
                         <feComposite in="SourceGraphic" in2="blur" operator="over" />
                     </filter>
                 </defs>
                 {paths.map((p, i) => (
                     <g key={`${i}-${p.type}`}>
-                         {/* 1. Background Rail (Darker, slightly thicker) */}
+                         {/* 1. Background Rail (Darker, Thicker to be visible on dark bg) */}
                         <path 
                             d={p.d} 
                             fill="none" 
+                            stroke="#111827" 
+                            strokeWidth="6" 
+                            strokeLinecap="round" 
+                        />
+                         <path 
+                            d={p.d} 
+                            fill="none" 
                             stroke="#1f2937" 
-                            strokeWidth="5" 
+                            strokeWidth="2" 
                             strokeLinecap="round" 
                         />
                         
-                        {/* 2. Marching Dashes (The Ants) - Using Native SVG Animate */}
+                        {/* 2. Marching Dashes (The Ants) - Using CSS Animation Class */}
                         <path
                             d={p.d}
                             fill="none"
                             stroke="#00f0ff"
                             strokeWidth="3"
-                            strokeDasharray="12 12" // 12px line, 12px gap = 24px cycle
+                            strokeDasharray="12 12" 
                             strokeLinecap="round"
+                            className="animate-dash-flow"
                             filter="url(#line-glow)"
                             opacity="1"
-                        >
-                            {/* Native SVG Animation for maximum compatibility */}
-                            <animate 
-                                attributeName="stroke-dashoffset" 
-                                from="24" // Match the sum of dasharray (12+12)
-                                to="0" 
-                                dur="0.4s" // Fast speed
-                                repeatCount="indefinite" 
-                            />
-                        </path>
+                        />
                     </g>
                 ))}
             </svg>
