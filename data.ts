@@ -272,6 +272,48 @@ export const MOCK_DATA: ProcessNode[] = [
             meta: { colSpan: 1 },
             children: generateLineStations('cpre', 8)
           },
+          // Moved here as requested
+          {
+            id: 'asm-windshield',
+            label: '风挡涂胶', 
+            type: NodeType.STATION,
+            status: NodeStatus.NORMAL,
+            meta: { colSpan: 1 },
+            children: [
+                {
+                    id: 'insp-wsg-primer',
+                    label: '玻璃底涂动作检测',
+                    type: NodeType.INSPECTION,
+                    status: NodeStatus.NORMAL,
+                    meta: {
+                        description: '机械臂自动进行玻璃底涂涂抹动作监控与轨迹分析。',
+                        metrics: generateMockMetrics(20, 2),
+                        imgUrl: 'https://images.unsplash.com/photo-1621905252507-b35492cc7471?auto=format&fit=crop&w=800&q=80'
+                    }
+                }
+            ]
+          },
+          // Moved here as requested
+          {
+            id: 'asm-roof',
+            label: '天幕涂胶', 
+            type: NodeType.STATION,
+            status: NodeStatus.NORMAL,
+            meta: { colSpan: 1 },
+            children: [
+                {
+                    id: 'insp-prf-primer',
+                    label: '玻璃底涂动作检测',
+                    type: NodeType.INSPECTION,
+                    status: NodeStatus.NORMAL,
+                    meta: {
+                        description: '天幕玻璃底涂动作执行情况实时监控。',
+                        metrics: generateMockMetrics(20, 2),
+                        imgUrl: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=80'
+                    }
+                }
+            ]
+          }
         ]
       },
 
@@ -313,46 +355,6 @@ export const MOCK_DATA: ProcessNode[] = [
             status: NodeStatus.CRITICAL,
             meta: { colSpan: 2 },
             children: generateLineStations('fa4', 20)
-          },
-          {
-            id: 'asm-windshield',
-            label: '风挡涂胶', 
-            type: NodeType.STATION,
-            status: NodeStatus.NORMAL,
-            meta: { colSpan: 1 },
-            children: [
-                {
-                    id: 'insp-wsg-primer',
-                    label: '玻璃底涂动作检测',
-                    type: NodeType.INSPECTION,
-                    status: NodeStatus.NORMAL,
-                    meta: {
-                        description: '机械臂自动进行玻璃底涂涂抹动作监控与轨迹分析。',
-                        metrics: generateMockMetrics(20, 2),
-                        imgUrl: 'https://images.unsplash.com/photo-1621905252507-b35492cc7471?auto=format&fit=crop&w=800&q=80'
-                    }
-                }
-            ]
-          },
-          {
-            id: 'asm-roof',
-            label: '天幕涂胶', 
-            type: NodeType.STATION,
-            status: NodeStatus.NORMAL,
-            meta: { colSpan: 1 },
-            children: [
-                {
-                    id: 'insp-prf-primer',
-                    label: '玻璃底涂动作检测',
-                    type: NodeType.INSPECTION,
-                    status: NodeStatus.NORMAL,
-                    meta: {
-                        description: '天幕玻璃底涂动作执行情况实时监控。',
-                        metrics: generateMockMetrics(20, 2),
-                        imgUrl: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=80'
-                    }
-                }
-            ]
           }
         ]
       },

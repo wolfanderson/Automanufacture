@@ -17,7 +17,20 @@ const App: React.FC = () => {
 
   const selectedStation = useMemo(() => {
     if (!selectedWorkshop || !selectedStationId) return undefined;
-    return selectedWorkshop.children?.find(s => s.id === selectedStationId);
+
+    // Recursively find the selected station (needed for nested Zones)
+    const findNode = (nodes: ProcessNode[]): ProcessNode | undefined => {
+      for (const node of nodes) {
+        if (node.id === selectedStationId) return node;
+        if (node.children) {
+          const found = findNode(node.children);
+          if (found) return found;
+        }
+      }
+      return undefined;
+    };
+
+    return findNode(selectedWorkshop.children || []);
   }, [selectedWorkshop, selectedStationId]);
 
   // --- Handlers ---
