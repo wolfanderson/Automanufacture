@@ -211,44 +211,52 @@ export const MOCK_DATA: ProcessNode[] = [
     children: [
       // Order: Front -> Chassis -> Rear -> Sub-Assembly (at the end)
 
-      // 1. 前装主线 (Zone)
+      // 1. 前装主线 (Front Assembly) - Updated based on request
       {
         id: 'zone-front-main',
         label: '前装主线 (Front Assembly)',
         type: NodeType.ZONE,
-        status: NodeStatus.CRITICAL,
+        status: NodeStatus.NORMAL,
         children: [
            {
-            id: 'asm-front-1',
-            label: '前装 1 线', 
+            id: 'asm-front-z054',
+            label: '前装Z054', 
             type: NodeType.STATION,
             status: NodeStatus.NORMAL,
-            meta: { colSpan: 2 },
-            children: generateLineStations('fa1', 20)
-          },
-          {
-            id: 'asm-front-2',
-            label: '前装 2 线', 
-            type: NodeType.STATION,
-            status: NodeStatus.NORMAL,
-            meta: { colSpan: 2 },
-            children: generateLineStations('fa2', 20)
-          },
-          {
-            id: 'asm-front-3',
-            label: '前装 3 线', 
-            type: NodeType.STATION,
-            status: NodeStatus.NORMAL,
-            meta: { colSpan: 2 },
-            children: generateLineStations('fa3', 20)
-          },
-          {
-            id: 'asm-front-4',
-            label: '前装 4 线', 
-            type: NodeType.STATION,
-            status: NodeStatus.CRITICAL,
-            meta: { colSpan: 2 },
-            children: generateLineStations('fa4', 20)
+            meta: { colSpan: 4 }, // Make it span wider for better visibility
+            children: [
+                {
+                    id: 'insp-z054-harness',
+                    label: '智驾域控制器线束接插状态检测',
+                    type: NodeType.INSPECTION,
+                    status: NodeStatus.NORMAL,
+                    meta: {
+                        description: '智能驾驶域控线束接口连接完整性与锁扣状态AI检测。',
+                        metrics: generateMockMetrics(20, 5),
+                        imgUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80'
+                    }
+                },
+                {
+                    id: 'insp-z054-install',
+                    label: '智驾域控制器错漏装检测',
+                    type: NodeType.INSPECTION,
+                    status: NodeStatus.NORMAL,
+                    meta: {
+                        description: '基于3D点云对比的控制器安装到位与防错检测。',
+                        metrics: generateMockMetrics(20, 2)
+                    }
+                },
+                {
+                    id: 'insp-z054-nameplate',
+                    label: '铭牌检测',
+                    type: NodeType.INSPECTION,
+                    status: NodeStatus.NORMAL,
+                    meta: {
+                        description: 'OCR识别零部件铭牌信息并与MES系统数据比对。',
+                        metrics: generateMockMetrics(20, 1)
+                    }
+                }
+            ]
           }
         ]
       },

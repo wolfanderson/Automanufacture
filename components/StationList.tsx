@@ -55,7 +55,7 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
       const currentId = children[i].id;
       const nextId = children[i+1].id;
       
-      // Stop connecting if the next item is the Sub-Assembly zone (it should be isolated)
+      // Stop connecting if the next item is the Sub-Assembly zone (it should be isolated or handled differently)
       if (nextId === 'zone-sub-assembly') continue;
 
       const currentEl = itemsRef.current.get(currentId);
@@ -67,25 +67,39 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
 
         // Connect Bottom Center of Current to Top Center of Next (Vertical Flow)
         if (children[i].type === NodeType.ZONE) {
-            const startX = currRect.left + currRect.width / 2 - containerRect.left;
+            let startX = currRect.left + currRect.width / 2 - containerRect.left;
             const startY = currRect.bottom - containerRect.top;
             
-            const endX = nextRect.left + nextRect.width / 2 - containerRect.left;
+            let endX = nextRect.left + nextRect.width / 2 - containerRect.left;
             const endY = nextRect.top - containerRect.top;
 
+             // Snap to center if very close to avoid jagged lines on near-vertical connections
+             // Using Math.round to ensure pixel-perfect rendering
+             if (Math.abs(startX - endX) < 20) {
+                 const avgX = Math.round((startX + endX) / 2);
+                 startX = avgX;
+                 endX = avgX;
+             } else {
+                 startX = Math.round(startX);
+                 endX = Math.round(endX);
+             }
+             
+             const roundedStartY = Math.round(startY);
+             const roundedEndY = Math.round(endY);
+
              // Draw a nice stepped line
-             let path = `M ${startX} ${startY}`;
-             path += ` L ${startX} ${startY + (endY - startY) / 2}`;
-             path += ` L ${endX} ${startY + (endY - startY) / 2}`;
-             path += ` L ${endX} ${endY}`;
+             let path = `M ${startX} ${roundedStartY}`;
+             path += ` L ${startX} ${Math.round(roundedStartY + (roundedEndY - roundedStartY) / 2)}`;
+             path += ` L ${endX} ${Math.round(roundedStartY + (roundedEndY - roundedStartY) / 2)}`;
+             path += ` L ${endX} ${roundedEndY}`;
 
              newPaths.push({ d: path, type: 'complex' });
         } else {
              // Standard left-to-right flow for simple workshops
-             const startX = currRect.right - containerRect.left;
-             const startY = currRect.top + currRect.height / 2 - containerRect.top;
-             const endX = nextRect.left - containerRect.left;
-             const endY = nextRect.top + nextRect.height / 2 - containerRect.top;
+             const startX = Math.round(currRect.right - containerRect.left);
+             const startY = Math.round(currRect.top + currRect.height / 2 - containerRect.top);
+             const endX = Math.round(nextRect.left - containerRect.left);
+             const endY = Math.round(nextRect.top + nextRect.height / 2 - containerRect.top);
              
              // Only draw if on same row (approx) and moving left-to-right
              if (Math.abs(currRect.top - nextRect.top) < 50 && endX > startX) {
@@ -102,7 +116,7 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
     calculatePaths();
     
     // Safety timeout to ensure DOM is fully painted
-    const timer = setTimeout(calculatePaths, 100);
+    const timer = setTimeout(calculatePaths, 250);
 
     const observer = new ResizeObserver(() => {
         window.requestAnimationFrame(calculatePaths);
@@ -201,16 +215,12 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
     <div className="h-full flex flex-col bg-industrial-900/30">
       {/* CSS Animation Injection */}
       <style>{`
-        @keyframes dash-flow {
-          0% {
-            stroke-dashoffset: 24;
-          }
-          100% {
-            stroke-dashoffset: 0;
-          }
+        @keyframes flowAnimation {
+          0% { stroke-dashoffset: 20; }
+          100% { stroke-dashoffset: 0; }
         }
-        .animate-dash-flow {
-          animation: dash-flow 0.5s linear infinite;
+        .flow-path {
+          animation: flowAnimation 1s linear infinite;
         }
       `}</style>
 
@@ -238,43 +248,64 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
       <div className="flex-1 overflow-y-auto custom-scrollbar bg-industrial-900/20 relative" ref={scrollContainerRef}>
         <div className="relative min-h-full pb-20 pt-8 px-6" ref={contentRef}>
             
-            {/* SVG Circuit Layer with CSS Animation */}
+            {/* SVG Circuit Layer */}
+            {/* 
+                REMOVED FILTERS: Standard SVG filters often clip vertical lines (width=0). 
+                Replaced with Multi-Layer Stroke technique for consistent glow on all lines.
+            */}
             <svg className="absolute top-0 left-0 w-full h-full pointer-events-none z-0 overflow-visible">
-                <defs>
-                    <filter id="line-glow" x="-20%" y="-20%" width="140%" height="140%">
-                        <feGaussianBlur stdDeviation="2" result="blur" />
-                        <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                    </filter>
-                </defs>
                 {paths.map((p, i) => (
-                    <g key={`${i}-${p.type}`}>
-                         {/* 1. Background Rail (Darker, Thicker to be visible on dark bg) */}
+                    <g key={i}>
+                         {/* 1. Base Rail (Dark background) */}
                         <path 
                             d={p.d} 
-                            fill="none" 
                             stroke="#111827" 
-                            strokeWidth="6" 
-                            strokeLinecap="round" 
-                        />
-                         <path 
-                            d={p.d} 
+                            strokeWidth="8" 
                             fill="none" 
-                            stroke="#1f2937" 
-                            strokeWidth="2" 
-                            strokeLinecap="round" 
+                            strokeLinecap="round"
                         />
                         
-                        {/* 2. Marching Dashes (The Ants) - Using CSS Animation Class */}
+                        {/* 2. Glow Simulation (Thick static transparent cyan) */}
+                         <path 
+                            d={p.d} 
+                            stroke="#00f0ff" 
+                            strokeWidth="12" 
+                            strokeOpacity="0.15" 
+                            fill="none" 
+                            strokeLinecap="round"
+                        />
+
+                        {/* 3. Inner Rail (Dark thin line to define track) */}
+                         <path 
+                            d={p.d} 
+                            stroke="#1f2937" 
+                            strokeWidth="4" 
+                            fill="none" 
+                            strokeLinecap="round"
+                        />
+                        
+                        {/* 4. Moving Light (The Flow - Cyan) */}
                         <path
                             d={p.d}
-                            fill="none"
                             stroke="#00f0ff"
-                            strokeWidth="3"
-                            strokeDasharray="12 12" 
+                            strokeWidth="2"
+                            strokeDasharray="10 10" 
                             strokeLinecap="round"
-                            className="animate-dash-flow"
-                            filter="url(#line-glow)"
-                            opacity="1"
+                            fill="none"
+                            className="flow-path"
+                            opacity="0.8"
+                        />
+
+                         {/* 5. Moving Highlight (The Flow - White Core for Contrast) */}
+                         <path
+                            d={p.d}
+                            stroke="#ffffff"
+                            strokeWidth="1"
+                            strokeDasharray="10 10" 
+                            strokeLinecap="round"
+                            fill="none"
+                            className="flow-path"
+                            opacity="0.9"
                         />
                     </g>
                 ))}
@@ -282,11 +313,6 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
 
             {/* Grid Content */}
             <div className="relative z-10 space-y-16">
-                {/* 
-                   Special Render Logic:
-                   If the node is a ZONE, render it as a full-width Section.
-                   If the node is a STATION, render it as part of a default grid (fallback for non-zoned workshops).
-                */}
                 {workshop.children && workshop.children[0].type === NodeType.ZONE ? (
                      // Zoned Layout (Assembly)
                      <div className="flex flex-col gap-16 max-w-7xl mx-auto">
