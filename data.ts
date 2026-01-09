@@ -234,10 +234,14 @@ export const MOCK_DATA: ProcessNode[] = [
            },
            {
             id: 'asm-front-z054',
-            label: 'Z054', 
+            label: '智驾域控安装', 
             type: NodeType.STATION,
             status: NodeStatus.NORMAL,
-            meta: { colSpan: 1 }, 
+            meta: { 
+                colSpan: 1,
+                inspectionObject: '域控制器主体、散热背板、接地线',
+                inspectionMethod: '固定相机视觉检测'
+            }, 
             children: [
                 {
                     id: 'insp-z054-harness',
@@ -263,11 +267,34 @@ export const MOCK_DATA: ProcessNode[] = [
           },
           {
             id: 'asm-front-gap-2',
-            label: 'Z055-Z077', 
+            label: 'Z055-Z076', 
             type: NodeType.STATION,
             status: NodeStatus.INACTIVE,
             meta: { colSpan: 1, isPlaceholder: true },
             children: []
+           },
+           {
+            id: 'asm-front-z077',
+            label: '前舱线束安装', 
+            type: NodeType.STATION,
+            status: NodeStatus.NORMAL,
+            meta: { 
+                colSpan: 1,
+                inspectionObject: '前舱主线束、大灯接口、ABS泵插头',
+                inspectionMethod: '固定相机拍照检测'
+            }, 
+            children: [
+                {
+                    id: 'insp-z077-harness',
+                    label: '线束连接检测',
+                    type: NodeType.INSPECTION,
+                    status: NodeStatus.NORMAL,
+                    meta: {
+                        description: '前舱线束关键接插件连接状态与布线规范性检测。',
+                        metrics: generateMockMetrics(20, 3)
+                    }
+                }
+            ]
            },
            {
             id: 'asm-front-z078',
@@ -297,36 +324,40 @@ export const MOCK_DATA: ProcessNode[] = [
            },
            {
             id: 'asm-chassis-gap-1',
-            label: 'Z080-Z089',
+            label: 'Z080-Z103',
             type: NodeType.STATION,
             status: NodeStatus.INACTIVE,
             meta: { colSpan: 1, isPlaceholder: true },
             children: [] 
            },
            {
-            id: 'asm-chassis-z090',
-            label: 'Z090',
+            id: 'asm-chassis-z104',
+            label: '底盘线束安装',
             type: NodeType.STATION,
             status: NodeStatus.NORMAL,
-            meta: { colSpan: 1 },
+            meta: { 
+                colSpan: 1,
+                inspectionObject: '底盘主线束走向、EPB插头、轮速传感器线缆',
+                inspectionMethod: '固定相机拍照检测'
+            },
             children: [
                 {
-                    id: 'insp-z090-subframe',
-                    label: '副车架自动拧紧检测',
+                    id: 'insp-z104-harness',
+                    label: '底盘线束检测',
                     type: NodeType.INSPECTION,
                     status: NodeStatus.NORMAL,
                     meta: {
-                        description: '副车架关键连接点扭矩与角度实时监控。',
+                        description: '底盘线束走向、卡扣完整性及接插件锁止状态检测。',
                         metrics: generateMockMetrics(20, 3)
                     }
                 },
                 {
-                    id: 'insp-z090-visual',
-                    label: '底盘合装到位检测',
+                    id: 'insp-z104-routing',
+                    label: '管路干涉检测',
                     type: NodeType.INSPECTION,
                     status: NodeStatus.NORMAL,
                     meta: {
-                        description: '基于3D视觉的底盘与车身对合间隙检测。',
+                        description: '线束与周边制动管路、冷却管路间隙干涉风险排查。',
                         metrics: generateMockMetrics(20, 2)
                     }
                 }
@@ -334,61 +365,7 @@ export const MOCK_DATA: ProcessNode[] = [
            },
            {
             id: 'asm-chassis-gap-2',
-            label: 'Z091-Z114',
-            type: NodeType.STATION,
-            status: NodeStatus.INACTIVE,
-            meta: { colSpan: 1, isPlaceholder: true },
-            children: [] 
-           },
-           {
-            id: 'asm-chassis-z115',
-            label: 'Z115',
-            type: NodeType.STATION,
-            status: NodeStatus.NORMAL,
-            meta: { colSpan: 1 },
-            children: [
-                {
-                    id: 'insp-z115-harness',
-                    label: '前舱线束检测',
-                    type: NodeType.INSPECTION,
-                    status: NodeStatus.NORMAL,
-                    meta: {
-                        description: '前舱线束布局与连接器状态AI视觉检测。',
-                        metrics: generateMockMetrics(20, 3)
-                    }
-                }
-            ]
-           },
-           {
-            id: 'asm-chassis-gap-3',
-            label: 'Z116-Z127',
-            type: NodeType.STATION,
-            status: NodeStatus.INACTIVE,
-            meta: { colSpan: 1, isPlaceholder: true },
-            children: [] 
-           },
-           {
-            id: 'asm-chassis-z128',
-            label: 'Z128',
-            type: NodeType.STATION,
-            status: NodeStatus.NORMAL,
-            meta: { colSpan: 1 }, 
-            children: [
-                {
-                    id: 'insp-z128-harness',
-                    label: '底盘线束检测',
-                    type: NodeType.INSPECTION,
-                    status: NodeStatus.NORMAL,
-                    meta: {
-                        description: '底盘线束走向及卡扣完整性检测。',
-                        metrics: generateMockMetrics(20, 4)
-                    }
-                }
-            ]
-           },
-           {
-            id: 'asm-chassis-gap-4',
-            label: 'Z129-Z131',
+            label: 'Z105-Z131',
             type: NodeType.STATION,
             status: NodeStatus.INACTIVE,
             meta: { colSpan: 1, isPlaceholder: true },
@@ -422,34 +399,48 @@ export const MOCK_DATA: ProcessNode[] = [
            },
            {
             id: 'asm-rear-gap-1',
-            label: 'Z134-Z150', 
+            label: 'Z134-Z141', 
             type: NodeType.STATION,
             status: NodeStatus.INACTIVE,
             meta: { colSpan: 1, isPlaceholder: true },
             children: []
            },
            {
-            id: 'asm-rear-z151',
-            label: 'Z151', 
+            id: 'asm-rear-z142',
+            label: '空调线束总成', 
             type: NodeType.STATION,
             status: NodeStatus.NORMAL,
-            meta: { colSpan: 1 }, 
+            meta: { 
+                colSpan: 1,
+                inspectionObject: '空调主机线束、鼓风机插头、风门执行器接口',
+                inspectionMethod: '手机拍照'
+            }, 
             children: [
                 {
-                    id: 'insp-z151-trim',
-                    label: '内饰板安装检测',
+                    id: 'insp-z142-harness',
+                    label: '空调线束检测',
                     type: NodeType.INSPECTION,
                     status: NodeStatus.NORMAL,
                     meta: {
-                        description: 'C柱内饰板卡扣安装状态检测。',
+                        description: '空调箱体线束整理与固定卡扣检查。',
                         metrics: generateMockMetrics(20, 2)
+                    }
+                },
+                {
+                    id: 'insp-z142-connector',
+                    label: '插接件到位检测',
+                    type: NodeType.INSPECTION,
+                    status: NodeStatus.NORMAL,
+                    meta: {
+                        description: '关键电器接口插接深度与锁止确认。',
+                        metrics: generateMockMetrics(20, 3)
                     }
                 }
             ]
            },
            {
              id: 'asm-rear-gap-2',
-             label: 'Z152-Z190', 
+             label: 'Z143-Z190', 
              type: NodeType.STATION,
              status: NodeStatus.INACTIVE,
              meta: { colSpan: 1, isPlaceholder: true },
@@ -483,7 +474,7 @@ export const MOCK_DATA: ProcessNode[] = [
             },
             {
                 id: 'asm-batt-z196', // Moved from Rear
-                label: 'Z196', 
+                label: '电池包输送1', 
                 type: NodeType.STATION,
                 status: NodeStatus.NORMAL,
                 meta: { colSpan: 1 }, 
@@ -503,7 +494,7 @@ export const MOCK_DATA: ProcessNode[] = [
             },
             {
                 id: 'asm-batt-z197', // Moved from Rear
-                label: 'Z197', 
+                label: '电池包输送2', 
                 type: NodeType.STATION,
                 status: NodeStatus.NORMAL,
                 meta: { colSpan: 1 }, 
@@ -530,10 +521,14 @@ export const MOCK_DATA: ProcessNode[] = [
             },
             {
                 id: 'asm-batt-z199', // Moved from Rear
-                label: 'Z199', 
+                label: '底盘高压线束', 
                 type: NodeType.STATION,
                 status: NodeStatus.NORMAL,
-                meta: { colSpan: 1 }, 
+                meta: { 
+                    colSpan: 1,
+                    inspectionObject: '高低压线束接插件、前底盘护板和后保险杠螺栓',
+                    inspectionMethod: '机械臂拍照检测'
+                }, 
                 children: [
                     {
                         id: 'insp-z199-seats',
@@ -565,13 +560,46 @@ export const MOCK_DATA: ProcessNode[] = [
         type: NodeType.ZONE,
         status: NodeStatus.WARNING,
         children: [
+          // MODIFIED: Powertrain Assembly to include DY002 and Main Ops as sub-modules
           {
             id: 'asm-powertrain',
             label: '动总分装线', 
             type: NodeType.STATION,
             status: NodeStatus.WARNING,
-            meta: { colSpan: 3 }, // Wider
-            children: generateLineStations('pt', 12)
+            meta: { colSpan: 3, description: '动力总成综合分装' }, 
+            children: [
+                {
+                    id: 'dy002',
+                    label: '空气软管总成',
+                    type: NodeType.STATION, // Inner station
+                    status: NodeStatus.NORMAL,
+                    meta: { 
+                        description: 'DY002 空气软管分装',
+                        inspectionObject: '进气软管、涡轮增压管路、高压卡箍',
+                        inspectionMethod: '手机拍照'
+                    },
+                    children: [
+                         {
+                            id: 'insp-dy002-visual',
+                            label: '软管外观检测',
+                            type: NodeType.INSPECTION,
+                            status: NodeStatus.NORMAL,
+                            meta: {
+                                description: '人工使用手机拍照上传，AI辅助判定软管位置。',
+                                metrics: generateMockMetrics(20, 2)
+                            }
+                         }
+                    ]
+                },
+                {
+                    id: 'pt-main-ops',
+                    label: '发动机主线', 
+                    type: NodeType.STATION, // Inner station for legacy content
+                    status: NodeStatus.WARNING,
+                    meta: { description: '发动机与变速箱集成' },
+                    children: generateLineStations('pt', 10)
+                }
+            ]
           },
           {
             id: 'asm-rear-drive',
@@ -748,11 +776,12 @@ export const MOCK_DATA: ProcessNode[] = [
             children: [
                 {
                     id: 'dr026',
-                    label: 'DR026', 
+                    label: '裸车门', 
                     type: NodeType.STATION, // Inner station
                     status: NodeStatus.NORMAL,
                     meta: { 
-                        description: '车门分装检测点A' 
+                        description: '车门分装检测点A',
+                        inspectionMethod: '机械臂拍照检测'
                     },
                     children: [
                         {
@@ -769,11 +798,12 @@ export const MOCK_DATA: ProcessNode[] = [
                 },
                 {
                     id: 'dr033',
-                    label: 'DR033', 
+                    label: '饰板车门', 
                     type: NodeType.STATION, // Inner station
                     status: NodeStatus.NORMAL,
                     meta: { 
-                        description: '车门分装检测点B' 
+                        description: '车门分装检测点B' ,
+                        inspectionMethod: '机械臂拍照检测'
                     },
                     children: [
                         {

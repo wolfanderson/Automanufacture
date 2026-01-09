@@ -28,6 +28,10 @@ export interface NodeMeta {
   imgUrl?: string; // Placeholder for camera feed or snapshot
   colSpan?: number; // Layout control: 1, 2, 3, 4 etc.
   isPlaceholder?: boolean; // NEW: Mark this node as a visual spacer/gap
+  
+  // NEW FIELDS
+  inspectionObject?: string; // 检测对象
+  inspectionMethod?: string; // 检测方案
 }
 
 // The recursive structure

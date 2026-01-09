@@ -388,9 +388,9 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
                                 {/* Zone Children Grid */}
                                 <div className={`mt-6 gap-6 ${
                                     zone.id === 'zone-front-main' 
-                                    ? 'grid grid-cols-5' 
+                                    ? 'grid grid-cols-6' 
                                     : zone.id === 'zone-chassis-main' 
-                                      ? 'grid grid-cols-9' 
+                                      ? 'grid grid-cols-5' 
                                       : zone.id === 'zone-rear-main'
                                         ? 'grid grid-cols-5' // Narrowed from 7
                                         : zone.id === 'zone-battery-main'
