@@ -118,11 +118,16 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
     }
 
     // 2. Intra-Zone Connections (Horizontal/Straight for adjacent stations)
+    // Specifically targeting the main assembly lines to ensure internal flow
+    const flowZones = ['zone-front-main', 'zone-chassis-main', 'zone-rear-main', 'zone-battery-main'];
+    
     children.forEach(zone => {
         // Skip connection lines for Sub-Assembly Zone as requested
         if (zone.id === 'zone-sub-assembly') return;
 
         if (zone.type === NodeType.ZONE && zone.children && zone.children.length > 1) {
+             const isFlowZone = flowZones.includes(zone.id);
+
              for (let j = 0; j < zone.children.length - 1; j++) {
                  const c1 = zone.children[j];
                  const c2 = zone.children[j+1];
@@ -142,7 +147,7 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
                         const endY = Math.round(r2.top + r2.height / 2 - containerRect.top);
 
                         if (endX > startX) {
-                            // Use default variant for station connections
+                            // Use default variant for station connections to get the optical flow
                             newPaths.push({
                                 d: `M ${startX} ${startY} L ${endX} ${endY}`,
                                 type: 'straight',
@@ -181,13 +186,10 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
   // Helper to render a clickable station card or a group container
   const renderStationCard = (station: ProcessNode, index: number, isSubItem: boolean = false) => {
     // 1. Check if this is a grouping station (contains child Stations)
-    // We look for children that are NOT just INSPECTION type (though we rely on Type.STATION explicitly here)
     const subStations = station.children?.filter(c => c.type === NodeType.STATION);
     const isGroup = subStations && subStations.length > 0;
     
     const colSpan = station.meta?.colSpan || 1;
-    // For groups, if colSpan is 1 but we have multiple items, let the grid handle it naturally or use a wrapper.
-    // We'll stick to spanClass for the outer container.
     const spanClass = colSpan === 2 ? 'col-span-2' : 
                       colSpan === 3 ? 'col-span-3' : 
                       colSpan >= 4 ? 'col-span-4' : 'col-span-1';
@@ -228,10 +230,14 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
         return (
             <div
                 key={station.id}
-                className={`${spanClass} h-[130px] w-full flex flex-col items-center justify-center border-2 border-dashed border-industrial-600 rounded bg-industrial-800/50 text-gray-400 select-none px-2`}
+                ref={(el) => {
+                     if(el) itemsRef.current.set(station.id, el);
+                     else itemsRef.current.delete(station.id);
+                }}
+                className={`${spanClass} h-[130px] w-full flex flex-col items-center justify-center border-2 border-transparent rounded text-gray-400 select-none px-2`}
             >
                 <MoreHorizontal size={24} className="opacity-50 mb-1" />
-                <span className="text-xs font-mono font-bold text-center w-full break-words leading-tight">{station.label}</span>
+                <span className="text-xs font-mono font-bold text-center w-full break-words leading-tight opacity-90">{station.label}</span>
             </div>
         );
     }
@@ -317,17 +323,17 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
       {/* CSS Animation Injection */}
       <style>{`
         @keyframes flowAnimation {
-          0% { stroke-dashoffset: 40; }
+          0% { stroke-dashoffset: 60; }
           100% { stroke-dashoffset: 0; }
         }
         .flow-path {
-          animation: flowAnimation 1.5s linear infinite;
+          animation: flowAnimation 2.5s linear infinite;
         }
         .flow-path-bright {
-          animation: flowAnimation 0.8s linear infinite;
+          animation: flowAnimation 1.2s linear infinite;
         }
         .flow-path-dim {
-          animation: flowAnimation 3s linear infinite;
+          animation: flowAnimation 5s linear infinite;
         }
       `}</style>
 
@@ -411,16 +417,20 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
                 {paths.map((p, i) => {
                     const isDimmed = p.variant === 'dimmed';
                     const isBright = p.variant === 'bright';
-                    const baseOpacity = isDimmed ? 0.1 : 0.3;
+                    const baseOpacity = isDimmed ? 0.1 : 0.2; // Reduced from 0.3 for subtler rails
                     const glowOpacity = isDimmed ? 0 : (isBright ? 0.5 : 0.3); 
                     const coreOpacity = isDimmed ? 0.1 : (isBright ? 0.9 : 0.6);
                     const animClass = isDimmed ? 'flow-path-dim' : (isBright ? 'flow-path-bright' : 'flow-path');
                     return (
                         <g key={i}>
-                            <path d={p.d} stroke="#0f172a" strokeWidth="12" fill="none" strokeLinecap="round" opacity={1}/>
-                            {!isDimmed && <path d={p.d} stroke="#00f0ff" strokeWidth={isBright ? "22" : "16"} strokeOpacity={glowOpacity} fill="none" strokeLinecap="round" style={{ filter: 'blur(6px)' }}/>}
-                             <path d={p.d} stroke="#334155" strokeWidth="6" fill="none" strokeLinecap="round" opacity={baseOpacity}/>
-                            <path d={p.d} stroke="#00f0ff" strokeWidth={isBright ? "4" : "3"} strokeDasharray={isDimmed ? "5 40" : "15 30"} strokeLinecap="round" fill="none" className={animClass} opacity={coreOpacity}/>
+                            {/* Background Mask - Thinner */}
+                            <path d={p.d} stroke="#0f172a" strokeWidth="8" fill="none" strokeLinecap="round" opacity={1}/>
+                            {/* Glow - Softer */}
+                            {!isDimmed && <path d={p.d} stroke="#00f0ff" strokeWidth={isBright ? "20" : "12"} strokeOpacity={glowOpacity} fill="none" strokeLinecap="round" style={{ filter: 'blur(8px)' }}/>}
+                            {/* Static Rail - Thinner */}
+                             <path d={p.d} stroke="#334155" strokeWidth="2" fill="none" strokeLinecap="round" opacity={baseOpacity}/>
+                            {/* Flow Beam */}
+                            <path d={p.d} stroke="#00f0ff" strokeWidth={isBright ? "3" : "2"} strokeDasharray={isDimmed ? "5 25" : "10 50"} strokeLinecap="round" fill="none" className={animClass} opacity={coreOpacity}/>
                         </g>
                     );
                 })}

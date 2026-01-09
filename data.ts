@@ -589,13 +589,57 @@ export const MOCK_DATA: ProcessNode[] = [
             meta: { colSpan: 1 },
             children: generateLineStations('fd', 5)
           },
+          // MODIFIED: Rear Module Line to resemble Door Sub-assembly with FH006 grouping
           {
             id: 'asm-rear-module',
             label: '后模块分装线', 
             type: NodeType.STATION,
             status: NodeStatus.NORMAL,
-            meta: { colSpan: 1 },
-            children: generateLineStations('rm', 6)
+            meta: { colSpan: 2, description: '后模块综合分装' },
+            children: [
+                {
+                    id: 'fh006-01',
+                    label: '前保分装', 
+                    type: NodeType.STATION, // Inner station
+                    status: NodeStatus.NORMAL,
+                    meta: { 
+                        description: 'FH006 前保险杠分装' 
+                    },
+                    children: [
+                        {
+                            id: 'insp-fh006-f-harness',
+                            label: '线束错漏装检测',
+                            type: NodeType.INSPECTION,
+                            status: NodeStatus.NORMAL,
+                            meta: {
+                                description: '前保线束接口、卡扣位置及型号正确性检测。',
+                                metrics: generateMockMetrics(20, 3)
+                            }
+                        }
+                    ]
+                },
+                {
+                    id: 'fh006-02',
+                    label: '后保分装', 
+                    type: NodeType.STATION, // Inner station
+                    status: NodeStatus.NORMAL,
+                    meta: { 
+                        description: 'FH006 后保险杠分装' 
+                    },
+                    children: [
+                        {
+                            id: 'insp-fh006-r-harness',
+                            label: '线束错漏装检测',
+                            type: NodeType.INSPECTION,
+                            status: NodeStatus.NORMAL,
+                            meta: {
+                                description: '后保线束走向及雷达传感器连接状态检测。',
+                                metrics: generateMockMetrics(20, 4)
+                            }
+                        }
+                    ]
+                }
+            ]
           },
           // New Group Structure: Chassis Pre-assembly -> DY007 (ColSpan 2)
           {
@@ -607,7 +651,7 @@ export const MOCK_DATA: ProcessNode[] = [
             children: [
                  {
                     id: 'dy007',
-                    label: 'DY007',
+                    label: '底盘前/后模块',
                     type: NodeType.STATION, // Inner station
                     status: NodeStatus.NORMAL,
                     meta: { 
