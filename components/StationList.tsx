@@ -265,7 +265,10 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
 
     // Adjust height for nested items to be more compact
     const heightClass = isSubItem ? 'h-full' : 'h-[130px]';
-    const labelSizeClass = isSubItem ? 'text-sm font-bold line-clamp-2 leading-tight' : (colSpan > 1 ? 'text-xl' : 'text-lg line-clamp-2');
+    // Adjusted text size to allow better wrapping in narrower columns
+    const labelSizeClass = isSubItem 
+        ? 'text-sm font-bold line-clamp-2 leading-tight' 
+        : (colSpan > 1 ? 'text-xl' : 'text-sm font-bold leading-snug line-clamp-3 break-words');
     const paddingClass = isSubItem ? 'p-2' : 'p-4';
 
     return (
@@ -391,9 +394,9 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
                                 {/* Zone Children Grid */}
                                 <div className={`mt-6 gap-6 ${
                                     zone.id === 'zone-front-main' 
-                                    ? 'grid grid-cols-6' 
+                                    ? 'grid grid-cols-4 lg:grid-cols-8' // Force 1 row on desktop
                                     : zone.id === 'zone-chassis-main' 
-                                      ? 'grid grid-cols-5' 
+                                      ? 'grid grid-cols-6' // 12 units / 2 rows
                                       : zone.id === 'zone-rear-main'
                                         ? 'grid grid-cols-5' 
                                         : zone.id === 'zone-battery-main'

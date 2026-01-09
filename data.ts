@@ -500,7 +500,7 @@ export const MOCK_DATA: ProcessNode[] = [
             label: 'Z132',
             type: NodeType.STATION,
             status: NodeStatus.INACTIVE,
-            meta: { colSpan: 1, description: '流转至后装' },
+            meta: { colSpan: 2, description: '流转至后装' }, // Changed to colSpan 2
             children: [] 
            },
         ]
@@ -1118,7 +1118,7 @@ export const MOCK_DATA: ProcessNode[] = [
         children: [
             { id: 'eol-cp8-elec', label: '电检', type: NodeType.STATION, status: NodeStatus.NORMAL, meta: { inspectionObject: '休眠电流、故障码清除', inspectionMethod: '最终OBD检测' }, children: [] },
             { id: 'eol-cp8-final', label: '外饰内饰检测', type: NodeType.STATION, status: NodeStatus.NORMAL, meta: { inspectionObject: '最终整车外观/内饰状态', inspectionMethod: '人工检测' }, children: [] },
-            { id: 'eol-cp8-cert', label: '合格证&随车卡', type: NodeType.STATION, status: NodeStatus.NORMAL, meta: { inspectionObject: '车辆一致性证书', inspectionMethod: '手机拍照' }, children: [] },
+            { id: 'eol-cp8-cert', label: '合格证&随车卡', type: NodeType.STATION, status: NodeStatus.NORMAL, meta: { inspectionObject: '车辆一致性证书', inspectionMethod: '手机拍照检测' }, children: [] },
         ]
       }
     ]
