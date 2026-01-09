@@ -192,7 +192,7 @@ export const InspectionDetail: React.FC<InspectionDetailProps> = ({ station }) =
           <div className="flex items-center justify-between mb-4 px-1">
               <h3 className="text-sm font-bold text-gray-300 flex items-center gap-2 uppercase tracking-wide">
                   <Activity size={16} className="text-neon-green" />
-                  30天合格率 (FPY)
+                  通过率
               </h3>
               <span className="text-neon-green font-mono text-sm font-bold">
                   Avg: 99.2%
