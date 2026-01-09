@@ -119,6 +119,9 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
 
     // 2. Intra-Zone Connections (Horizontal/Straight for adjacent stations)
     children.forEach(zone => {
+        // Skip connection lines for Sub-Assembly Zone as requested
+        if (zone.id === 'zone-sub-assembly') return;
+
         if (zone.type === NodeType.ZONE && zone.children && zone.children.length > 1) {
              for (let j = 0; j < zone.children.length - 1; j++) {
                  const c1 = zone.children[j];
@@ -175,28 +178,57 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
     };
   }, [workshop]);
 
-  // Helper to render a clickable station card
+  // Helper to render a clickable station card or a group container
   const renderStationCard = (station: ProcessNode, index: number, isSubItem: boolean = false) => {
-    const isSelected = selectedStationId === station.id;
-    const isInactive = station.status === NodeStatus.INACTIVE;
-    const isPlaceholder = station.meta?.isPlaceholder;
+    // 1. Check if this is a grouping station (contains child Stations)
+    // We look for children that are NOT just INSPECTION type (though we rely on Type.STATION explicitly here)
+    const subStations = station.children?.filter(c => c.type === NodeType.STATION);
+    const isGroup = subStations && subStations.length > 0;
+    
     const colSpan = station.meta?.colSpan || 1;
-
-    // Grid classes
+    // For groups, if colSpan is 1 but we have multiple items, let the grid handle it naturally or use a wrapper.
+    // We'll stick to spanClass for the outer container.
     const spanClass = colSpan === 2 ? 'col-span-2' : 
                       colSpan === 3 ? 'col-span-3' : 
                       colSpan >= 4 ? 'col-span-4' : 'col-span-1';
 
-    // Special Rendering for Placeholder/Gap Stations
-    if (isPlaceholder) {
-        return (
+    // RENDER GROUP CONTAINER
+    if (isGroup) {
+         return (
             <div
                 key={station.id}
                 ref={(el) => {
                      if(el) itemsRef.current.set(station.id, el);
                      else itemsRef.current.delete(station.id);
                 }}
-                className={`${spanClass} h-[120px] w-full flex flex-col items-center justify-center border-2 border-dashed border-industrial-600 rounded bg-industrial-800/50 text-gray-400 select-none px-2`}
+                className={`${spanClass} h-[130px] flex flex-col gap-1 p-2 rounded-lg border-2 border-dashed border-industrial-600 bg-industrial-800/20`}
+            >
+                {/* Group Header */}
+                <div className="flex items-center gap-2 mb-0.5 pl-1 h-5 flex-shrink-0">
+                    <Box size={12} className="text-gray-400" />
+                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wider truncate">{station.label}</span>
+                </div>
+                
+                {/* Render Children (Recursively) - Horizontal Layout */}
+                <div className="flex flex-row gap-2 flex-1 w-full h-full min-h-0">
+                    {subStations!.map((sub, i) => renderStationCard(sub, i, true))}
+                </div>
+            </div>
+         );
+    }
+
+
+    // RENDER STANDARD CARD
+    const isSelected = selectedStationId === station.id;
+    const isInactive = station.status === NodeStatus.INACTIVE;
+    const isPlaceholder = station.meta?.isPlaceholder;
+
+    // Special Rendering for Placeholder/Gap Stations
+    if (isPlaceholder) {
+        return (
+            <div
+                key={station.id}
+                className={`${spanClass} h-[130px] w-full flex flex-col items-center justify-center border-2 border-dashed border-industrial-600 rounded bg-industrial-800/50 text-gray-400 select-none px-2`}
             >
                 <MoreHorizontal size={24} className="opacity-50 mb-1" />
                 <span className="text-xs font-mono font-bold text-center w-full break-words leading-tight">{station.label}</span>
@@ -222,6 +254,11 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
         shadowClass = isSelected ? 'shadow-[0_0_15px_rgba(255,42,42,0.4)]' : '';
     }
 
+    // Adjust height for nested items to be more compact
+    const heightClass = isSubItem ? 'h-full' : 'h-[130px]';
+    const labelSizeClass = isSubItem ? 'text-sm font-bold line-clamp-2 leading-tight' : (colSpan > 1 ? 'text-xl' : 'text-lg line-clamp-2');
+    const paddingClass = isSubItem ? 'p-2' : 'p-4';
+
     return (
         <button
             key={station.id}
@@ -234,31 +271,33 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
                 onSelect(station.id)
             }}
             className={`
-                ${isSubItem ? spanClass : spanClass}
-                relative flex flex-col justify-between p-5 rounded-lg border-2 text-left transition-all duration-200 group
-                ${isSubItem ? 'h-[120px] bg-industrial-800' : 'h-[130px] bg-industrial-800'}
+                ${isSubItem ? 'flex-1 min-w-0' : spanClass}
+                ${heightClass}
+                relative flex flex-col justify-between rounded-lg border-2 text-left transition-all duration-200 group
+                bg-industrial-800
+                ${paddingClass}
                 ${isSelected ? `scale-[1.02] -translate-y-1 ${shadowClass} z-20 bg-industrial-700` : 'hover:border-gray-500 hover:bg-industrial-700 hover:-translate-y-0.5'}
                 ${isInactive ? 'opacity-50 grayscale bg-industrial-900' : 'cursor-pointer'}
                 ${borderColor}
             `}
         >
             {/* Header */}
-            <div className="flex justify-between items-start w-full mb-3">
-                <span className={`text-sm font-mono tracking-wider uppercase truncate max-w-[80%] font-semibold ${isSelected ? 'text-neon-blue' : 'text-gray-400'}`}>
-                    {station.id.replace('asm-', '').replace('front-','').replace('chassis-', '').replace('rear-', '').toUpperCase()}
+            <div className={`flex justify-between items-start w-full ${isSubItem ? 'mb-1' : 'mb-2'}`}>
+                <span className={`${isSubItem ? 'text-[10px]' : 'text-xs'} font-mono tracking-wider uppercase truncate max-w-[80%] font-semibold ${isSelected ? 'text-neon-blue' : 'text-gray-400'}`}>
+                    {station.id.replace('asm-', '').replace('front-','').replace('chassis-', '').replace('rear-', '').replace('door-sub-', '').replace('batt-', '').replace('st-eol-', '').toUpperCase()}
                 </span>
-                <div className={`h-3 w-3 rounded-full ${statusColor} shadow-sm flex-shrink-0`}></div>
+                <div className={`${isSubItem ? 'h-2 w-2' : 'h-2.5 w-2.5'} rounded-full ${statusColor} shadow-sm flex-shrink-0`}></div>
             </div>
 
             {/* Label */}
             <div className="flex-1 flex items-center">
-                    <h3 className={`font-bold leading-tight ${colSpan > 1 ? 'text-xl' : 'text-lg line-clamp-2'} ${isSelected ? 'text-white' : 'text-gray-100'}`}>
+                    <h3 className={`${labelSizeClass} ${isSelected ? 'text-white' : 'text-gray-100'}`}>
                     {station.label}
                     </h3>
             </div>
 
             {/* Footer/Progress */}
-            <div className="w-full h-[6px] bg-industrial-900 rounded-full overflow-hidden mt-auto border border-industrial-700/50">
+            <div className="w-full h-[4px] bg-industrial-900 rounded-full overflow-hidden mt-auto border border-industrial-700/50">
                 <div className={`h-full ${statusColor} w-full opacity-90`}></div>
             </div>
         </button>
@@ -319,7 +358,7 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
             {/* Grid Content - Rendered first to be below SVG */}
             <div className="relative z-10 space-y-20">
                 {workshop.children && workshop.children[0].type === NodeType.ZONE ? (
-                     // Zoned Layout (Assembly)
+                     // Zoned Layout (Assembly & EOL)
                      <div className="flex flex-col gap-20 max-w-7xl mx-auto">
                         {workshop.children.map((zone) => (
                             <div 
@@ -343,14 +382,18 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
                                 {/* Zone Children Grid */}
                                 <div className={`mt-6 gap-6 ${
                                     zone.id === 'zone-front-main' 
-                                    ? 'grid grid-cols-5' 
+                                    ? 'grid grid-cols-4' 
                                     : zone.id === 'zone-chassis-main' 
-                                      ? 'grid grid-cols-9' // Special 9-col layout for Chassis
+                                      ? 'grid grid-cols-9' 
                                       : zone.id === 'zone-rear-main'
-                                        ? 'grid grid-cols-7' // 7 cols for Rear Main
-                                        : 'grid grid-cols-4 lg:grid-cols-6 xl:grid-cols-8'
+                                        ? 'grid grid-cols-5' // Narrowed from 7
+                                        : zone.id === 'zone-battery-main'
+                                          ? 'grid grid-cols-6' // New battery line
+                                          : zone.id.startsWith('zone-eol') 
+                                            ? 'grid grid-cols-1 max-w-4xl mx-auto' 
+                                            : 'grid grid-cols-4 lg:grid-cols-6 xl:grid-cols-8' // Default / Sub-assembly
                                 }`}>
-                                    {zone.children?.map(station => renderStationCard(station, 0, true))}
+                                    {zone.children?.map(station => renderStationCard(station, 0, false))}
                                 </div>
                             </div>
                         ))}
@@ -363,68 +406,21 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
                 )}
             </div>
 
-            {/* SVG Circuit Layer - Rendered last to be on top */}
+            {/* SVG Circuit Layer */}
             <svg className="absolute top-0 left-0 w-full h-full pointer-events-none z-20 overflow-visible">
                 {paths.map((p, i) => {
-                    // Style logic based on variant
                     const isDimmed = p.variant === 'dimmed';
                     const isBright = p.variant === 'bright';
-                    
-                    // Adjusted opacities for better visibility against Slate bg
                     const baseOpacity = isDimmed ? 0.1 : 0.3;
                     const glowOpacity = isDimmed ? 0 : (isBright ? 0.5 : 0.3); 
                     const coreOpacity = isDimmed ? 0.1 : (isBright ? 0.9 : 0.6);
-                    
-                    const animClass = isDimmed 
-                        ? 'flow-path-dim' 
-                        : (isBright ? 'flow-path-bright' : 'flow-path');
-
+                    const animClass = isDimmed ? 'flow-path-dim' : (isBright ? 'flow-path-bright' : 'flow-path');
                     return (
                         <g key={i}>
-                             {/* 1. Base Rail (Darker background line) */}
-                            <path 
-                                d={p.d} 
-                                stroke="#0f172a" 
-                                strokeWidth="12" 
-                                fill="none" 
-                                strokeLinecap="round"
-                                opacity={1}
-                            />
-                            
-                            {/* 2. Outer Glow */}
-                            {!isDimmed && (
-                                <path 
-                                    d={p.d} 
-                                    stroke="#00f0ff" 
-                                    strokeWidth={isBright ? "22" : "16"} 
-                                    strokeOpacity={glowOpacity} 
-                                    fill="none" 
-                                    strokeLinecap="round"
-                                    style={{ filter: 'blur(6px)' }}
-                                />
-                            )}
-                            
-                            {/* 3. Rail Track */}
-                             <path 
-                                d={p.d} 
-                                stroke="#334155" 
-                                strokeWidth="6" 
-                                fill="none" 
-                                strokeLinecap="round"
-                                opacity={baseOpacity}
-                            />
-                            
-                            {/* 4. Moving Light (Cyan) */}
-                            <path
-                                d={p.d}
-                                stroke="#00f0ff" 
-                                strokeWidth={isBright ? "4" : "3"}
-                                strokeDasharray={isDimmed ? "5 40" : "15 30"}
-                                strokeLinecap="round"
-                                fill="none"
-                                className={animClass}
-                                opacity={coreOpacity}
-                            />
+                            <path d={p.d} stroke="#0f172a" strokeWidth="12" fill="none" strokeLinecap="round" opacity={1}/>
+                            {!isDimmed && <path d={p.d} stroke="#00f0ff" strokeWidth={isBright ? "22" : "16"} strokeOpacity={glowOpacity} fill="none" strokeLinecap="round" style={{ filter: 'blur(6px)' }}/>}
+                             <path d={p.d} stroke="#334155" strokeWidth="6" fill="none" strokeLinecap="round" opacity={baseOpacity}/>
+                            <path d={p.d} stroke="#00f0ff" strokeWidth={isBright ? "4" : "3"} strokeDasharray={isDimmed ? "5 40" : "15 30"} strokeLinecap="round" fill="none" className={animClass} opacity={coreOpacity}/>
                         </g>
                     );
                 })}

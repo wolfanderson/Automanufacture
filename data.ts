@@ -209,9 +209,7 @@ export const MOCK_DATA: ProcessNode[] = [
     type: NodeType.WORKSHOP,
     status: NodeStatus.NORMAL, 
     children: [
-      // Order: Front -> Chassis -> Rear -> Sub-Assembly (at the end)
-
-      // 1. 前装主线 (Front Assembly)
+      // 1. 前装主线 (Front Assembly): Z001 - Z078
       {
         id: 'zone-front-main',
         label: '前装主线',
@@ -243,57 +241,46 @@ export const MOCK_DATA: ProcessNode[] = [
             children: [
                 {
                     id: 'insp-z054-harness',
-                    label: '智驾域控制器线束接插状态检测',
+                    label: '智驾域控制器线束检测',
                     type: NodeType.INSPECTION,
                     status: NodeStatus.NORMAL,
                     meta: {
                         description: '智能驾驶域控线束接口连接完整性与锁扣状态AI检测。',
-                        metrics: generateMockMetrics(20, 5),
-                        imgUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80'
+                        metrics: generateMockMetrics(20, 5)
                     }
                 },
                 {
                     id: 'insp-z054-install',
-                    label: '智驾域控制器错漏装检测',
+                    label: '控制器错漏装检测',
                     type: NodeType.INSPECTION,
                     status: NodeStatus.NORMAL,
                     meta: {
                         description: '基于3D点云对比的控制器安装到位与防错检测。',
                         metrics: generateMockMetrics(20, 2)
                     }
-                },
-                {
-                    id: 'insp-z054-nameplate',
-                    label: '铭牌检测',
-                    type: NodeType.INSPECTION,
-                    status: NodeStatus.NORMAL,
-                    meta: {
-                        description: 'OCR识别零部件铭牌信息并与MES系统数据比对。',
-                        metrics: generateMockMetrics(20, 1)
-                    }
                 }
             ]
           },
           {
             id: 'asm-front-gap-2',
-            label: 'Z055-Z099', 
+            label: 'Z055-Z077', 
             type: NodeType.STATION,
             status: NodeStatus.INACTIVE,
             meta: { colSpan: 1, isPlaceholder: true },
             children: []
            },
            {
-            id: 'asm-front-z100',
-            label: 'Z100', 
+            id: 'asm-front-z078',
+            label: 'Z078', 
             type: NodeType.STATION,
             status: NodeStatus.INACTIVE,
-            meta: { colSpan: 1, description: '流转至底盘' },
+            meta: { colSpan: 1, description: '前装下线' },
             children: []
            },
         ]
       },
 
-      // 2. 底盘线 (Zone)
+      // 2. 底盘线 (Chassis): Z079 - Z132
       {
         id: 'zone-chassis-main',
         label: '底盘合装线',
@@ -301,8 +288,8 @@ export const MOCK_DATA: ProcessNode[] = [
         status: NodeStatus.NORMAL,
         children: [
            {
-            id: 'asm-chassis-z001',
-            label: 'Z001',
+            id: 'asm-chassis-z079',
+            label: 'Z079',
             type: NodeType.STATION,
             status: NodeStatus.INACTIVE,
             meta: { colSpan: 1, description: '底盘上线' },
@@ -310,21 +297,21 @@ export const MOCK_DATA: ProcessNode[] = [
            },
            {
             id: 'asm-chassis-gap-1',
-            label: 'Z002-Z059',
+            label: 'Z080-Z089',
             type: NodeType.STATION,
             status: NodeStatus.INACTIVE,
             meta: { colSpan: 1, isPlaceholder: true },
             children: [] 
            },
            {
-            id: 'asm-chassis-z060',
-            label: 'Z060',
+            id: 'asm-chassis-z090',
+            label: 'Z090',
             type: NodeType.STATION,
             status: NodeStatus.NORMAL,
             meta: { colSpan: 1 },
             children: [
                 {
-                    id: 'insp-z060-subframe',
+                    id: 'insp-z090-subframe',
                     label: '副车架自动拧紧检测',
                     type: NodeType.INSPECTION,
                     status: NodeStatus.NORMAL,
@@ -334,7 +321,7 @@ export const MOCK_DATA: ProcessNode[] = [
                     }
                 },
                 {
-                    id: 'insp-z060-visual',
+                    id: 'insp-z090-visual',
                     label: '底盘合装到位检测',
                     type: NodeType.INSPECTION,
                     status: NodeStatus.NORMAL,
@@ -347,21 +334,21 @@ export const MOCK_DATA: ProcessNode[] = [
            },
            {
             id: 'asm-chassis-gap-2',
-            label: 'Z061-Z076',
+            label: 'Z091-Z114',
             type: NodeType.STATION,
             status: NodeStatus.INACTIVE,
             meta: { colSpan: 1, isPlaceholder: true },
             children: [] 
            },
            {
-            id: 'asm-chassis-z077',
-            label: 'Z077',
+            id: 'asm-chassis-z115',
+            label: 'Z115',
             type: NodeType.STATION,
             status: NodeStatus.NORMAL,
             meta: { colSpan: 1 },
             children: [
                 {
-                    id: 'insp-z077-harness',
+                    id: 'insp-z115-harness',
                     label: '前舱线束检测',
                     type: NodeType.INSPECTION,
                     status: NodeStatus.NORMAL,
@@ -374,21 +361,21 @@ export const MOCK_DATA: ProcessNode[] = [
            },
            {
             id: 'asm-chassis-gap-3',
-            label: 'Z078-Z103',
+            label: 'Z116-Z127',
             type: NodeType.STATION,
             status: NodeStatus.INACTIVE,
             meta: { colSpan: 1, isPlaceholder: true },
             children: [] 
            },
            {
-            id: 'asm-chassis-z104',
-            label: 'Z104',
+            id: 'asm-chassis-z128',
+            label: 'Z128',
             type: NodeType.STATION,
             status: NodeStatus.NORMAL,
             meta: { colSpan: 1 }, 
             children: [
                 {
-                    id: 'insp-z104-harness',
+                    id: 'insp-z128-harness',
                     label: '底盘线束检测',
                     type: NodeType.INSPECTION,
                     status: NodeStatus.NORMAL,
@@ -401,24 +388,24 @@ export const MOCK_DATA: ProcessNode[] = [
            },
            {
             id: 'asm-chassis-gap-4',
-            label: 'Z105-Z119',
+            label: 'Z129-Z131',
             type: NodeType.STATION,
             status: NodeStatus.INACTIVE,
             meta: { colSpan: 1, isPlaceholder: true },
             children: [] 
            },
            {
-            id: 'asm-chassis-z120',
-            label: 'Z120',
+            id: 'asm-chassis-z132',
+            label: 'Z132',
             type: NodeType.STATION,
             status: NodeStatus.INACTIVE,
-            meta: { colSpan: 1, description: '下线流转' },
+            meta: { colSpan: 1, description: '流转至后装' },
             children: [] 
            },
         ]
       },
 
-      // 3. 后装线 (Zone)
+      // 3. 后装线 (Rear): Z133 - Z191
       {
         id: 'zone-rear-main',
         label: '后装主线',
@@ -426,8 +413,8 @@ export const MOCK_DATA: ProcessNode[] = [
         status: NodeStatus.NORMAL,
         children: [
            {
-            id: 'asm-rear-z121',
-            label: 'Z121', 
+            id: 'asm-rear-z133',
+            label: 'Z133', 
             type: NodeType.STATION,
             status: NodeStatus.INACTIVE,
             meta: { colSpan: 1, description: '后装上线' },
@@ -435,81 +422,42 @@ export const MOCK_DATA: ProcessNode[] = [
            },
            {
             id: 'asm-rear-gap-1',
-            label: 'Z122-Z195', 
+            label: 'Z134-Z150', 
             type: NodeType.STATION,
             status: NodeStatus.INACTIVE,
             meta: { colSpan: 1, isPlaceholder: true },
             children: []
            },
            {
-            id: 'asm-rear-z196',
-            label: 'Z196', 
+            id: 'asm-rear-z151',
+            label: 'Z151', 
             type: NodeType.STATION,
             status: NodeStatus.NORMAL,
             meta: { colSpan: 1 }, 
             children: [
                 {
-                    id: 'insp-z196-roof',
-                    label: '全景天幕安装',
+                    id: 'insp-z151-trim',
+                    label: '内饰板安装检测',
                     type: NodeType.INSPECTION,
                     status: NodeStatus.NORMAL,
                     meta: {
-                        description: '全景天幕机械臂安装位置度与密封性检测。',
-                        metrics: generateMockMetrics(20, 2),
-                         imgUrl: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=80'
+                        description: 'C柱内饰板卡扣安装状态检测。',
+                        metrics: generateMockMetrics(20, 2)
                     }
                 }
             ]
            },
            {
-            id: 'asm-rear-z197',
-            label: 'Z197', 
-            type: NodeType.STATION,
-            status: NodeStatus.NORMAL,
-            meta: { colSpan: 1 }, 
-            children: [
-                {
-                    id: 'insp-z197-taillight',
-                    label: '尾灯间隙面差检测',
-                    type: NodeType.INSPECTION,
-                    status: NodeStatus.NORMAL,
-                    meta: {
-                        description: '贯穿式尾灯与后备箱盖间隙均匀度检测。',
-                        metrics: generateMockMetrics(20, 1.5)
-                    }
-                }
-            ]
+             id: 'asm-rear-gap-2',
+             label: 'Z152-Z190', 
+             type: NodeType.STATION,
+             status: NodeStatus.INACTIVE,
+             meta: { colSpan: 1, isPlaceholder: true },
+             children: []
            },
            {
-            id: 'asm-rear-gap-2',
-            label: 'Z198', 
-            type: NodeType.STATION,
-            status: NodeStatus.INACTIVE,
-            meta: { colSpan: 1, isPlaceholder: true },
-            children: []
-           },
-           {
-            id: 'asm-rear-z199',
-            label: 'Z199', 
-            type: NodeType.STATION,
-            status: NodeStatus.NORMAL,
-            meta: { colSpan: 1 }, 
-            children: [
-                {
-                    id: 'insp-z199-seats',
-                    label: '后排座椅安装检测',
-                    type: NodeType.INSPECTION,
-                    status: NodeStatus.NORMAL,
-                    meta: {
-                        description: '后排座椅滑轨锁止状态与头枕高度自动检测。',
-                        metrics: generateMockMetrics(20, 3)
-                    }
-                }
-            ]
-           },
-           {
-            id: 'asm-rear-z200',
-            label: 'Z200', 
+            id: 'asm-rear-z191',
+            label: 'Z191', 
             type: NodeType.STATION,
             status: NodeStatus.INACTIVE,
             meta: { colSpan: 1, description: '后装下线' },
@@ -518,7 +466,99 @@ export const MOCK_DATA: ProcessNode[] = [
         ]
       },
 
-      // 4. 分装集成区 (Zone) - Moved to bottom
+      // 4. 电池合装线 (Battery): Z192 - Z200
+      {
+        id: 'zone-battery-main',
+        label: '电池合装线',
+        type: NodeType.ZONE,
+        status: NodeStatus.NORMAL,
+        children: [
+            {
+                id: 'asm-batt-z192',
+                label: 'Z192', 
+                type: NodeType.STATION,
+                status: NodeStatus.INACTIVE,
+                meta: { colSpan: 1, description: '电池合装上线' },
+                children: []
+            },
+            {
+                id: 'asm-batt-z196', // Moved from Rear
+                label: 'Z196', 
+                type: NodeType.STATION,
+                status: NodeStatus.NORMAL,
+                meta: { colSpan: 1 }, 
+                children: [
+                    {
+                        id: 'insp-z196-roof',
+                        label: '全景天幕安装',
+                        type: NodeType.INSPECTION,
+                        status: NodeStatus.NORMAL,
+                        meta: {
+                            description: '全景天幕机械臂安装位置度与密封性检测。',
+                            metrics: generateMockMetrics(20, 2),
+                            imgUrl: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=80'
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'asm-batt-z197', // Moved from Rear
+                label: 'Z197', 
+                type: NodeType.STATION,
+                status: NodeStatus.NORMAL,
+                meta: { colSpan: 1 }, 
+                children: [
+                    {
+                        id: 'insp-z197-taillight',
+                        label: '尾灯间隙面差检测',
+                        type: NodeType.INSPECTION,
+                        status: NodeStatus.NORMAL,
+                        meta: {
+                            description: '贯穿式尾灯与后备箱盖间隙均匀度检测。',
+                            metrics: generateMockMetrics(20, 1.5)
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'asm-batt-gap', 
+                label: 'Z198', 
+                type: NodeType.STATION,
+                status: NodeStatus.INACTIVE,
+                meta: { colSpan: 1, isPlaceholder: true },
+                children: []
+            },
+            {
+                id: 'asm-batt-z199', // Moved from Rear
+                label: 'Z199', 
+                type: NodeType.STATION,
+                status: NodeStatus.NORMAL,
+                meta: { colSpan: 1 }, 
+                children: [
+                    {
+                        id: 'insp-z199-seats',
+                        label: '后排座椅安装检测',
+                        type: NodeType.INSPECTION,
+                        status: NodeStatus.NORMAL,
+                        meta: {
+                            description: '后排座椅滑轨锁止状态与头枕高度自动检测。',
+                            metrics: generateMockMetrics(20, 3)
+                        }
+                    }
+                ]
+            },
+            {
+                id: 'asm-batt-z200',
+                label: 'Z200', 
+                type: NodeType.STATION,
+                status: NodeStatus.INACTIVE,
+                meta: { colSpan: 1, description: '最终下线' },
+                children: []
+            },
+        ]
+      },
+
+      // 5. 分装集成区 (Sub-Assembly)
       {
         id: 'zone-sub-assembly',
         label: '分装集成区',
@@ -530,7 +570,7 @@ export const MOCK_DATA: ProcessNode[] = [
             label: '动总分装线', 
             type: NodeType.STATION,
             status: NodeStatus.WARNING,
-            meta: { colSpan: 2 }, 
+            meta: { colSpan: 3 }, // Wider
             children: generateLineStations('pt', 12)
           },
           {
@@ -557,6 +597,47 @@ export const MOCK_DATA: ProcessNode[] = [
             meta: { colSpan: 1 },
             children: generateLineStations('rm', 6)
           },
+          // New Group Structure: Chassis Pre-assembly -> DY007 (ColSpan 2)
+          {
+            id: 'asm-chassis-pre',
+            label: '底盘预装线', 
+            type: NodeType.STATION,
+            status: NodeStatus.NORMAL,
+            meta: { colSpan: 2, description: '底盘预装' }, // Width changed to 2
+            children: [
+                 {
+                    id: 'dy007',
+                    label: 'DY007',
+                    type: NodeType.STATION, // Inner station
+                    status: NodeStatus.NORMAL,
+                    meta: { 
+                        description: '底盘预装核心工位' 
+                    },
+                    children: [
+                        {
+                            id: 'insp-dy007-front',
+                            label: '前零件防错检测',
+                            type: NodeType.INSPECTION,
+                            status: NodeStatus.NORMAL,
+                            meta: {
+                                description: '底盘预装线-前部关键零部件防错识别。',
+                                metrics: generateMockMetrics(20, 2)
+                            }
+                        },
+                        {
+                            id: 'insp-dy007-rear',
+                            label: '后零件防错检测',
+                            type: NodeType.INSPECTION,
+                            status: NodeStatus.NORMAL,
+                            meta: {
+                                description: '底盘预装线-后部关键零部件防错识别。',
+                                metrics: generateMockMetrics(20, 2)
+                            }
+                        }
+                    ]
+                 }
+            ]
+          },
           {
             id: 'asm-heat-pump',
             label: '热泵分装', 
@@ -572,14 +653,6 @@ export const MOCK_DATA: ProcessNode[] = [
             status: NodeStatus.NORMAL,
             meta: { colSpan: 1 },
             children: generateLineStations('ip', 8)
-          },
-          {
-            id: 'asm-chassis-pre',
-            label: '底盘预装线', 
-            type: NodeType.STATION,
-            status: NodeStatus.NORMAL,
-            meta: { colSpan: 1 },
-            children: generateLineStations('cpre', 8)
           },
           {
             id: 'asm-windshield',
@@ -620,6 +693,58 @@ export const MOCK_DATA: ProcessNode[] = [
                     }
                 }
             ]
+          },
+          // New Group Structure: Door Sub-assembly -> DR026, DR033 (ColSpan 2)
+          {
+            id: 'asm-door-sub',
+            label: '门分装线', 
+            type: NodeType.STATION,
+            status: NodeStatus.NORMAL,
+            meta: { colSpan: 2, description: '门分装' }, // Width changed to 2
+            children: [
+                {
+                    id: 'dr026',
+                    label: 'DR026', 
+                    type: NodeType.STATION, // Inner station
+                    status: NodeStatus.NORMAL,
+                    meta: { 
+                        description: '车门分装检测点A' 
+                    },
+                    children: [
+                        {
+                            id: 'insp-dr026-main',
+                            label: '车门分装检测',
+                            type: NodeType.INSPECTION,
+                            status: NodeStatus.NORMAL,
+                            meta: {
+                                description: '车门内部附件安装完整性检查。',
+                                metrics: generateMockMetrics(20, 3)
+                            }
+                        }
+                    ]
+                },
+                {
+                    id: 'dr033',
+                    label: 'DR033', 
+                    type: NodeType.STATION, // Inner station
+                    status: NodeStatus.NORMAL,
+                    meta: { 
+                        description: '车门分装检测点B' 
+                    },
+                    children: [
+                        {
+                            id: 'insp-dr033-main',
+                            label: '车门饰板检测',
+                            type: NodeType.INSPECTION,
+                            status: NodeStatus.NORMAL,
+                            meta: {
+                                description: '车门内饰板安装间隙与平整度检测。',
+                                metrics: generateMockMetrics(20, 4)
+                            }
+                        }
+                    ]
+                }
+            ]
           }
         ]
       }
@@ -631,124 +756,195 @@ export const MOCK_DATA: ProcessNode[] = [
     type: NodeType.WORKSHOP,
     status: NodeStatus.NORMAL,
     children: [
+      // 1. CP7 调整线
       {
-        id: 'st-aging',
-        label: '老化测试', 
-        type: NodeType.STATION,
+        id: 'zone-eol-cp7',
+        label: 'CP7 调整线',
+        type: NodeType.ZONE,
         status: NodeStatus.NORMAL,
         children: [
-           {
-            id: 'insp-battery',
-            label: '电池放电测试',
-            type: NodeType.INSPECTION,
-            status: NodeStatus.NORMAL,
-            meta: { description: '高压电池负载循环测试数据。', metrics: generateMockMetrics(20, 3) }
-           }
+            {
+                id: 'st-eol-cp7',
+                label: 'CP7 调整与返修',
+                type: NodeType.STATION,
+                status: NodeStatus.NORMAL,
+                meta: { description: '下线后首道调整工序' },
+                children: [
+                    { id: 'insp-eol-cp7', label: '整车间隙面差初检', type: NodeType.INSPECTION, status: NodeStatus.NORMAL, meta: { metrics: generateMockMetrics(20, 2) } }
+                ]
+            }
         ]
       },
+      // 2. 检测线
       {
-        id: 'st-dyn-road',
-        label: '动态路试',
-        type: NodeType.STATION,
+        id: 'zone-eol-test-line',
+        label: '检测线',
+        type: NodeType.ZONE,
         status: NodeStatus.NORMAL,
         children: [
-          {
-            id: 'insp-nvh',
-            label: 'NVH 分析',
-            type: NodeType.INSPECTION,
-            status: NodeStatus.NORMAL,
-            meta: { description: '噪音、振动与声振粗糙度指标分析。', metrics: generateMockMetrics(20, 5) }
-           }
+            {
+                id: 'st-eol-test',
+                label: '四轮定位与安规测试',
+                type: NodeType.STATION,
+                status: NodeStatus.NORMAL,
+                meta: { description: '四轮定位、转鼓、侧滑、制动测试' },
+                children: [
+                     { id: 'insp-eol-align', label: '四轮定位数据', type: NodeType.INSPECTION, status: NodeStatus.NORMAL, meta: { metrics: generateMockMetrics(20, 1) } },
+                     { id: 'insp-eol-brake', label: '制动力测试', type: NodeType.INSPECTION, status: NodeStatus.NORMAL, meta: { metrics: generateMockMetrics(20, 2) } }
+                ]
+            }
         ]
       },
+      // 3. 强化路试
       {
-        id: 'st-intensive-road',
+        id: 'zone-eol-road-intensive',
         label: '强化路试',
-        type: NodeType.STATION,
+        type: NodeType.ZONE,
         status: NodeStatus.WARNING,
         children: [
-          {
-            id: 'insp-suspension',
-            label: '悬挂系统检测',
-            type: NodeType.INSPECTION,
-            status: NodeStatus.WARNING,
-            meta: { description: '减震器热应力与耐久性数据。', metrics: generateMockMetrics(20, 15) }
-           }
+             {
+                id: 'st-eol-intensive',
+                label: '特殊路面测试',
+                type: NodeType.STATION,
+                status: NodeStatus.WARNING,
+                meta: { description: '扭曲路、比利时路、搓板路震动测试' },
+                children: [
+                    { id: 'insp-suspension', label: '悬挂系统应力监测', type: NodeType.INSPECTION, status: NodeStatus.WARNING, meta: { metrics: generateMockMetrics(20, 15) } }
+                ]
+             }
         ]
       },
+      // 4. ORT
       {
-        id: 'st-ort',
+        id: 'zone-eol-ort',
         label: 'ORT 测试',
-        type: NodeType.STATION,
+        type: NodeType.ZONE,
         status: NodeStatus.NORMAL,
         children: [
-           {
-            id: 'insp-rel',
-            label: '可靠性循环',
-            type: NodeType.INSPECTION,
-            status: NodeStatus.NORMAL,
-            meta: { description: '持续运行压力测试与故障率分析。', metrics: generateMockMetrics(20, 2) }
-           }
+            {
+                id: 'st-eol-ort',
+                label: 'ORT 抽检循环',
+                type: NodeType.STATION,
+                status: NodeStatus.NORMAL,
+                meta: { description: '持续可靠性与耐久性抽样检测' },
+                children: [
+                    { id: 'insp-rel', label: '可靠性循环数据', type: NodeType.INSPECTION, status: NodeStatus.NORMAL, meta: { metrics: generateMockMetrics(20, 2) } }
+                ]
+            }
         ]
       },
+      // 5. 老化/人工检
       {
-        id: 'st-pit',
-        label: '地沟检测', 
-        type: NodeType.STATION,
+        id: 'zone-eol-aging',
+        label: '老化/人工检',
+        type: NodeType.ZONE,
         status: NodeStatus.NORMAL,
         children: [
-           {
-            id: 'insp-leak',
-            label: '底盘测漏',
-            type: NodeType.INSPECTION,
-            status: NodeStatus.NORMAL,
-            meta: { description: '底盘管路液体泄漏目视检查。', metrics: generateMockMetrics(20, 1) }
-           }
+            {
+                id: 'st-eol-aging',
+                label: '高压老化与静态检查',
+                type: NodeType.STATION,
+                status: NodeStatus.NORMAL,
+                meta: { description: '整车高压系统老化及人工静态外观检查' },
+                children: [
+                     { id: 'insp-battery', label: '电池放电测试', type: NodeType.INSPECTION, status: NodeStatus.NORMAL, meta: { metrics: generateMockMetrics(20, 3) } }
+                ]
+            }
         ]
       },
+      // 6. 动态路试
       {
-        id: 'st-dark-room',
-        label: '灯光隧道',
-        type: NodeType.STATION,
+        id: 'zone-eol-road-dyn',
+        label: '动态路试',
+        type: NodeType.ZONE,
         status: NodeStatus.NORMAL,
         children: [
-          {
-            id: 'insp-headlight',
-            label: '大灯校准',
-            type: NodeType.INSPECTION,
-            status: NodeStatus.NORMAL,
-            meta: { description: '矩阵 LED 大灯投影角度校准。', metrics: generateMockMetrics(20, 2) }
-           }
+             {
+                id: 'st-eol-dyn',
+                label: '综合道路测试',
+                type: NodeType.STATION,
+                status: NodeStatus.NORMAL,
+                meta: { description: '厂区跑道异响（NVH）与动态性能评估' },
+                children: [
+                     { id: 'insp-nvh', label: 'NVH 频谱分析', type: NodeType.INSPECTION, status: NodeStatus.NORMAL, meta: { metrics: generateMockMetrics(20, 4) } }
+                ]
+             }
         ]
       },
+      // 7. 地沟检测
       {
-        id: 'st-shower',
+        id: 'zone-eol-pit',
+        label: '地沟检测',
+        type: NodeType.ZONE,
+        status: NodeStatus.NORMAL,
+        children: [
+            {
+                id: 'st-eol-pit',
+                label: '底盘目视检查',
+                type: NodeType.STATION,
+                status: NodeStatus.NORMAL,
+                meta: { description: '底部管路、螺栓、防腐涂层检查' },
+                children: [
+                    { id: 'insp-leak', label: '底盘防漏液检测', type: NodeType.INSPECTION, status: NodeStatus.NORMAL, meta: { metrics: generateMockMetrics(20, 1) } }
+                ]
+            }
+        ]
+      },
+      // 8. 小黑屋
+      {
+        id: 'zone-eol-dark',
+        label: '小黑屋',
+        type: NodeType.ZONE,
+        status: NodeStatus.NORMAL,
+        children: [
+             {
+                id: 'st-eol-dark',
+                label: '灯光隧道检测',
+                type: NodeType.STATION,
+                status: NodeStatus.NORMAL,
+                meta: { description: '灯光光型、亮度及内饰氛围灯检查' },
+                children: [
+                    { id: 'insp-headlight', label: '大灯校准参数', type: NodeType.INSPECTION, status: NodeStatus.NORMAL, meta: { metrics: generateMockMetrics(20, 2) } }
+                ]
+             }
+        ]
+      },
+      // 9. 淋雨线
+      {
+        id: 'zone-eol-shower',
         label: '淋雨线',
-        type: NodeType.STATION,
+        type: NodeType.ZONE,
         status: NodeStatus.NORMAL,
         children: [
-           {
-            id: 'insp-seal',
-            label: '驾驶室密封性',
-            type: NodeType.INSPECTION,
-            status: NodeStatus.NORMAL,
-            meta: { description: '车内湿度传感器阵列读数。', metrics: generateMockMetrics(20, 4) }
-           }
+             {
+                id: 'st-eol-shower',
+                label: '高压淋雨测试',
+                type: NodeType.STATION,
+                status: NodeStatus.NORMAL,
+                meta: { description: '模拟暴雨环境检测整车密封性' },
+                children: [
+                    { id: 'insp-seal', label: '湿度传感器阵列', type: NodeType.INSPECTION, status: NodeStatus.NORMAL, meta: { metrics: generateMockMetrics(20, 4) } }
+                ]
+             }
         ]
       },
+      // 10. CP8/9 终检
       {
-        id: 'st-cp89',
-        label: 'CP8/9 终检', 
-        type: NodeType.STATION,
+        id: 'zone-eol-cp89',
+        label: 'CP8/9 终检',
+        type: NodeType.ZONE,
         status: NodeStatus.NORMAL,
         children: [
-           {
-            id: 'insp-final',
-            label: '最终验收',
-            type: NodeType.INSPECTION,
-            status: NodeStatus.NORMAL,
-            meta: { description: '整车各项指标数字签收。', metrics: generateMockMetrics(20, 1) }
-           }
+            {
+                id: 'st-eol-cp89',
+                label: '最终验收与合格证打印',
+                type: NodeType.STATION,
+                status: NodeStatus.NORMAL,
+                meta: { description: '全车整备、最终质量门验收及发运' },
+                children: [
+                    { id: 'insp-final', label: 'VES 综合评分', type: NodeType.INSPECTION, status: NodeStatus.NORMAL, meta: { metrics: generateMockMetrics(20, 1) } }
+                ]
+            }
         ]
       }
     ]
