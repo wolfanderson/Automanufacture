@@ -1,5 +1,5 @@
 import React from 'react';
-import { ProcessNode } from '../types';
+import { ProcessNode, NodeType } from '../types';
 import { Factory, Cog, SprayCan, Wrench, Activity } from 'lucide-react';
 
 interface WorkshopNavProps {
@@ -16,6 +16,44 @@ const getIcon = (label: string) => {
   return <Cog size={26} />;
 };
 
+// Helper function to recursively count leaf stations
+const getStationCount = (node: ProcessNode): number => {
+  if (!node.children) return 0;
+  
+  let count = 0;
+  
+  const traverse = (nodes: ProcessNode[]) => {
+    nodes.forEach(child => {
+      // If it is a ZONE, dive in
+      if (child.type === NodeType.ZONE) {
+        if (child.children) traverse(child.children);
+        return;
+      }
+
+      // If it is a STATION
+      if (child.type === NodeType.STATION) {
+        // Check if it is a placeholder - don't count gaps
+        if (child.meta?.isPlaceholder) return;
+
+        // Check if it acts as a container for other stations (e.g., Sub-assembly groups like "Door Sub-assembly")
+        // If it has children that are also STATIONS, it's a container.
+        const subStations = child.children?.filter(c => c.type === NodeType.STATION);
+        
+        if (subStations && subStations.length > 0) {
+           // It's a container, recurse to count its children
+           traverse(child.children!);
+        } else {
+           // It's a leaf station (actual work unit) or a station with only inspections
+           count++;
+        }
+      }
+    });
+  };
+
+  traverse(node.children);
+  return count;
+};
+
 export const WorkshopNav: React.FC<WorkshopNavProps> = ({ workshops, selectedId, onSelect }) => {
   return (
     <div className="flex flex-row items-center w-full h-24 bg-industrial-900 border-b border-industrial-700 px-8 shadow-md z-40 flex-shrink-0">
@@ -23,7 +61,7 @@ export const WorkshopNav: React.FC<WorkshopNavProps> = ({ workshops, selectedId,
       <div className="flex flex-col mr-16 flex-shrink-0 select-none">
         <h1 className="text-3xl font-bold text-white tracking-wider flex items-center gap-4">
            <div className="w-2 h-10 bg-neon-blue shadow-[0_0_10px_rgba(0,240,255,0.8)]"></div>
-           汽车制造工艺平台
+           智界 - 产线工艺检测平台
         </h1>
       </div>
 
@@ -31,6 +69,8 @@ export const WorkshopNav: React.FC<WorkshopNavProps> = ({ workshops, selectedId,
       <div className="flex-1 flex overflow-x-auto h-full items-center gap-4 no-scrollbar">
         {workshops.map((node) => {
           const isSelected = selectedId === node.id;
+          const stationCount = getStationCount(node);
+
           return (
             <button
               key={node.id}
@@ -51,7 +91,7 @@ export const WorkshopNav: React.FC<WorkshopNavProps> = ({ workshops, selectedId,
                     {node.label}
                 </div>
                 <div className={`text-sm font-mono mt-0.5 ${isSelected ? 'text-gray-300' : 'text-gray-500'}`}>
-                    {node.children?.length || 0} 个工位
+                    {stationCount} 个工位
                 </div>
               </div>
               
