@@ -125,8 +125,11 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
         // Skip connection lines for Sub-Assembly Zone as requested
         if (zone.id === 'zone-sub-assembly') return;
 
+        // EOL zones should now also behave like flow zones if they have multiple children
+        const isEolZone = zone.id.startsWith('zone-eol');
+
         if (zone.type === NodeType.ZONE && zone.children && zone.children.length > 1) {
-             const isFlowZone = flowZones.includes(zone.id);
+             const isFlowZone = flowZones.includes(zone.id) || isEolZone;
 
              for (let j = 0; j < zone.children.length - 1; j++) {
                  const c1 = zone.children[j];
@@ -290,7 +293,7 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
             {/* Header */}
             <div className={`flex justify-between items-start w-full ${isSubItem ? 'mb-1' : 'mb-2'}`}>
                 <span className={`${isSubItem ? 'text-[10px]' : 'text-xs'} font-mono tracking-wider uppercase truncate max-w-[80%] font-semibold ${isSelected ? 'text-neon-blue' : 'text-gray-400'}`}>
-                    {station.id.replace('asm-', '').replace('front-','').replace('chassis-', '').replace('rear-', '').replace('door-sub-', '').replace('batt-', '').replace('st-eol-', '').toUpperCase()}
+                    {station.id.replace('asm-', '').replace('front-','').replace('chassis-', '').replace('rear-', '').replace('door-sub-', '').replace('batt-', '').replace('st-eol-', '').replace('eol-', '').toUpperCase()}
                 </span>
                 <div className={`${isSubItem ? 'h-2 w-2' : 'h-2.5 w-2.5'} rounded-full ${statusColor} shadow-sm flex-shrink-0`}></div>
             </div>
@@ -392,11 +395,11 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
                                     : zone.id === 'zone-chassis-main' 
                                       ? 'grid grid-cols-5' 
                                       : zone.id === 'zone-rear-main'
-                                        ? 'grid grid-cols-5' // Narrowed from 7
+                                        ? 'grid grid-cols-5' 
                                         : zone.id === 'zone-battery-main'
-                                          ? 'grid grid-cols-6' // New battery line
+                                          ? 'grid grid-cols-6' 
                                           : zone.id.startsWith('zone-eol') 
-                                            ? 'grid grid-cols-1 max-w-4xl mx-auto' 
+                                            ? 'grid grid-cols-4 lg:grid-cols-5' // EOL now uses multi-column layout
                                             : 'grid grid-cols-4 lg:grid-cols-6 xl:grid-cols-8' // Default / Sub-assembly
                                 }`}>
                                     {zone.children?.map(station => renderStationCard(station, 0, false))}

@@ -565,7 +565,7 @@ export const MOCK_DATA: ProcessNode[] = [
             id: 'asm-powertrain',
             label: '动总分装线', 
             type: NodeType.STATION,
-            status: NodeStatus.WARNING,
+            status: NodeStatus.NORMAL, // Changed to NORMAL since active child is normal
             meta: { colSpan: 3, description: '动力总成综合分装' }, 
             children: [
                 {
@@ -595,9 +595,9 @@ export const MOCK_DATA: ProcessNode[] = [
                     id: 'pt-main-ops',
                     label: '发动机主线', 
                     type: NodeType.STATION, // Inner station for legacy content
-                    status: NodeStatus.WARNING,
+                    status: NodeStatus.INACTIVE, // SET TO INACTIVE
                     meta: { description: '发动机与变速箱集成' },
-                    children: generateLineStations('pt', 10)
+                    children: [] // CLEARED CHILDREN
                 }
             ]
           },
@@ -605,17 +605,17 @@ export const MOCK_DATA: ProcessNode[] = [
             id: 'asm-rear-drive',
             label: '后驱分装线', 
             type: NodeType.STATION,
-            status: NodeStatus.NORMAL,
-            meta: { colSpan: 1 },
-            children: generateLineStations('rd', 5)
+            status: NodeStatus.INACTIVE, // SET TO INACTIVE
+            meta: { colSpan: 1, description: '暂未投产' },
+            children: [] // CLEARED CHILDREN
           },
           {
             id: 'asm-front-drive',
             label: '前驱分装线', 
             type: NodeType.STATION,
-            status: NodeStatus.NORMAL,
-            meta: { colSpan: 1 },
-            children: generateLineStations('fd', 5)
+            status: NodeStatus.INACTIVE, // SET TO INACTIVE
+            meta: { colSpan: 1, description: '暂未投产' },
+            children: [] // CLEARED CHILDREN
           },
           // MODIFIED: Rear Module Line to resemble Door Sub-assembly with FH006 grouping
           {
@@ -714,17 +714,17 @@ export const MOCK_DATA: ProcessNode[] = [
             id: 'asm-heat-pump',
             label: '热泵分装', 
             type: NodeType.STATION,
-            status: NodeStatus.NORMAL,
-            meta: { colSpan: 1 },
-            children: generateLineStations('hp', 5)
+            status: NodeStatus.INACTIVE, // SET TO INACTIVE
+            meta: { colSpan: 1, description: '暂未投产' },
+            children: [] // CLEARED CHILDREN
           },
           {
             id: 'asm-ip',
             label: '仪表台分装', 
             type: NodeType.STATION,
-            status: NodeStatus.NORMAL,
-            meta: { colSpan: 1 },
-            children: generateLineStations('ip', 8)
+            status: NodeStatus.INACTIVE, // SET TO INACTIVE
+            meta: { colSpan: 1, description: '暂未投产' },
+            children: [] // CLEARED CHILDREN
           },
           {
             id: 'asm-windshield',
@@ -837,16 +837,17 @@ export const MOCK_DATA: ProcessNode[] = [
         type: NodeType.ZONE,
         status: NodeStatus.NORMAL,
         children: [
-            {
-                id: 'st-eol-cp7',
-                label: 'CP7 调整与返修',
-                type: NodeType.STATION,
-                status: NodeStatus.NORMAL,
-                meta: { description: '下线后首道调整工序' },
-                children: [
-                    { id: 'insp-eol-cp7', label: '整车间隙面差初检', type: NodeType.INSPECTION, status: NodeStatus.NORMAL, meta: { metrics: generateMockMetrics(20, 2) } }
-                ]
-            }
+            { id: 'eol-cp7-gap', label: '间隙检查&后门槛安装', type: NodeType.STATION, status: NodeStatus.NORMAL, meta: { inspectionObject: '车身间隙、后门槛饰板', inspectionMethod: '间隙尺 & 扭矩枪' }, children: [] },
+            { id: 'eol-cp7-fill', label: '加注', type: NodeType.STATION, status: NodeStatus.NORMAL, meta: { inspectionObject: '冷却液、制动液、洗涤液', inspectionMethod: '自动加注机数据互联' }, children: [] },
+            { id: 'eol-cp7-elec', label: '电检', type: NodeType.STATION, status: NodeStatus.NORMAL, meta: { inspectionObject: '整车控制器、ECU/TCU', inspectionMethod: 'OBD诊断仪自动扫描' }, children: [] },
+            { id: 'eol-cp7-func', label: '基础功能检查', type: NodeType.STATION, status: NodeStatus.NORMAL, meta: { inspectionObject: '雨刮、喇叭、车窗升降', inspectionMethod: '人工操作确认' }, children: [] },
+            { id: 'eol-cp7-flush', label: '间隙面差检测', type: NodeType.STATION, status: NodeStatus.NORMAL, meta: { inspectionObject: '四门两盖匹配度', inspectionMethod: '激光面差仪' }, children: [] },
+            { id: 'eol-cp7-ext', label: '外观检测', type: NodeType.STATION, status: NodeStatus.WARNING, meta: { inspectionObject: '漆面划痕、凹陷', inspectionMethod: '高亮光廊目视' }, children: [] },
+            { id: 'eol-cp7-int', label: '内饰检查', type: NodeType.STATION, status: NodeStatus.NORMAL, meta: { inspectionObject: '座椅、仪表台、顶棚', inspectionMethod: '人工目视 & 触摸' }, children: [] },
+            { id: 'eol-cp7-phone', label: '手机映射', type: NodeType.STATION, status: NodeStatus.NORMAL, meta: { inspectionObject: 'CarPlay / Carlife 连接', inspectionMethod: '实机连接测试' }, children: [] },
+            { id: 'eol-cp7-frunk', label: '前舱检查', type: NodeType.STATION, status: NodeStatus.NORMAL, meta: { inspectionObject: '前备箱盖锁止、内衬', inspectionMethod: '人工检查' }, children: [] },
+            { id: 'eol-cp7-trim', label: '外饰检查', type: NodeType.STATION, status: NodeStatus.NORMAL, meta: { inspectionObject: '字标、饰条、轮眉', inspectionMethod: '视觉对比' }, children: [] },
+            { id: 'eol-cp7-charge', label: '快慢充检查', type: NodeType.STATION, status: NodeStatus.NORMAL, meta: { inspectionObject: '交/直流充电口功能', inspectionMethod: '模拟充电桩测试' }, children: [] },
         ]
       },
       // 2. 检测线
@@ -856,17 +857,13 @@ export const MOCK_DATA: ProcessNode[] = [
         type: NodeType.ZONE,
         status: NodeStatus.NORMAL,
         children: [
-            {
-                id: 'st-eol-test',
-                label: '四轮定位与安规测试',
-                type: NodeType.STATION,
-                status: NodeStatus.NORMAL,
-                meta: { description: '四轮定位、转鼓、侧滑、制动测试' },
-                children: [
-                     { id: 'insp-eol-align', label: '四轮定位数据', type: NodeType.INSPECTION, status: NodeStatus.NORMAL, meta: { metrics: generateMockMetrics(20, 1) } },
-                     { id: 'insp-eol-brake', label: '制动力测试', type: NodeType.INSPECTION, status: NodeStatus.NORMAL, meta: { metrics: generateMockMetrics(20, 2) } }
-                ]
-            }
+            { id: 'eol-test-bump', label: '颠簸路', type: NodeType.STATION, status: NodeStatus.NORMAL, meta: { inspectionObject: '底盘异响、减震器功能', inspectionMethod: '特定路谱行驶' }, children: [] },
+            { id: 'eol-test-align', label: '四轮调整', type: NodeType.STATION, status: NodeStatus.NORMAL, meta: { inspectionObject: '前束角、外倾角', inspectionMethod: '3D四轮定位仪' }, children: [] },
+            { id: 'eol-test-light', label: '大灯检测', type: NodeType.STATION, status: NodeStatus.NORMAL, meta: { inspectionObject: '近光/远光切线、亮度', inspectionMethod: '自动大灯检测仪' }, children: [] },
+            { id: 'eol-test-slip', label: '侧滑测试', type: NodeType.STATION, status: NodeStatus.NORMAL, meta: { inspectionObject: '车轮侧滑量', inspectionMethod: '侧滑试验台' }, children: [] },
+            { id: 'eol-test-dyno', label: '转毂测试', type: NodeType.STATION, status: NodeStatus.NORMAL, meta: { inspectionObject: '加速、制动、ABS功能', inspectionMethod: '底盘测功机' }, children: [] },
+            { id: 'eol-test-radar', label: 'ADS雷达标定', type: NodeType.STATION, status: NodeStatus.NORMAL, meta: { inspectionObject: '毫米波/激光雷达角度', inspectionMethod: '多普勒模拟器标定' }, children: [] },
+            { id: 'eol-test-cam', label: '整车相机标定', type: NodeType.STATION, status: NodeStatus.NORMAL, meta: { inspectionObject: '环视/智驾摄像头参数', inspectionMethod: '标定房靶标识别' }, children: [] },
         ]
       },
       // 3. 强化路试
@@ -971,16 +968,9 @@ export const MOCK_DATA: ProcessNode[] = [
         type: NodeType.ZONE,
         status: NodeStatus.NORMAL,
         children: [
-             {
-                id: 'st-eol-dark',
-                label: '灯光隧道检测',
-                type: NodeType.STATION,
-                status: NodeStatus.NORMAL,
-                meta: { description: '灯光光型、亮度及内饰氛围灯检查' },
-                children: [
-                    { id: 'insp-headlight', label: '大灯校准参数', type: NodeType.INSPECTION, status: NodeStatus.NORMAL, meta: { metrics: generateMockMetrics(20, 2) } }
-                ]
-             }
+             { id: 'eol-dark-chassis', label: '底盘AI划伤检测', type: NodeType.STATION, status: NodeStatus.NORMAL, meta: { inspectionObject: '底盘护板、电池包底部', inspectionMethod: '线扫相机AI识别' }, children: [] },
+             { id: 'eol-dark-sound', label: '异响AI检测', type: NodeType.STATION, status: NodeStatus.NORMAL, meta: { inspectionObject: '整车动态异响', inspectionMethod: '声学阵列分析' }, children: [] },
+             { id: 'eol-dark-proj', label: '投影大灯检测', type: NodeType.STATION, status: NodeStatus.NORMAL, meta: { inspectionObject: 'DLP投影图案清晰度', inspectionMethod: '高动态工业相机' }, children: [] },
         ]
       },
       // 9. 淋雨线
@@ -990,16 +980,9 @@ export const MOCK_DATA: ProcessNode[] = [
         type: NodeType.ZONE,
         status: NodeStatus.NORMAL,
         children: [
-             {
-                id: 'st-eol-shower',
-                label: '高压淋雨测试',
-                type: NodeType.STATION,
-                status: NodeStatus.NORMAL,
-                meta: { description: '模拟暴雨环境检测整车密封性' },
-                children: [
-                    { id: 'insp-seal', label: '湿度传感器阵列', type: NodeType.INSPECTION, status: NodeStatus.NORMAL, meta: { metrics: generateMockMetrics(20, 4) } }
-                ]
-             }
+             { id: 'eol-show-ambient', label: '淋雨检测（氛围灯检测）', type: NodeType.STATION, status: NodeStatus.NORMAL, meta: { inspectionObject: '全车氛围灯颜色/亮度', inspectionMethod: '暗室视觉检测' }, children: [] },
+             { id: 'eol-show-iso', label: '绝缘检测（安规）', type: NodeType.STATION, status: NodeStatus.NORMAL, meta: { inspectionObject: '高压系统绝缘阻值', inspectionMethod: '安规测试仪' }, children: [] },
+             { id: 'eol-show-rain', label: '淋雨检验', type: NodeType.STATION, status: NodeStatus.NORMAL, meta: { inspectionObject: '天窗、车门、涉水密封性', inspectionMethod: '高压喷淋' }, children: [] },
         ]
       },
       // 10. CP8/9 终检
@@ -1009,16 +992,9 @@ export const MOCK_DATA: ProcessNode[] = [
         type: NodeType.ZONE,
         status: NodeStatus.NORMAL,
         children: [
-            {
-                id: 'st-eol-cp89',
-                label: '最终验收与合格证打印',
-                type: NodeType.STATION,
-                status: NodeStatus.NORMAL,
-                meta: { description: '全车整备、最终质量门验收及发运' },
-                children: [
-                    { id: 'insp-final', label: 'VES 综合评分', type: NodeType.INSPECTION, status: NodeStatus.NORMAL, meta: { metrics: generateMockMetrics(20, 1) } }
-                ]
-            }
+            { id: 'eol-cp8-elec', label: '电检', type: NodeType.STATION, status: NodeStatus.NORMAL, meta: { inspectionObject: '休眠电流、故障码清除', inspectionMethod: '最终OBD检测' }, children: [] },
+            { id: 'eol-cp8-final', label: '外饰内饰检测', type: NodeType.STATION, status: NodeStatus.NORMAL, meta: { inspectionObject: '最终整车外观/内饰状态', inspectionMethod: 'VES 评审标准' }, children: [] },
+            { id: 'eol-cp8-cert', label: '合格证&随车卡', type: NodeType.STATION, status: NodeStatus.NORMAL, meta: { inspectionObject: '车辆一致性证书', inspectionMethod: '自动打印与绑定' }, children: [] },
         ]
       }
     ]
