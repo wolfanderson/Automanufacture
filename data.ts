@@ -225,8 +225,39 @@ export const MOCK_DATA: ProcessNode[] = [
             children: []
            },
            {
-            id: 'asm-front-gap-1',
-            label: 'Z002-Z053', 
+            id: 'asm-front-gap-1a',
+            label: 'Z002-Z035', 
+            type: NodeType.STATION,
+            status: NodeStatus.INACTIVE,
+            meta: { colSpan: 1, isPlaceholder: true },
+            children: []
+           },
+           {
+            id: 'asm-front-z036',
+            label: '室内地板线束',
+            type: NodeType.STATION,
+            status: NodeStatus.NORMAL,
+            meta: {
+                colSpan: 1,
+                inspectionObject: '室内地板线束走向、卡扣',
+                inspectionMethod: '手机拍照检测'
+            },
+            children: [
+                {
+                    id: 'insp-z036-visual',
+                    label: '线束外观检测',
+                    type: NodeType.INSPECTION,
+                    status: NodeStatus.NORMAL,
+                    meta: {
+                        description: '室内地板线束铺设路径与固定点检查',
+                        metrics: generateMockMetrics(20, 2)
+                    }
+                }
+            ]
+           },
+           {
+            id: 'asm-front-gap-1b',
+            label: 'Z037-Z053',
             type: NodeType.STATION,
             status: NodeStatus.INACTIVE,
             meta: { colSpan: 1, isPlaceholder: true },
@@ -364,8 +395,101 @@ export const MOCK_DATA: ProcessNode[] = [
             ]
            },
            {
-            id: 'asm-chassis-gap-2',
-            label: 'Z105-Z131',
+            id: 'asm-chassis-gap-2a',
+            label: 'Z105-Z107',
+            type: NodeType.STATION,
+            status: NodeStatus.INACTIVE,
+            meta: { colSpan: 1, isPlaceholder: true },
+            children: [] 
+           },
+           {
+            id: 'asm-chassis-z108',
+            label: '空调线束总成',
+            type: NodeType.STATION,
+            status: NodeStatus.NORMAL,
+            meta: {
+                colSpan: 1,
+                inspectionObject: '空调线束接插件、固定卡扣',
+                inspectionMethod: '手机拍照检测'
+            },
+            children: [
+                {
+                    id: 'insp-z108-conn',
+                    label: '接插件连接检测',
+                    type: NodeType.INSPECTION,
+                    status: NodeStatus.NORMAL,
+                    meta: {
+                        description: '空调线束关键接口连接状态',
+                        metrics: generateMockMetrics(20, 3)
+                    }
+                }
+            ]
+           },
+           {
+            id: 'asm-chassis-gap-2b',
+            label: 'Z109-Z111',
+            type: NodeType.STATION,
+            status: NodeStatus.INACTIVE,
+            meta: { colSpan: 1, isPlaceholder: true },
+            children: []
+           },
+           {
+            id: 'asm-chassis-z112',
+            label: '储气罐',
+            type: NodeType.STATION,
+            status: NodeStatus.NORMAL,
+            meta: {
+                colSpan: 1,
+                inspectionObject: '储气罐安装位置、气管连接',
+                inspectionMethod: '手机拍照检测'
+            },
+            children: [
+                {
+                    id: 'insp-z112-install',
+                    label: '储气罐安装检测',
+                    type: NodeType.INSPECTION,
+                    status: NodeStatus.NORMAL,
+                    meta: {
+                        description: '储气罐固定螺栓与气管接口检查',
+                        metrics: generateMockMetrics(20, 2)
+                    }
+                }
+            ]
+           },
+           {
+            id: 'asm-chassis-gap-2c',
+            label: 'Z113-Z116',
+            type: NodeType.STATION,
+            status: NodeStatus.INACTIVE,
+            meta: { colSpan: 1, isPlaceholder: true },
+            children: []
+           },
+           {
+            id: 'asm-chassis-z117',
+            label: '高压电加热器',
+            type: NodeType.STATION,
+            status: NodeStatus.NORMAL,
+            meta: {
+                colSpan: 1,
+                inspectionObject: '电加热器本体、高压线束',
+                inspectionMethod: '手机拍照检测'
+            },
+            children: [
+                {
+                    id: 'insp-z117-hv',
+                    label: '高压接口检测',
+                    type: NodeType.INSPECTION,
+                    status: NodeStatus.NORMAL,
+                    meta: {
+                        description: '高压线束橙色互锁接插件状态确认',
+                        metrics: generateMockMetrics(20, 4)
+                    }
+                }
+            ]
+           },
+           {
+            id: 'asm-chassis-gap-2d',
+            label: 'Z118-Z131',
             type: NodeType.STATION,
             status: NodeStatus.INACTIVE,
             meta: { colSpan: 1, isPlaceholder: true },
@@ -407,32 +531,32 @@ export const MOCK_DATA: ProcessNode[] = [
            },
            {
             id: 'asm-rear-z142',
-            label: '空调线束总成', 
+            label: '压缩机', // Updated label
             type: NodeType.STATION,
             status: NodeStatus.NORMAL,
             meta: { 
                 colSpan: 1,
-                inspectionObject: '空调主机线束、鼓风机插头、风门执行器接口',
-                inspectionMethod: '手机拍照'
+                inspectionObject: '压缩机安装、皮带/高压线', // Updated info
+                inspectionMethod: '手机拍照检测'
             }, 
             children: [
                 {
-                    id: 'insp-z142-harness',
-                    label: '空调线束检测',
+                    id: 'insp-z142-mount',
+                    label: '压缩机安装检测',
                     type: NodeType.INSPECTION,
                     status: NodeStatus.NORMAL,
                     meta: {
-                        description: '空调箱体线束整理与固定卡扣检查。',
+                        description: '压缩机固定与管路连接状态',
                         metrics: generateMockMetrics(20, 2)
                     }
                 },
                 {
-                    id: 'insp-z142-connector',
-                    label: '插接件到位检测',
+                    id: 'insp-z142-conn', // Keep/Modify existing child ID structure
+                    label: '管路连接检测',
                     type: NodeType.INSPECTION,
                     status: NodeStatus.NORMAL,
                     meta: {
-                        description: '关键电器接口插接深度与锁止确认。',
+                        description: '压缩机进排气管路及电连接检测。',
                         metrics: generateMockMetrics(20, 3)
                     }
                 }
@@ -993,8 +1117,8 @@ export const MOCK_DATA: ProcessNode[] = [
         status: NodeStatus.NORMAL,
         children: [
             { id: 'eol-cp8-elec', label: '电检', type: NodeType.STATION, status: NodeStatus.NORMAL, meta: { inspectionObject: '休眠电流、故障码清除', inspectionMethod: '最终OBD检测' }, children: [] },
-            { id: 'eol-cp8-final', label: '外饰内饰检测', type: NodeType.STATION, status: NodeStatus.NORMAL, meta: { inspectionObject: '最终整车外观/内饰状态', inspectionMethod: 'VES 评审标准' }, children: [] },
-            { id: 'eol-cp8-cert', label: '合格证&随车卡', type: NodeType.STATION, status: NodeStatus.NORMAL, meta: { inspectionObject: '车辆一致性证书', inspectionMethod: '自动打印与绑定' }, children: [] },
+            { id: 'eol-cp8-final', label: '外饰内饰检测', type: NodeType.STATION, status: NodeStatus.NORMAL, meta: { inspectionObject: '最终整车外观/内饰状态', inspectionMethod: '人工检测' }, children: [] },
+            { id: 'eol-cp8-cert', label: '合格证&随车卡', type: NodeType.STATION, status: NodeStatus.NORMAL, meta: { inspectionObject: '车辆一致性证书', inspectionMethod: '手机拍照' }, children: [] },
         ]
       }
     ]
