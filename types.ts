@@ -27,6 +27,7 @@ export interface NodeMeta {
   metrics?: MetricPoint[]; // For L3 visualization
   imgUrl?: string; // Placeholder for camera feed or snapshot
   colSpan?: number; // Layout control: 1, 2, 3, 4 etc.
+  isPlaceholder?: boolean; // NEW: Mark this node as a visual spacer/gap
 }
 
 // The recursive structure

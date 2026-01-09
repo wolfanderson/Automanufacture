@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>汽车制造工艺检测平台</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script>
       tailwind.config = {
         theme: {
@@ -16,10 +16,11 @@
             },
             colors: {
               industrial: {
-                900: '#0a0f1c',
-                800: '#111827',
-                700: '#1f2937',
-                600: '#374151',
+                900: '#0f172a', // Slate 900 (Lighter than original #0a0f1c)
+                800: '#1e293b', // Slate 800
+                700: '#334155', // Slate 700
+                600: '#475569', // Slate 600
+                500: '#64748b', // Slate 500
               },
               neon: {
                 blue: '#00f0ff',
@@ -29,7 +30,8 @@
               }
             },
             backgroundImage: {
-              'grid-pattern': "linear-gradient(to right, #1f2937 1px, transparent 1px), linear-gradient(to bottom, #1f2937 1px, transparent 1px)",
+              // Removed noisy grid pattern for cleaner look
+              'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
             }
           }
         }
@@ -37,28 +39,23 @@
     </script>
     <style>
       body {
-        background-color: #050505;
-        color: #e5e7eb;
+        background-color: #0f172a; /* Slate 900 */
+        color: #f1f5f9; /* Slate 100 - Brighter text base */
       }
-      /* Custom Scrollbar for high-tech feel */
+      /* Custom Scrollbar */
       ::-webkit-scrollbar {
-        width: 6px;
-        height: 6px;
+        width: 8px; /* Slightly wider */
+        height: 8px;
       }
       ::-webkit-scrollbar-track {
-        background: #0f172a; 
+        background: #1e293b; 
       }
       ::-webkit-scrollbar-thumb {
-        background: #334155; 
-        border-radius: 3px;
+        background: #475569; 
+        border-radius: 4px;
       }
       ::-webkit-scrollbar-thumb:hover {
-        background: #475569; 
-      }
-      .glass-panel {
-        background: rgba(17, 24, 39, 0.7);
-        backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: #64748b; 
       }
     </style>
   <script type="importmap">

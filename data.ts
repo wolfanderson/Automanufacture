@@ -211,7 +211,7 @@ export const MOCK_DATA: ProcessNode[] = [
     children: [
       // Order: Front -> Chassis -> Rear -> Sub-Assembly (at the end)
 
-      // 1. 前装主线 (Front Assembly) - Updated based on request
+      // 1. 前装主线 (Front Assembly)
       {
         id: 'zone-front-main',
         label: '前装主线',
@@ -219,27 +219,27 @@ export const MOCK_DATA: ProcessNode[] = [
         status: NodeStatus.NORMAL,
         children: [
            {
-            id: 'asm-front-z052',
-            label: '前装Z052', 
+            id: 'asm-front-z001',
+            label: 'Z001', 
             type: NodeType.STATION,
             status: NodeStatus.INACTIVE,
-            meta: { colSpan: 1 },
+            meta: { colSpan: 1, description: '上线投产' },
             children: []
            },
            {
-            id: 'asm-front-z053',
-            label: '前装Z053', 
+            id: 'asm-front-gap-1',
+            label: 'Z002-Z053', 
             type: NodeType.STATION,
             status: NodeStatus.INACTIVE,
-            meta: { colSpan: 1 },
+            meta: { colSpan: 1, isPlaceholder: true },
             children: []
            },
            {
             id: 'asm-front-z054',
-            label: '前装Z054', 
+            label: 'Z054', 
             type: NodeType.STATION,
             status: NodeStatus.NORMAL,
-            meta: { colSpan: 1 }, // Make it span wider for better visibility
+            meta: { colSpan: 1 }, 
             children: [
                 {
                     id: 'insp-z054-harness',
@@ -275,19 +275,19 @@ export const MOCK_DATA: ProcessNode[] = [
             ]
           },
           {
-            id: 'asm-front-z055',
-            label: '前装Z055', 
+            id: 'asm-front-gap-2',
+            label: 'Z055-Z099', 
             type: NodeType.STATION,
             status: NodeStatus.INACTIVE,
-            meta: { colSpan: 1 },
+            meta: { colSpan: 1, isPlaceholder: true },
             children: []
            },
            {
-            id: 'asm-front-z056',
-            label: '前装Z056', 
+            id: 'asm-front-z100',
+            label: 'Z100', 
             type: NodeType.STATION,
             status: NodeStatus.INACTIVE,
-            meta: { colSpan: 1 },
+            meta: { colSpan: 1, description: '流转至底盘' },
             children: []
            },
         ]
@@ -301,19 +301,64 @@ export const MOCK_DATA: ProcessNode[] = [
         status: NodeStatus.NORMAL,
         children: [
            {
+            id: 'asm-chassis-z001',
+            label: 'Z001',
+            type: NodeType.STATION,
+            status: NodeStatus.INACTIVE,
+            meta: { colSpan: 1, description: '底盘上线' },
+            children: [] 
+           },
+           {
+            id: 'asm-chassis-gap-1',
+            label: 'Z002-Z059',
+            type: NodeType.STATION,
+            status: NodeStatus.INACTIVE,
+            meta: { colSpan: 1, isPlaceholder: true },
+            children: [] 
+           },
+           {
             id: 'asm-chassis-z060',
-            label: '前舱Z060',
+            label: 'Z060',
             type: NodeType.STATION,
             status: NodeStatus.NORMAL,
-            meta: { colSpan: 2 },
+            meta: { colSpan: 1 },
+            children: [
+                {
+                    id: 'insp-z060-subframe',
+                    label: '副车架自动拧紧检测',
+                    type: NodeType.INSPECTION,
+                    status: NodeStatus.NORMAL,
+                    meta: {
+                        description: '副车架关键连接点扭矩与角度实时监控。',
+                        metrics: generateMockMetrics(20, 3)
+                    }
+                },
+                {
+                    id: 'insp-z060-visual',
+                    label: '底盘合装到位检测',
+                    type: NodeType.INSPECTION,
+                    status: NodeStatus.NORMAL,
+                    meta: {
+                        description: '基于3D视觉的底盘与车身对合间隙检测。',
+                        metrics: generateMockMetrics(20, 2)
+                    }
+                }
+            ]
+           },
+           {
+            id: 'asm-chassis-gap-2',
+            label: 'Z061-Z076',
+            type: NodeType.STATION,
+            status: NodeStatus.INACTIVE,
+            meta: { colSpan: 1, isPlaceholder: true },
             children: [] 
            },
            {
             id: 'asm-chassis-z077',
-            label: '前舱Z077',
+            label: 'Z077',
             type: NodeType.STATION,
             status: NodeStatus.NORMAL,
-            meta: { colSpan: 2 },
+            meta: { colSpan: 1 },
             children: [
                 {
                     id: 'insp-z077-harness',
@@ -327,29 +372,20 @@ export const MOCK_DATA: ProcessNode[] = [
                 }
             ]
            },
-           // Virtual Stations (Middle fillers)
            {
-             id: 'asm-chassis-v1',
-             label: '底盘合装工序 A',
-             type: NodeType.STATION,
-             status: NodeStatus.INACTIVE,
-             meta: { colSpan: 1 },
-             children: []
-           },
-           {
-             id: 'asm-chassis-v2',
-             label: '底盘合装工序 B',
-             type: NodeType.STATION,
-             status: NodeStatus.INACTIVE,
-             meta: { colSpan: 1 },
-             children: []
+            id: 'asm-chassis-gap-3',
+            label: 'Z078-Z103',
+            type: NodeType.STATION,
+            status: NodeStatus.INACTIVE,
+            meta: { colSpan: 1, isPlaceholder: true },
+            children: [] 
            },
            {
             id: 'asm-chassis-z104',
-            label: '底盘Z104',
+            label: 'Z104',
             type: NodeType.STATION,
             status: NodeStatus.NORMAL,
-            meta: { colSpan: 2 }, 
+            meta: { colSpan: 1 }, 
             children: [
                 {
                     id: 'insp-z104-harness',
@@ -363,6 +399,22 @@ export const MOCK_DATA: ProcessNode[] = [
                 }
             ]
            },
+           {
+            id: 'asm-chassis-gap-4',
+            label: 'Z105-Z119',
+            type: NodeType.STATION,
+            status: NodeStatus.INACTIVE,
+            meta: { colSpan: 1, isPlaceholder: true },
+            children: [] 
+           },
+           {
+            id: 'asm-chassis-z120',
+            label: 'Z120',
+            type: NodeType.STATION,
+            status: NodeStatus.INACTIVE,
+            meta: { colSpan: 1, description: '下线流转' },
+            children: [] 
+           },
         ]
       },
 
@@ -373,38 +425,96 @@ export const MOCK_DATA: ProcessNode[] = [
         type: NodeType.ZONE,
         status: NodeStatus.NORMAL,
         children: [
-          {
-            id: 'asm-door',
-            label: '车门线', 
-            type: NodeType.STATION,
-            status: NodeStatus.NORMAL,
-            meta: { colSpan: 2 },
-            children: generateLineStations('door', 15)
-          },
-          {
-            id: 'asm-rear-1',
-            label: '后装 1 线', 
-            type: NodeType.STATION,
-            status: NodeStatus.NORMAL,
-            meta: { colSpan: 2 },
-            children: generateLineStations('ra1', 15)
-          },
-          {
-            id: 'asm-rear-2',
-            label: '后装 2 线', 
-            type: NodeType.STATION,
-            status: NodeStatus.NORMAL,
-            meta: { colSpan: 2 },
-            children: generateLineStations('ra2', 15)
-          },
-          {
-            id: 'asm-supply',
-            label: '辅房/物料区', 
+           {
+            id: 'asm-rear-z121',
+            label: 'Z121', 
             type: NodeType.STATION,
             status: NodeStatus.INACTIVE,
-            meta: { colSpan: 2 },
+            meta: { colSpan: 1, description: '后装上线' },
             children: []
-          }
+           },
+           {
+            id: 'asm-rear-gap-1',
+            label: 'Z122-Z195', 
+            type: NodeType.STATION,
+            status: NodeStatus.INACTIVE,
+            meta: { colSpan: 1, isPlaceholder: true },
+            children: []
+           },
+           {
+            id: 'asm-rear-z196',
+            label: 'Z196', 
+            type: NodeType.STATION,
+            status: NodeStatus.NORMAL,
+            meta: { colSpan: 1 }, 
+            children: [
+                {
+                    id: 'insp-z196-roof',
+                    label: '全景天幕安装',
+                    type: NodeType.INSPECTION,
+                    status: NodeStatus.NORMAL,
+                    meta: {
+                        description: '全景天幕机械臂安装位置度与密封性检测。',
+                        metrics: generateMockMetrics(20, 2),
+                         imgUrl: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=80'
+                    }
+                }
+            ]
+           },
+           {
+            id: 'asm-rear-z197',
+            label: 'Z197', 
+            type: NodeType.STATION,
+            status: NodeStatus.NORMAL,
+            meta: { colSpan: 1 }, 
+            children: [
+                {
+                    id: 'insp-z197-taillight',
+                    label: '尾灯间隙面差检测',
+                    type: NodeType.INSPECTION,
+                    status: NodeStatus.NORMAL,
+                    meta: {
+                        description: '贯穿式尾灯与后备箱盖间隙均匀度检测。',
+                        metrics: generateMockMetrics(20, 1.5)
+                    }
+                }
+            ]
+           },
+           {
+            id: 'asm-rear-gap-2',
+            label: 'Z198', 
+            type: NodeType.STATION,
+            status: NodeStatus.INACTIVE,
+            meta: { colSpan: 1, isPlaceholder: true },
+            children: []
+           },
+           {
+            id: 'asm-rear-z199',
+            label: 'Z199', 
+            type: NodeType.STATION,
+            status: NodeStatus.NORMAL,
+            meta: { colSpan: 1 }, 
+            children: [
+                {
+                    id: 'insp-z199-seats',
+                    label: '后排座椅安装检测',
+                    type: NodeType.INSPECTION,
+                    status: NodeStatus.NORMAL,
+                    meta: {
+                        description: '后排座椅滑轨锁止状态与头枕高度自动检测。',
+                        metrics: generateMockMetrics(20, 3)
+                    }
+                }
+            ]
+           },
+           {
+            id: 'asm-rear-z200',
+            label: 'Z200', 
+            type: NodeType.STATION,
+            status: NodeStatus.INACTIVE,
+            meta: { colSpan: 1, description: '后装下线' },
+            children: []
+           },
         ]
       },
 

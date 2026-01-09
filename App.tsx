@@ -44,7 +44,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen w-screen bg-industrial-900 text-gray-100 overflow-hidden font-sans selection:bg-neon-blue selection:text-black bg-grid-pattern bg-[size:40px_40px]">
+    <div className="flex flex-col h-screen w-screen bg-industrial-900 text-slate-100 overflow-hidden font-sans">
       
       {/* Layer 1: Workshops (Top Header) */}
       <WorkshopNav 
@@ -57,10 +57,7 @@ const App: React.FC = () => {
       <div className="flex flex-1 overflow-hidden relative">
         
         {/* Layer 2: Stations (Main Grid Area) */}
-        <main className="flex-1 relative z-10 flex flex-col min-w-0">
-          {/* Ambient Glow */}
-          <div className="absolute top-0 left-0 w-full h-96 bg-neon-blue/5 blur-[100px] pointer-events-none transform -translate-y-1/2"></div>
-          
+        <main className="flex-1 relative z-10 flex flex-col min-w-0 bg-industrial-900">
           <StationList 
             workshop={selectedWorkshop} 
             selectedStationId={selectedStationId} 
@@ -69,7 +66,7 @@ const App: React.FC = () => {
         </main>
 
         {/* Layer 3: Inspection Details (Right Sidebar) */}
-        <aside className="w-[400px] flex-shrink-0 z-20 transition-all duration-300 ease-in-out border-l border-gray-800 bg-industrial-900">
+        <aside className="w-[450px] flex-shrink-0 z-20 transition-all duration-300 ease-in-out border-l border-industrial-700 bg-industrial-800">
            <InspectionDetail 
              station={selectedStation} 
            />
