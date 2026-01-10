@@ -23,6 +23,8 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
   const [paths, setPaths] = useState<PathData[]>([]);
   
   const isEol = workshop?.id === 'ws-eol';
+  const isAssembly = workshop?.id === 'ws-assembly';
+  const isCompactView = isEol || isAssembly;
 
   // Calculate global stats for the header
   const stats = useMemo(() => {
@@ -66,8 +68,8 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
       const currentId = children[i].id;
       const nextId = children[i+1].id;
       
-      // Stop connecting if the next item is the Sub-Assembly zone
-      if (nextId === 'zone-sub-assembly') continue;
+      // Stop connecting if the current item is the Sub-Assembly zone (it's at the top now, don't connect down)
+      if (currentId === 'zone-sub-assembly') continue;
 
       const currentEl = itemsRef.current.get(currentId);
       const nextEl = itemsRef.current.get(nextId);
@@ -76,21 +78,31 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
         const currRect = currentEl.getBoundingClientRect();
         const nextRect = nextEl.getBoundingClientRect();
 
-        // LOGIC FOR EOL GRID CONNECTIONS (More direct)
-        if (isEol) {
+        // LOGIC FOR EOL/ASSEMBLY GRID CONNECTIONS
+        if (isCompactView) {
              const startX = Math.round(currRect.right - containerRect.left);
              const startY = Math.round(currRect.top + currRect.height / 2 - containerRect.top);
              const endX = Math.round(nextRect.left - containerRect.left);
              const endY = Math.round(nextRect.top + nextRect.height / 2 - containerRect.top);
 
-             // If elements are far apart vertically, use stepped line, otherwise straight
-             if (Math.abs(currRect.bottom - nextRect.top) > 50 || endX < startX) {
-                 // Complex path for grid wrapping
-                 // Not implementing complex grid path finding for now to keep it clean, 
-                 // relying on visual grouping, but basic lines can be added if needed.
+             // For vertical stacking in compact view (Assembly), draw simple center-to-center lines
+             if (isAssembly) {
+                 const centerX = Math.round(currRect.left + currRect.width / 2 - containerRect.left);
+                 const bottomY = Math.round(currRect.bottom - containerRect.top);
+                 const topY = Math.round(nextRect.top - containerRect.top);
+                 
+                 // If stacked vertically
+                 if (Math.abs(currRect.left - nextRect.left) < 50 && topY > bottomY) {
+                      newPaths.push({ 
+                          d: `M ${centerX} ${bottomY} L ${centerX} ${topY}`, 
+                          type: 'straight', 
+                          variant: 'default' 
+                      });
+                 }
              }
+             // Logic for EOL grid wrapping if needed (currently minimal connections)
         } 
-        // LOGIC FOR STANDARD VERTICAL ZONES
+        // LOGIC FOR STANDARD VERTICAL ZONES (Stamping/Welding/Painting if they used Zones)
         else if (children[i].type === NodeType.ZONE) {
             let startX = currRect.left + currRect.width / 2 - containerRect.left;
             const startY = currRect.bottom - containerRect.top;
@@ -136,12 +148,11 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
     children.forEach(zone => {
         if (zone.id === 'zone-sub-assembly') return;
 
-        // EOL zones behave like flow zones
-        const isEolZone = zone.id.startsWith('zone-eol');
+        // EOL and Assembly zones behave like flow zones for internal items
+        const isFlowZone = flowZones.includes(zone.id) || zone.id.startsWith('zone-eol');
 
-        if (zone.type === NodeType.ZONE && zone.children && zone.children.length > 1) {
-             const isFlowZone = flowZones.includes(zone.id) || isEolZone;
-
+        if (zone.type === NodeType.ZONE && zone.children && zone.children.length > 1 && isFlowZone) {
+             
              for (let j = 0; j < zone.children.length - 1; j++) {
                  const c1 = zone.children[j];
                  const c2 = zone.children[j+1];
@@ -153,7 +164,7 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
                      const r2 = el2.getBoundingClientRect();
 
                      // Connect Right of 1 to Left of 2
-                     if (Math.abs(r1.top - r2.top) < 40) { // Increased tolerance for compactness
+                     if (Math.abs(r1.top - r2.top) < 40) { // Tolerance
                         const startX = Math.round(r1.right - containerRect.left);
                         const startY = Math.round(r1.top + r1.height / 2 - containerRect.top);
                         const endX = Math.round(r2.left - containerRect.left);
@@ -227,7 +238,7 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
     const isInactive = station.status === NodeStatus.INACTIVE;
     const isPlaceholder = station.meta?.isPlaceholder;
 
-    // Compact Mode Adjustments for EOL View
+    // Compact Mode Adjustments for EOL/Assembly View
     const cardHeight = compactMode ? 'h-[90px]' : 'h-[130px]';
     const cardPadding = compactMode ? 'p-2' : (isSubItem ? 'p-2' : 'p-4');
     const headerMb = compactMode ? 'mb-1' : (isSubItem ? 'mb-1' : 'mb-2');
@@ -344,26 +355,39 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
       </div>
 
       {/* Main Scrollable Area */}
-      <div className={`flex-1 overflow-y-auto custom-scrollbar bg-industrial-900 relative ${isEol ? 'overflow-hidden' : ''}`} ref={scrollContainerRef}>
-        <div className={`relative min-h-full ${isEol ? 'p-4' : 'pb-20 pt-10 px-10'}`} ref={contentRef}>
+      <div className={`flex-1 overflow-y-auto custom-scrollbar bg-industrial-900 relative ${isCompactView ? 'overflow-hidden' : ''}`} ref={scrollContainerRef}>
+        <div className={`relative min-h-full ${isCompactView ? 'p-4' : 'pb-20 pt-10 px-10'}`} ref={contentRef}>
             
             <div className="relative z-10">
                 {workshop.children && workshop.children[0].type === NodeType.ZONE ? (
-                     // EOL Compact Layout logic vs Standard Vertical Layout
-                     isEol ? (
-                         <div className="grid grid-cols-5 gap-3 max-w-full h-full">
+                     // COMPACT LAYOUT (EOL & ASSEMBLY DASHBOARD)
+                     isCompactView ? (
+                         <div className={`grid gap-3 max-w-full h-full ${isEol ? 'grid-cols-5' : 'grid-cols-12'}`}>
                             {workshop.children.map((zone) => {
-                                // Dynamic Span Calculation for EOL Dashboard
+                                // Dynamic Span Calculation
                                 let colSpan = 'col-span-1';
                                 let innerGrid = 'grid-cols-1';
                                 
-                                switch(zone.id) {
-                                    case 'zone-eol-cp7': colSpan = 'col-span-5'; innerGrid = 'grid-cols-6'; break;
-                                    case 'zone-eol-test-line': colSpan = 'col-span-3'; innerGrid = 'grid-cols-4'; break;
-                                    case 'zone-eol-dark': colSpan = 'col-span-2'; innerGrid = 'grid-cols-3'; break;
-                                    case 'zone-eol-shower': colSpan = 'col-span-2'; innerGrid = 'grid-cols-3'; break;
-                                    case 'zone-eol-cp89': colSpan = 'col-span-3'; innerGrid = 'grid-cols-3'; break;
-                                    default: colSpan = 'col-span-1'; innerGrid = 'grid-cols-1'; break;
+                                if (isAssembly) {
+                                    // Assembly Dashboard Logic (Stacked Full Width)
+                                    switch(zone.id) {
+                                        case 'zone-sub-assembly': colSpan = 'col-span-12'; innerGrid = 'grid-cols-9'; break; 
+                                        case 'zone-front-main': colSpan = 'col-span-12'; innerGrid = 'grid-cols-9'; break;
+                                        case 'zone-chassis-main': colSpan = 'col-span-12'; innerGrid = 'grid-cols-11'; break;
+                                        case 'zone-rear-main': colSpan = 'col-span-12'; innerGrid = 'grid-cols-5'; break;
+                                        case 'zone-battery-main': colSpan = 'col-span-12'; innerGrid = 'grid-cols-6'; break;
+                                        default: colSpan = 'col-span-12'; innerGrid = 'grid-cols-4'; break;
+                                    }
+                                } else {
+                                    // EOL Dashboard Logic
+                                    switch(zone.id) {
+                                        case 'zone-eol-cp7': colSpan = 'col-span-5'; innerGrid = 'grid-cols-6'; break;
+                                        case 'zone-eol-test-line': colSpan = 'col-span-3'; innerGrid = 'grid-cols-4'; break;
+                                        case 'zone-eol-dark': colSpan = 'col-span-2'; innerGrid = 'grid-cols-3'; break;
+                                        case 'zone-eol-shower': colSpan = 'col-span-2'; innerGrid = 'grid-cols-3'; break;
+                                        case 'zone-eol-cp89': colSpan = 'col-span-3'; innerGrid = 'grid-cols-3'; break;
+                                        default: colSpan = 'col-span-1'; innerGrid = 'grid-cols-1'; break;
+                                    }
                                 }
 
                                 return (
@@ -372,7 +396,7 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
                                         ref={(el) => { if(el) itemsRef.current.set(zone.id, el); else itemsRef.current.delete(zone.id); }}
                                         className={`relative bg-industrial-800 border border-industrial-700 rounded-lg p-3 ${colSpan}`}
                                     >
-                                        {/* Inline Zone Header for EOL */}
+                                        {/* Inline Zone Header */}
                                         <div className="flex items-center gap-2 mb-2 pb-1 border-b border-industrial-700/50">
                                             <Box size={14} className="text-neon-blue" />
                                             <span className="text-sm font-bold text-gray-200 tracking-wide">{zone.label}</span>
@@ -388,7 +412,7 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
                             })}
                          </div>
                      ) : (
-                         // Standard Layout (Vertical Stack)
+                         // STANDARD VERTICAL LAYOUT
                          <div className="flex flex-col gap-20 max-w-7xl mx-auto">
                             {workshop.children.map((zone) => (
                                 <div 
@@ -396,7 +420,7 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
                                     ref={(el) => { if(el) itemsRef.current.set(zone.id, el); else itemsRef.current.delete(zone.id); }}
                                     className={`
                                         relative bg-industrial-800 border-2 border-industrial-700 rounded-xl p-10 transition-all duration-300
-                                        ${zone.id === 'zone-sub-assembly' ? 'mt-12 border-neon-blue/20 bg-industrial-800' : ''}
+                                        ${zone.id === 'zone-sub-assembly' ? 'border-neon-blue/20 bg-industrial-800' : ''}
                                     `}
                                 >
                                     {/* Floating Zone Header */}
@@ -410,13 +434,11 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
                                     <div className={`mt-6 gap-6 ${
                                         zone.id === 'zone-front-main' 
                                         ? 'grid grid-cols-4 lg:grid-cols-8' 
-                                        : zone.id === 'zone-chassis-main' 
+                                        : zone.id === 'zone-chassis-main' || zone.id === 'zone-battery-main'
                                           ? 'grid grid-cols-6' 
-                                          : zone.id === 'zone-rear-main'
+                                          : zone.id === 'zone-rear-main' || zone.id === 'zone-sub-assembly'
                                             ? 'grid grid-cols-5' 
-                                            : zone.id === 'zone-battery-main'
-                                              ? 'grid grid-cols-6' 
-                                              : 'grid grid-cols-4 lg:grid-cols-6 xl:grid-cols-8'
+                                            : 'grid grid-cols-4 lg:grid-cols-6 xl:grid-cols-8'
                                     }`}>
                                         {zone.children?.map(station => renderStationCard(station, 0, false))}
                                     </div>

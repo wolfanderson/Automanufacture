@@ -209,6 +209,276 @@ export const MOCK_DATA: ProcessNode[] = [
     type: NodeType.WORKSHOP,
     status: NodeStatus.NORMAL, 
     children: [
+      // 0. 分装集成区 (Sub-Assembly) - Moved to TOP
+      {
+        id: 'zone-sub-assembly',
+        label: '分装集成区',
+        type: NodeType.ZONE,
+        status: NodeStatus.WARNING,
+        children: [
+          // MODIFIED: Powertrain Assembly to include DY002 and Main Ops as sub-modules
+          {
+            id: 'asm-powertrain',
+            label: '动总分装线', 
+            type: NodeType.STATION,
+            status: NodeStatus.NORMAL, // Changed to NORMAL since active child is normal
+            meta: { colSpan: 3, description: '动力总成综合分装' }, 
+            children: [
+                {
+                    id: 'dy002',
+                    label: '空气软管总成',
+                    type: NodeType.STATION, // Inner station
+                    status: NodeStatus.NORMAL,
+                    meta: { 
+                        description: 'DY002 空气软管分装',
+                        inspectionObject: '进气软管、涡轮增压管路、高压卡箍',
+                        inspectionMethod: '手机拍照'
+                    },
+                    children: [
+                         {
+                            id: 'insp-dy002-visual',
+                            label: '软管外观检测',
+                            type: NodeType.INSPECTION,
+                            status: NodeStatus.NORMAL,
+                            meta: {
+                                description: '人工使用手机拍照上传，AI辅助判定软管位置。',
+                                metrics: generateMockMetrics(20, 2)
+                            }
+                         }
+                    ]
+                },
+                {
+                    id: 'pt-main-ops',
+                    label: '发动机主线', 
+                    type: NodeType.STATION, // Inner station for legacy content
+                    status: NodeStatus.INACTIVE, // SET TO INACTIVE
+                    meta: { description: '发动机与变速箱集成' },
+                    children: [] // CLEARED CHILDREN
+                }
+            ]
+          },
+          {
+            id: 'asm-rear-drive',
+            label: '后驱分装线', 
+            type: NodeType.STATION,
+            status: NodeStatus.INACTIVE, // SET TO INACTIVE
+            meta: { colSpan: 1, description: '暂未投产' },
+            children: [] // CLEARED CHILDREN
+          },
+          {
+            id: 'asm-front-drive',
+            label: '前驱分装线', 
+            type: NodeType.STATION,
+            status: NodeStatus.INACTIVE, // SET TO INACTIVE
+            meta: { colSpan: 1, description: '暂未投产' },
+            children: [] // CLEARED CHILDREN
+          },
+          // MODIFIED: Rear Module Line to resemble Door Sub-assembly with FH006 grouping
+          {
+            id: 'asm-rear-module',
+            label: '后模块分装线', 
+            type: NodeType.STATION,
+            status: NodeStatus.NORMAL,
+            meta: { colSpan: 2, description: '后模块综合分装' },
+            children: [
+                {
+                    id: 'fh006-01',
+                    label: '前保分装', 
+                    type: NodeType.STATION, // Inner station
+                    status: NodeStatus.NORMAL,
+                    meta: { 
+                        description: 'FH006 前保险杠分装' 
+                    },
+                    children: [
+                        {
+                            id: 'insp-fh006-f-harness',
+                            label: '线束错漏装检测',
+                            type: NodeType.INSPECTION,
+                            status: NodeStatus.NORMAL,
+                            meta: {
+                                description: '前保线束接口、卡扣位置及型号正确性检测。',
+                                metrics: generateMockMetrics(20, 3)
+                            }
+                        }
+                    ]
+                },
+                {
+                    id: 'fh006-02',
+                    label: '后保分装', 
+                    type: NodeType.STATION, // Inner station
+                    status: NodeStatus.NORMAL,
+                    meta: { 
+                        description: 'FH006 后保险杠分装' 
+                    },
+                    children: [
+                        {
+                            id: 'insp-fh006-r-harness',
+                            label: '线束错漏装检测',
+                            type: NodeType.INSPECTION,
+                            status: NodeStatus.NORMAL,
+                            meta: {
+                                description: '后保线束走向及雷达传感器连接状态检测。',
+                                metrics: generateMockMetrics(20, 4)
+                            }
+                        }
+                    ]
+                }
+            ]
+          },
+          // New Group Structure: Chassis Pre-assembly -> DY007 (ColSpan 2)
+          {
+            id: 'asm-chassis-pre',
+            label: '底盘预装线', 
+            type: NodeType.STATION,
+            status: NodeStatus.NORMAL,
+            meta: { colSpan: 2, description: '底盘预装' }, // Width changed to 2
+            children: [
+                 {
+                    id: 'dy007',
+                    label: '底盘前/后模块',
+                    type: NodeType.STATION, // Inner station
+                    status: NodeStatus.NORMAL,
+                    meta: { 
+                        description: '底盘预装核心工位' 
+                    },
+                    children: [
+                        {
+                            id: 'insp-dy007-front',
+                            label: '前零件防错检测',
+                            type: NodeType.INSPECTION,
+                            status: NodeStatus.NORMAL,
+                            meta: {
+                                description: '底盘预装线-前部关键零部件防错识别。',
+                                metrics: generateMockMetrics(20, 2)
+                            }
+                        },
+                        {
+                            id: 'insp-dy007-rear',
+                            label: '后零件防错检测',
+                            type: NodeType.INSPECTION,
+                            status: NodeStatus.NORMAL,
+                            meta: {
+                                description: '底盘预装线-后部关键零部件防错识别。',
+                                metrics: generateMockMetrics(20, 2)
+                            }
+                        }
+                    ]
+                 }
+            ]
+          },
+          {
+            id: 'asm-heat-pump',
+            label: '热泵分装', 
+            type: NodeType.STATION,
+            status: NodeStatus.INACTIVE, // SET TO INACTIVE
+            meta: { colSpan: 1, description: '暂未投产' },
+            children: [] // CLEARED CHILDREN
+          },
+          {
+            id: 'asm-ip',
+            label: '仪表台分装', 
+            type: NodeType.STATION,
+            status: NodeStatus.INACTIVE, // SET TO INACTIVE
+            meta: { colSpan: 1, description: '暂未投产' },
+            children: [] // CLEARED CHILDREN
+          },
+          {
+            id: 'asm-windshield',
+            label: '风挡涂胶', 
+            type: NodeType.STATION,
+            status: NodeStatus.NORMAL,
+            meta: { colSpan: 1 },
+            children: [
+                {
+                    id: 'insp-wsg-primer',
+                    label: '玻璃底涂动作检测',
+                    type: NodeType.INSPECTION,
+                    status: NodeStatus.NORMAL,
+                    meta: {
+                        description: '机械臂自动进行玻璃底涂涂抹动作监控与轨迹分析。',
+                        metrics: generateMockMetrics(20, 2),
+                        imgUrl: 'https://images.unsplash.com/photo-1621905252507-b35492cc7471?auto=format&fit=crop&w=800&q=80'
+                    }
+                }
+            ]
+          },
+          {
+            id: 'asm-roof',
+            label: '天幕涂胶', 
+            type: NodeType.STATION,
+            status: NodeStatus.NORMAL,
+            meta: { colSpan: 1 },
+            children: [
+                {
+                    id: 'insp-prf-primer',
+                    label: '玻璃底涂动作检测',
+                    type: NodeType.INSPECTION,
+                    status: NodeStatus.NORMAL,
+                    meta: {
+                        description: '天幕玻璃底涂动作执行情况实时监控。',
+                        metrics: generateMockMetrics(20, 2),
+                        imgUrl: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=80'
+                    }
+                }
+            ]
+          },
+          // New Group Structure: Door Sub-assembly -> DR026, DR033 (ColSpan 2)
+          {
+            id: 'asm-door-sub',
+            label: '门分装线', 
+            type: NodeType.STATION,
+            status: NodeStatus.NORMAL,
+            meta: { colSpan: 2, description: '门分装' }, // Width changed to 2
+            children: [
+                {
+                    id: 'dr026',
+                    label: '裸车门', 
+                    type: NodeType.STATION, // Inner station
+                    status: NodeStatus.NORMAL,
+                    meta: { 
+                        description: '车门分装检测点A',
+                        inspectionMethod: '机械臂拍照检测'
+                    },
+                    children: [
+                        {
+                            id: 'insp-dr026-main',
+                            label: '车门分装检测',
+                            type: NodeType.INSPECTION,
+                            status: NodeStatus.NORMAL,
+                            meta: {
+                                description: '车门内部附件安装完整性检查。',
+                                metrics: generateMockMetrics(20, 3)
+                            }
+                        }
+                    ]
+                },
+                {
+                    id: 'dr033',
+                    label: '饰板车门', 
+                    type: NodeType.STATION, // Inner station
+                    status: NodeStatus.NORMAL,
+                    meta: { 
+                        description: '车门分装检测点B' ,
+                        inspectionMethod: '机械臂拍照检测'
+                    },
+                    children: [
+                        {
+                            id: 'insp-dr033-main',
+                            label: '车门饰板检测',
+                            type: NodeType.INSPECTION,
+                            status: NodeStatus.NORMAL,
+                            meta: {
+                                description: '车门内饰板安装间隙与平整度检测。',
+                                metrics: generateMockMetrics(20, 4)
+                            }
+                        }
+                    ]
+                }
+            ]
+          }
+        ]
+      },
+
       // 1. 前装主线 (Front Assembly): Z001 - Z078
       {
         id: 'zone-front-main',
@@ -676,276 +946,6 @@ export const MOCK_DATA: ProcessNode[] = [
             },
         ]
       },
-
-      // 5. 分装集成区 (Sub-Assembly)
-      {
-        id: 'zone-sub-assembly',
-        label: '分装集成区',
-        type: NodeType.ZONE,
-        status: NodeStatus.WARNING,
-        children: [
-          // MODIFIED: Powertrain Assembly to include DY002 and Main Ops as sub-modules
-          {
-            id: 'asm-powertrain',
-            label: '动总分装线', 
-            type: NodeType.STATION,
-            status: NodeStatus.NORMAL, // Changed to NORMAL since active child is normal
-            meta: { colSpan: 3, description: '动力总成综合分装' }, 
-            children: [
-                {
-                    id: 'dy002',
-                    label: '空气软管总成',
-                    type: NodeType.STATION, // Inner station
-                    status: NodeStatus.NORMAL,
-                    meta: { 
-                        description: 'DY002 空气软管分装',
-                        inspectionObject: '进气软管、涡轮增压管路、高压卡箍',
-                        inspectionMethod: '手机拍照'
-                    },
-                    children: [
-                         {
-                            id: 'insp-dy002-visual',
-                            label: '软管外观检测',
-                            type: NodeType.INSPECTION,
-                            status: NodeStatus.NORMAL,
-                            meta: {
-                                description: '人工使用手机拍照上传，AI辅助判定软管位置。',
-                                metrics: generateMockMetrics(20, 2)
-                            }
-                         }
-                    ]
-                },
-                {
-                    id: 'pt-main-ops',
-                    label: '发动机主线', 
-                    type: NodeType.STATION, // Inner station for legacy content
-                    status: NodeStatus.INACTIVE, // SET TO INACTIVE
-                    meta: { description: '发动机与变速箱集成' },
-                    children: [] // CLEARED CHILDREN
-                }
-            ]
-          },
-          {
-            id: 'asm-rear-drive',
-            label: '后驱分装线', 
-            type: NodeType.STATION,
-            status: NodeStatus.INACTIVE, // SET TO INACTIVE
-            meta: { colSpan: 1, description: '暂未投产' },
-            children: [] // CLEARED CHILDREN
-          },
-          {
-            id: 'asm-front-drive',
-            label: '前驱分装线', 
-            type: NodeType.STATION,
-            status: NodeStatus.INACTIVE, // SET TO INACTIVE
-            meta: { colSpan: 1, description: '暂未投产' },
-            children: [] // CLEARED CHILDREN
-          },
-          // MODIFIED: Rear Module Line to resemble Door Sub-assembly with FH006 grouping
-          {
-            id: 'asm-rear-module',
-            label: '后模块分装线', 
-            type: NodeType.STATION,
-            status: NodeStatus.NORMAL,
-            meta: { colSpan: 2, description: '后模块综合分装' },
-            children: [
-                {
-                    id: 'fh006-01',
-                    label: '前保分装', 
-                    type: NodeType.STATION, // Inner station
-                    status: NodeStatus.NORMAL,
-                    meta: { 
-                        description: 'FH006 前保险杠分装' 
-                    },
-                    children: [
-                        {
-                            id: 'insp-fh006-f-harness',
-                            label: '线束错漏装检测',
-                            type: NodeType.INSPECTION,
-                            status: NodeStatus.NORMAL,
-                            meta: {
-                                description: '前保线束接口、卡扣位置及型号正确性检测。',
-                                metrics: generateMockMetrics(20, 3)
-                            }
-                        }
-                    ]
-                },
-                {
-                    id: 'fh006-02',
-                    label: '后保分装', 
-                    type: NodeType.STATION, // Inner station
-                    status: NodeStatus.NORMAL,
-                    meta: { 
-                        description: 'FH006 后保险杠分装' 
-                    },
-                    children: [
-                        {
-                            id: 'insp-fh006-r-harness',
-                            label: '线束错漏装检测',
-                            type: NodeType.INSPECTION,
-                            status: NodeStatus.NORMAL,
-                            meta: {
-                                description: '后保线束走向及雷达传感器连接状态检测。',
-                                metrics: generateMockMetrics(20, 4)
-                            }
-                        }
-                    ]
-                }
-            ]
-          },
-          // New Group Structure: Chassis Pre-assembly -> DY007 (ColSpan 2)
-          {
-            id: 'asm-chassis-pre',
-            label: '底盘预装线', 
-            type: NodeType.STATION,
-            status: NodeStatus.NORMAL,
-            meta: { colSpan: 2, description: '底盘预装' }, // Width changed to 2
-            children: [
-                 {
-                    id: 'dy007',
-                    label: '底盘前/后模块',
-                    type: NodeType.STATION, // Inner station
-                    status: NodeStatus.NORMAL,
-                    meta: { 
-                        description: '底盘预装核心工位' 
-                    },
-                    children: [
-                        {
-                            id: 'insp-dy007-front',
-                            label: '前零件防错检测',
-                            type: NodeType.INSPECTION,
-                            status: NodeStatus.NORMAL,
-                            meta: {
-                                description: '底盘预装线-前部关键零部件防错识别。',
-                                metrics: generateMockMetrics(20, 2)
-                            }
-                        },
-                        {
-                            id: 'insp-dy007-rear',
-                            label: '后零件防错检测',
-                            type: NodeType.INSPECTION,
-                            status: NodeStatus.NORMAL,
-                            meta: {
-                                description: '底盘预装线-后部关键零部件防错识别。',
-                                metrics: generateMockMetrics(20, 2)
-                            }
-                        }
-                    ]
-                 }
-            ]
-          },
-          {
-            id: 'asm-heat-pump',
-            label: '热泵分装', 
-            type: NodeType.STATION,
-            status: NodeStatus.INACTIVE, // SET TO INACTIVE
-            meta: { colSpan: 1, description: '暂未投产' },
-            children: [] // CLEARED CHILDREN
-          },
-          {
-            id: 'asm-ip',
-            label: '仪表台分装', 
-            type: NodeType.STATION,
-            status: NodeStatus.INACTIVE, // SET TO INACTIVE
-            meta: { colSpan: 1, description: '暂未投产' },
-            children: [] // CLEARED CHILDREN
-          },
-          {
-            id: 'asm-windshield',
-            label: '风挡涂胶', 
-            type: NodeType.STATION,
-            status: NodeStatus.NORMAL,
-            meta: { colSpan: 1 },
-            children: [
-                {
-                    id: 'insp-wsg-primer',
-                    label: '玻璃底涂动作检测',
-                    type: NodeType.INSPECTION,
-                    status: NodeStatus.NORMAL,
-                    meta: {
-                        description: '机械臂自动进行玻璃底涂涂抹动作监控与轨迹分析。',
-                        metrics: generateMockMetrics(20, 2),
-                        imgUrl: 'https://images.unsplash.com/photo-1621905252507-b35492cc7471?auto=format&fit=crop&w=800&q=80'
-                    }
-                }
-            ]
-          },
-          {
-            id: 'asm-roof',
-            label: '天幕涂胶', 
-            type: NodeType.STATION,
-            status: NodeStatus.NORMAL,
-            meta: { colSpan: 1 },
-            children: [
-                {
-                    id: 'insp-prf-primer',
-                    label: '玻璃底涂动作检测',
-                    type: NodeType.INSPECTION,
-                    status: NodeStatus.NORMAL,
-                    meta: {
-                        description: '天幕玻璃底涂动作执行情况实时监控。',
-                        metrics: generateMockMetrics(20, 2),
-                        imgUrl: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=80'
-                    }
-                }
-            ]
-          },
-          // New Group Structure: Door Sub-assembly -> DR026, DR033 (ColSpan 2)
-          {
-            id: 'asm-door-sub',
-            label: '门分装线', 
-            type: NodeType.STATION,
-            status: NodeStatus.NORMAL,
-            meta: { colSpan: 2, description: '门分装' }, // Width changed to 2
-            children: [
-                {
-                    id: 'dr026',
-                    label: '裸车门', 
-                    type: NodeType.STATION, // Inner station
-                    status: NodeStatus.NORMAL,
-                    meta: { 
-                        description: '车门分装检测点A',
-                        inspectionMethod: '机械臂拍照检测'
-                    },
-                    children: [
-                        {
-                            id: 'insp-dr026-main',
-                            label: '车门分装检测',
-                            type: NodeType.INSPECTION,
-                            status: NodeStatus.NORMAL,
-                            meta: {
-                                description: '车门内部附件安装完整性检查。',
-                                metrics: generateMockMetrics(20, 3)
-                            }
-                        }
-                    ]
-                },
-                {
-                    id: 'dr033',
-                    label: '饰板车门', 
-                    type: NodeType.STATION, // Inner station
-                    status: NodeStatus.NORMAL,
-                    meta: { 
-                        description: '车门分装检测点B' ,
-                        inspectionMethod: '机械臂拍照检测'
-                    },
-                    children: [
-                        {
-                            id: 'insp-dr033-main',
-                            label: '车门饰板检测',
-                            type: NodeType.INSPECTION,
-                            status: NodeStatus.NORMAL,
-                            meta: {
-                                description: '车门内饰板安装间隙与平整度检测。',
-                                metrics: generateMockMetrics(20, 4)
-                            }
-                        }
-                    ]
-                }
-            ]
-          }
-        ]
-      }
     ]
   },
   {
