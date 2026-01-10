@@ -80,11 +80,6 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
 
         // LOGIC FOR EOL/ASSEMBLY GRID CONNECTIONS
         if (isCompactView) {
-             const startX = Math.round(currRect.right - containerRect.left);
-             const startY = Math.round(currRect.top + currRect.height / 2 - containerRect.top);
-             const endX = Math.round(nextRect.left - containerRect.left);
-             const endY = Math.round(nextRect.top + nextRect.height / 2 - containerRect.top);
-
              // For vertical stacking in compact view (Assembly), draw simple center-to-center lines
              if (isAssembly) {
                  const centerX = Math.round(currRect.left + currRect.width / 2 - containerRect.left);
@@ -251,7 +246,7 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
                      if(el) itemsRef.current.set(station.id, el);
                      else itemsRef.current.delete(station.id);
                 }}
-                className={`${spanClass} ${compactMode ? 'h-[110px]' : 'h-[130px]'} flex flex-col gap-1 p-2 rounded-lg border-2 border-dashed border-industrial-600 bg-industrial-800/20`}
+                className={`${spanClass} ${compactMode ? (isEol ? 'h-[90px]' : 'h-[110px]') : 'h-[130px]'} flex flex-col gap-1 p-2 rounded-lg border-2 border-dashed border-industrial-600 bg-industrial-800/20`}
             >
                 <div className="flex items-center gap-2 mb-0.5 pl-1 h-5 flex-shrink-0">
                     <Box size={12} className="text-gray-400" />
@@ -270,7 +265,8 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
     const isPlaceholder = station.meta?.isPlaceholder;
 
     // Compact Mode Adjustments for EOL/Assembly View
-    const cardHeight = compactMode ? 'h-[80px]' : 'h-[130px]';
+    // EOL cards are shorter (h-[64px]) to allow for larger vertical gaps
+    const cardHeight = compactMode ? (isEol ? 'h-[64px]' : 'h-[80px]') : 'h-[130px]';
     const cardPadding = compactMode ? 'p-2' : (isSubItem ? 'p-2' : 'p-4');
     const headerMb = compactMode ? 'mb-1' : (isSubItem ? 'mb-1' : 'mb-2');
     const labelSize = compactMode ? 'text-sm leading-snug font-bold line-clamp-2' : (isSubItem 
@@ -393,7 +389,7 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
                 {workshop.children && workshop.children[0].type === NodeType.ZONE ? (
                      // COMPACT LAYOUT (EOL & ASSEMBLY DASHBOARD)
                      isCompactView ? (
-                         <div className={`grid gap-3 max-w-full h-full ${isEol ? 'grid-cols-5' : 'grid-cols-12'}`}>
+                         <div className={`grid max-w-full h-full ${isEol ? 'grid-cols-5 gap-x-4 gap-y-20 py-8' : 'grid-cols-12 gap-3'}`}>
                             {workshop.children.map((zone) => {
                                 // Dynamic Span Calculation
                                 let colSpan = 'col-span-1';
@@ -425,7 +421,7 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
                                     <div 
                                         key={zone.id}
                                         ref={(el) => { if(el) itemsRef.current.set(zone.id, el); else itemsRef.current.delete(zone.id); }}
-                                        className={`relative bg-industrial-800 border border-industrial-700 rounded-lg p-3 ${colSpan}`}
+                                        className={`relative bg-industrial-800 border border-industrial-700 rounded-lg ${isEol ? 'p-2' : 'p-3'} ${colSpan}`}
                                     >
                                         {/* Inline Zone Header */}
                                         <div className="flex items-center gap-2 mb-2 pb-1 border-b border-industrial-700/50">
