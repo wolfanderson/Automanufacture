@@ -107,8 +107,18 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
                  const isNextRight = nextRect.left > currRect.right - 20; // Tolerance for same row
 
                  if (isNextBelow) {
-                     // Connect Bottom of Curr to Top of Next (Stepped Path)
-                     const startX = centerX_Curr;
+                     // Smart Alignment: If items overlap horizontally, drop straight down from the matching X
+                     // This fixes the dogleg between CP7 (wide) and Test Line (narrower, below left)
+                     const minX = Math.round(currRect.left - containerRect.left);
+                     const maxX = Math.round(currRect.right - containerRect.left);
+                     
+                     let startX = centerX_Curr;
+                     
+                     // If destination center is within source bounds, align start X to destination center
+                     if (centerX_Next >= minX && centerX_Next <= maxX) {
+                        startX = centerX_Next;
+                     }
+
                      const startY = Math.round(currRect.bottom - containerRect.top);
                      const endX = centerX_Next;
                      const endY = Math.round(nextRect.top - containerRect.top);
