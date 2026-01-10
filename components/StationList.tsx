@@ -99,8 +99,39 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
                           variant: 'default' 
                       });
                  }
+             } 
+             // Logic for EOL grid flow
+             else {
+                 const centerX_Curr = Math.round(currRect.left + currRect.width / 2 - containerRect.left);
+                 const centerY_Curr = Math.round(currRect.top + currRect.height / 2 - containerRect.top);
+                 
+                 const centerX_Next = Math.round(nextRect.left + nextRect.width / 2 - containerRect.left);
+                 const centerY_Next = Math.round(nextRect.top + nextRect.height / 2 - containerRect.top);
+
+                 const isNextBelow = nextRect.top > currRect.bottom - 20; // Tolerance for next row
+                 const isNextRight = nextRect.left > currRect.right - 20; // Tolerance for same row
+
+                 if (isNextBelow) {
+                     // Connect Bottom of Curr to Top of Next (Stepped Path)
+                     const startX = centerX_Curr;
+                     const startY = Math.round(currRect.bottom - containerRect.top);
+                     const endX = centerX_Next;
+                     const endY = Math.round(nextRect.top - containerRect.top);
+                     
+                     const midY = (startY + endY) / 2;
+                     const path = `M ${startX} ${startY} L ${startX} ${midY} L ${endX} ${midY} L ${endX} ${endY}`;
+                     
+                     newPaths.push({ d: path, type: 'complex', variant: 'default' });
+                 } else if (isNextRight) {
+                     // Connect Right of Curr to Left of Next (Straight Path)
+                     const startX = Math.round(currRect.right - containerRect.left);
+                     const startY = centerY_Curr;
+                     const endX = Math.round(nextRect.left - containerRect.left);
+                     const endY = centerY_Next;
+                     
+                     newPaths.push({ d: `M ${startX} ${startY} L ${endX} ${endY}`, type: 'straight', variant: 'default' });
+                 }
              }
-             // Logic for EOL grid wrapping if needed (currently minimal connections)
         } 
         // LOGIC FOR STANDARD VERTICAL ZONES (Stamping/Welding/Painting if they used Zones)
         else if (children[i].type === NodeType.ZONE) {
