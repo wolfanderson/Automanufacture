@@ -967,7 +967,7 @@ export const MOCK_DATA: ProcessNode[] = [
         children: [
              {
                 id: 'st-eol-intensive',
-                label: '特殊路面测试',
+                label: '强化路试',
                 type: NodeType.STATION,
                 status: NodeStatus.WARNING,
                 meta: { description: '扭曲路、比利时路、搓板路震动测试' },
@@ -986,7 +986,7 @@ export const MOCK_DATA: ProcessNode[] = [
         children: [
             {
                 id: 'st-eol-ort',
-                label: 'ORT 抽检循环',
+                label: 'ORT 测试',
                 type: NodeType.STATION,
                 status: NodeStatus.NORMAL,
                 meta: { description: '持续可靠性与耐久性抽样检测' },
@@ -1005,12 +1005,12 @@ export const MOCK_DATA: ProcessNode[] = [
         children: [
             {
                 id: 'st-eol-aging',
-                label: '高压老化与静态检查',
+                label: '老化测试/人工检',
                 type: NodeType.STATION,
                 status: NodeStatus.NORMAL,
-                meta: { description: '整车高压系统老化及人工静态外观检查' },
+                meta: { description: '整车电气系统老化及人工点检' },
                 children: [
-                     { id: 'insp-battery', label: '电池放电测试', type: NodeType.INSPECTION, status: NodeStatus.NORMAL, meta: { metrics: generateMockMetrics(20, 3) } }
+                     { id: 'insp-battery', label: '老化测试', type: NodeType.INSPECTION, status: NodeStatus.NORMAL, meta: { metrics: generateMockMetrics(20, 3) } }
                 ]
             }
         ]
@@ -1024,7 +1024,7 @@ export const MOCK_DATA: ProcessNode[] = [
         children: [
              {
                 id: 'st-eol-dyn',
-                label: '综合道路测试',
+                label: '动态路试',
                 type: NodeType.STATION,
                 status: NodeStatus.NORMAL,
                 meta: { description: '厂区跑道异响（NVH）与动态性能评估' },
@@ -1043,7 +1043,7 @@ export const MOCK_DATA: ProcessNode[] = [
         children: [
             {
                 id: 'st-eol-pit',
-                label: '底盘目视检查',
+                label: '地沟检测',
                 type: NodeType.STATION,
                 status: NodeStatus.NORMAL,
                 meta: { description: '底部管路、螺栓、防腐涂层检查' },
@@ -1072,7 +1072,7 @@ export const MOCK_DATA: ProcessNode[] = [
         type: NodeType.ZONE,
         status: NodeStatus.NORMAL,
         children: [
-             { id: 'eol-show-ambient', label: '淋雨检测（氛围灯检测）', type: NodeType.STATION, status: NodeStatus.NORMAL, meta: { inspectionObject: '全车氛围灯颜色/亮度', inspectionMethod: '暗室视觉检测' }, children: [] },
+             { id: 'eol-show-ambient', label: '淋雨检测 （氛围灯检测）', type: NodeType.STATION, status: NodeStatus.NORMAL, meta: { inspectionObject: '全车氛围灯颜色/亮度', inspectionMethod: '暗室视觉检测' }, children: [] },
              { id: 'eol-show-iso', label: '绝缘检测（安规）', type: NodeType.STATION, status: NodeStatus.NORMAL, meta: { inspectionObject: '高压系统绝缘阻值', inspectionMethod: '安规测试仪' }, children: [] },
              { id: 'eol-show-rain', label: '淋雨检验', type: NodeType.STATION, status: NodeStatus.NORMAL, meta: { inspectionObject: '天窗、车门、涉水密封性', inspectionMethod: '高压喷淋' }, children: [] },
         ]
