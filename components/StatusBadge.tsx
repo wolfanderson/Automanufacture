@@ -31,15 +31,16 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, size = 'md', p
       break;
   }
 
-  const sizeClass = size === 'sm' ? 'px-2 py-0.5 text-xs' : 'px-3 py-1 text-sm';
+  // Increased font sizes: text-xs -> text-sm, text-sm -> text-base
+  const sizeClass = size === 'sm' ? 'px-2.5 py-1 text-sm' : 'px-4 py-1.5 text-base';
 
   return (
-    <div className={`inline-flex items-center gap-2 rounded-full border ${colorClass} ${sizeClass} font-mono tracking-wider`}>
-      <span className={`relative flex h-2 w-2`}>
+    <div className={`inline-flex items-center gap-2 rounded-full border ${colorClass} ${sizeClass} font-mono tracking-wider font-medium`}>
+      <span className={`relative flex h-2.5 w-2.5`}>
         {pulsing && status !== NodeStatus.INACTIVE && (
           <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${dotClass}`}></span>
         )}
-        <span className={`relative inline-flex rounded-full h-2 w-2 ${dotClass}`}></span>
+        <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${dotClass}`}></span>
       </span>
       {status}
     </div>

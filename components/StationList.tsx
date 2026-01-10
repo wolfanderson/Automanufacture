@@ -259,8 +259,8 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
                 className={`${spanClass} ${compactMode ? (isEol ? 'h-[90px]' : 'h-[110px]') : 'h-[130px]'} flex flex-col gap-1 p-2 rounded-lg border-2 border-dashed border-industrial-600 bg-industrial-800/20`}
             >
                 <div className="flex items-center gap-2 mb-0.5 pl-1 h-5 flex-shrink-0">
-                    <Box size={12} className="text-gray-400" />
-                    <span className="text-xs font-bold text-gray-400 uppercase tracking-wider truncate">{station.label}</span>
+                    <Box size={14} className="text-gray-400" />
+                    <span className="text-sm font-bold text-gray-400 uppercase tracking-wider truncate">{station.label}</span>
                 </div>
                 <div className="flex flex-row gap-2 flex-1 w-full h-full min-h-0">
                     {subStations!.map((sub, i) => renderStationCard(sub, i, true, compactMode))}
@@ -279,9 +279,11 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
     const cardHeight = compactMode ? (isEol ? 'h-[64px]' : 'h-[80px]') : 'h-[130px]';
     const cardPadding = compactMode ? 'p-2' : (isSubItem ? 'p-2' : 'p-4');
     const headerMb = compactMode ? 'mb-1' : (isSubItem ? 'mb-1' : 'mb-2');
-    const labelSize = compactMode ? 'text-sm leading-snug font-bold line-clamp-2' : (isSubItem 
-        ? 'text-sm font-bold line-clamp-2 leading-tight' 
-        : (colSpan > 1 ? 'text-xl' : 'text-sm font-bold leading-snug line-clamp-3 break-words'));
+    
+    // Increased Font Sizes for Label
+    const labelSize = compactMode ? 'text-base leading-tight font-bold line-clamp-2' : (isSubItem 
+        ? 'text-base font-bold line-clamp-2 leading-tight' 
+        : (colSpan > 1 ? 'text-3xl' : 'text-lg font-bold leading-snug line-clamp-3 break-words'));
 
     // Special Rendering for Placeholder
     if (isPlaceholder) {
@@ -291,8 +293,8 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
                 ref={(el) => { if(el) itemsRef.current.set(station.id, el); else itemsRef.current.delete(station.id); }}
                 className={`${spanClass} ${cardHeight} w-full flex flex-col items-center justify-center border-2 border-transparent rounded text-gray-400 select-none px-2`}
             >
-                <MoreHorizontal size={24} className="opacity-50 mb-1" />
-                <span className="text-xs font-mono font-bold text-center w-full break-words leading-tight opacity-90">{station.label}</span>
+                <MoreHorizontal size={28} className="opacity-50 mb-1" />
+                <span className="text-sm font-mono font-bold text-center w-full break-words leading-tight opacity-90">{station.label}</span>
             </div>
         );
     }
@@ -333,10 +335,11 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
         >
             {/* Header */}
             <div className={`flex justify-between items-start w-full ${headerMb}`}>
-                <span className={`${compactMode ? 'text-[10px]' : (isSubItem ? 'text-[10px]' : 'text-xs')} font-mono tracking-wider uppercase truncate max-w-[80%] font-semibold ${isSelected ? 'text-neon-blue' : 'text-gray-400'}`}>
+                {/* Increased Font Size for ID */}
+                <span className={`${compactMode ? 'text-xs' : (isSubItem ? 'text-xs' : 'text-sm')} font-mono tracking-wider uppercase truncate max-w-[80%] font-semibold ${isSelected ? 'text-neon-blue' : 'text-gray-400'}`}>
                     {station.id.replace('asm-', '').replace('front-','').replace('chassis-', '').replace('rear-', '').replace('door-sub-', '').replace('batt-', '').replace('st-eol-', '').replace('eol-', '').toUpperCase()}
                 </span>
-                <div className={`${compactMode ? 'h-2 w-2' : (isSubItem ? 'h-2 w-2' : 'h-2.5 w-2.5')} rounded-full ${statusColor} shadow-sm flex-shrink-0`}></div>
+                <div className={`${compactMode ? 'h-2.5 w-2.5' : (isSubItem ? 'h-2.5 w-2.5' : 'h-3 w-3')} rounded-full ${statusColor} shadow-sm flex-shrink-0`}></div>
             </div>
 
             {/* Label */}
@@ -347,7 +350,7 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
             </div>
 
             {/* Footer/Progress */}
-            <div className="w-full h-[3px] bg-industrial-900 rounded-full overflow-hidden mt-auto border border-industrial-700/50">
+            <div className="w-full h-[4px] bg-industrial-900 rounded-full overflow-hidden mt-auto border border-industrial-700/50">
                 <div className={`h-full ${statusColor} w-full opacity-90`}></div>
             </div>
         </button>
@@ -356,7 +359,7 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
 
   if (!workshop) {
     return (
-      <div className="h-full flex items-center justify-center text-gray-400 font-mono text-base bg-industrial-900">
+      <div className="h-full flex items-center justify-center text-gray-400 font-mono text-xl bg-industrial-900">
         请选择车间
       </div>
     );
@@ -374,19 +377,19 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
       {/* Header */}
       <div className="p-5 border-b border-industrial-700 bg-industrial-800 z-30 flex items-center justify-between shadow-lg relative h-20 flex-shrink-0">
         <div>
-           <h2 className="text-xl font-bold text-white flex items-center gap-2 tracking-tight">
+           <h2 className="text-2xl font-bold text-white flex items-center gap-3 tracking-tight">
              <span className="text-neon-blue mr-1">#</span>
              {workshop.label}
            </h2>
         </div>
         <div className="flex gap-4">
-             <div className="flex items-center gap-2 px-4 py-1.5 bg-neon-green/10 rounded border border-neon-green/30">
-                <span className="w-2.5 h-2.5 rounded-full bg-neon-green animate-pulse"></span>
-                <span className="text-base font-bold text-neon-green font-mono">{stats.normal} 正常</span>
+             <div className="flex items-center gap-2 px-5 py-2 bg-neon-green/10 rounded border border-neon-green/30">
+                <span className="w-3 h-3 rounded-full bg-neon-green animate-pulse"></span>
+                <span className="text-lg font-bold text-neon-green font-mono">{stats.normal} 正常</span>
             </div>
-             <div className="flex items-center gap-2 px-4 py-1.5 bg-neon-red/10 rounded border border-neon-red/30">
-                <span className="w-2.5 h-2.5 rounded-full bg-neon-red animate-pulse"></span>
-                <span className="text-base font-bold text-neon-red font-mono">{stats.critical} 告警</span>
+             <div className="flex items-center gap-2 px-5 py-2 bg-neon-red/10 rounded border border-neon-red/30">
+                <span className="w-3 h-3 rounded-full bg-neon-red animate-pulse"></span>
+                <span className="text-lg font-bold text-neon-red font-mono">{stats.critical} 告警</span>
             </div>
         </div>
       </div>
@@ -435,10 +438,11 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
                                     >
                                         {/* Inline Zone Header */}
                                         <div className="flex items-center gap-2 mb-2 pb-1 border-b border-industrial-700/50">
-                                            <Box size={14} className="text-neon-blue" />
-                                            <span className="text-sm font-bold text-gray-200 tracking-wide">{zone.label}</span>
-                                            {zone.status === NodeStatus.WARNING && <AlertCircle size={14} className="text-neon-yellow" />}
-                                            {zone.status === NodeStatus.CRITICAL && <AlertCircle size={14} className="text-neon-red animate-pulse" />}
+                                            <Box size={16} className="text-neon-blue" />
+                                            {/* Increased Zone Label Font Size */}
+                                            <span className="text-base font-bold text-gray-200 tracking-wide">{zone.label}</span>
+                                            {zone.status === NodeStatus.WARNING && <AlertCircle size={16} className="text-neon-yellow" />}
+                                            {zone.status === NodeStatus.CRITICAL && <AlertCircle size={16} className="text-neon-red animate-pulse" />}
                                         </div>
                                         {/* Inner Grid */}
                                         <div className={`grid gap-2 ${innerGrid}`}>
@@ -462,9 +466,10 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
                                 >
                                     {/* Floating Zone Header */}
                                     <div className="absolute -top-6 left-8 bg-industrial-900 border-2 border-industrial-600 px-8 py-2 rounded-full flex items-center gap-3 shadow-lg z-20">
-                                        <Box size={20} className="text-neon-blue" />
-                                        <span className="text-xl font-bold text-white tracking-wide">{zone.label}</span>
-                                        {zone.status === NodeStatus.CRITICAL && <AlertCircle size={20} className="text-neon-red animate-pulse" />}
+                                        <Box size={24} className="text-neon-blue" />
+                                        {/* Increased Font Size */}
+                                        <span className="text-2xl font-bold text-white tracking-wide">{zone.label}</span>
+                                        {zone.status === NodeStatus.CRITICAL && <AlertCircle size={24} className="text-neon-red animate-pulse" />}
                                     </div>
                                     
                                     {/* Zone Children Grid */}
