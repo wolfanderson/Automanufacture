@@ -220,7 +220,7 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
                      if(el) itemsRef.current.set(station.id, el);
                      else itemsRef.current.delete(station.id);
                 }}
-                className={`${spanClass} h-[130px] flex flex-col gap-1 p-2 rounded-lg border-2 border-dashed border-industrial-600 bg-industrial-800/20`}
+                className={`${spanClass} ${compactMode ? 'h-[110px]' : 'h-[130px]'} flex flex-col gap-1 p-2 rounded-lg border-2 border-dashed border-industrial-600 bg-industrial-800/20`}
             >
                 <div className="flex items-center gap-2 mb-0.5 pl-1 h-5 flex-shrink-0">
                     <Box size={12} className="text-gray-400" />
@@ -239,7 +239,7 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
     const isPlaceholder = station.meta?.isPlaceholder;
 
     // Compact Mode Adjustments for EOL/Assembly View
-    const cardHeight = compactMode ? 'h-[90px]' : 'h-[130px]';
+    const cardHeight = compactMode ? 'h-[80px]' : 'h-[130px]';
     const cardPadding = compactMode ? 'p-2' : (isSubItem ? 'p-2' : 'p-4');
     const headerMb = compactMode ? 'mb-1' : (isSubItem ? 'mb-1' : 'mb-2');
     const labelSize = compactMode ? 'text-sm leading-snug font-bold line-clamp-2' : (isSubItem 
@@ -371,8 +371,8 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
                                 if (isAssembly) {
                                     // Assembly Dashboard Logic (Stacked Full Width)
                                     switch(zone.id) {
-                                        case 'zone-sub-assembly': colSpan = 'col-span-12'; innerGrid = 'grid-cols-9'; break; 
-                                        case 'zone-front-main': colSpan = 'col-span-12'; innerGrid = 'grid-cols-9'; break;
+                                        case 'zone-sub-assembly': colSpan = 'col-span-12'; innerGrid = 'grid-cols-10'; break; 
+                                        case 'zone-front-main': colSpan = 'col-span-12'; innerGrid = 'grid-cols-12'; break;
                                         case 'zone-chassis-main': colSpan = 'col-span-12'; innerGrid = 'grid-cols-11'; break;
                                         case 'zone-rear-main': colSpan = 'col-span-12'; innerGrid = 'grid-cols-5'; break;
                                         case 'zone-battery-main': colSpan = 'col-span-12'; innerGrid = 'grid-cols-6'; break;

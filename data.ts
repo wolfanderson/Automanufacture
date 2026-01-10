@@ -209,29 +209,29 @@ export const MOCK_DATA: ProcessNode[] = [
     type: NodeType.WORKSHOP,
     status: NodeStatus.NORMAL, 
     children: [
-      // 0. 分装集成区 (Sub-Assembly) - Moved to TOP
+      // 0. 分装集成区 (Sub-Assembly) - Cleaned up and flattened to 10 cols
       {
         id: 'zone-sub-assembly',
         label: '分装集成区',
         type: NodeType.ZONE,
-        status: NodeStatus.WARNING,
+        status: NodeStatus.NORMAL, // Changed to NORMAL as inactive items are removed
         children: [
-          // MODIFIED: Powertrain Assembly to include DY002 and Main Ops as sub-modules
+          // 1. Powertrain (Col 2)
           {
             id: 'asm-powertrain',
             label: '动总分装线', 
             type: NodeType.STATION,
-            status: NodeStatus.NORMAL, // Changed to NORMAL since active child is normal
-            meta: { colSpan: 3, description: '动力总成综合分装' }, 
+            status: NodeStatus.NORMAL, 
+            meta: { colSpan: 2, description: '动力总成综合分装' },
             children: [
                 {
                     id: 'dy002',
-                    label: '空气软管总成',
-                    type: NodeType.STATION, // Inner station
+                    label: '空簧&螺簧分装',
+                    type: NodeType.STATION,
                     status: NodeStatus.NORMAL,
                     meta: { 
-                        description: 'DY002 空气软管分装',
-                        inspectionObject: '进气软管、涡轮增压管路、高压卡箍',
+                        description: 'DY002 空簧螺簧分装',
+                        inspectionObject: '进气软管',
                         inspectionMethod: '手机拍照'
                     },
                     children: [
@@ -246,34 +246,10 @@ export const MOCK_DATA: ProcessNode[] = [
                             }
                          }
                     ]
-                },
-                {
-                    id: 'pt-main-ops',
-                    label: '发动机主线', 
-                    type: NodeType.STATION, // Inner station for legacy content
-                    status: NodeStatus.INACTIVE, // SET TO INACTIVE
-                    meta: { description: '发动机与变速箱集成' },
-                    children: [] // CLEARED CHILDREN
                 }
             ]
           },
-          {
-            id: 'asm-rear-drive',
-            label: '后驱分装线', 
-            type: NodeType.STATION,
-            status: NodeStatus.INACTIVE, // SET TO INACTIVE
-            meta: { colSpan: 1, description: '暂未投产' },
-            children: [] // CLEARED CHILDREN
-          },
-          {
-            id: 'asm-front-drive',
-            label: '前驱分装线', 
-            type: NodeType.STATION,
-            status: NodeStatus.INACTIVE, // SET TO INACTIVE
-            meta: { colSpan: 1, description: '暂未投产' },
-            children: [] // CLEARED CHILDREN
-          },
-          // MODIFIED: Rear Module Line to resemble Door Sub-assembly with FH006 grouping
+          // 2. Rear Module (Col 2)
           {
             id: 'asm-rear-module',
             label: '后模块分装线', 
@@ -284,7 +260,7 @@ export const MOCK_DATA: ProcessNode[] = [
                 {
                     id: 'fh006-01',
                     label: '前保分装', 
-                    type: NodeType.STATION, // Inner station
+                    type: NodeType.STATION,
                     status: NodeStatus.NORMAL,
                     meta: { 
                         description: 'FH006 前保险杠分装' 
@@ -305,7 +281,7 @@ export const MOCK_DATA: ProcessNode[] = [
                 {
                     id: 'fh006-02',
                     label: '后保分装', 
-                    type: NodeType.STATION, // Inner station
+                    type: NodeType.STATION,
                     status: NodeStatus.NORMAL,
                     meta: { 
                         description: 'FH006 后保险杠分装' 
@@ -325,18 +301,18 @@ export const MOCK_DATA: ProcessNode[] = [
                 }
             ]
           },
-          // New Group Structure: Chassis Pre-assembly -> DY007 (ColSpan 2)
+          // 3. Chassis Pre-assembly (Col 2)
           {
             id: 'asm-chassis-pre',
             label: '底盘预装线', 
             type: NodeType.STATION,
             status: NodeStatus.NORMAL,
-            meta: { colSpan: 2, description: '底盘预装' }, // Width changed to 2
+            meta: { colSpan: 2, description: '底盘预装' },
             children: [
                  {
                     id: 'dy007',
                     label: '底盘前/后模块',
-                    type: NodeType.STATION, // Inner station
+                    type: NodeType.STATION,
                     status: NodeStatus.NORMAL,
                     meta: { 
                         description: '底盘预装核心工位' 
@@ -366,69 +342,61 @@ export const MOCK_DATA: ProcessNode[] = [
                  }
             ]
           },
+          // 4. Glue Line (Combined) (Col 2)
           {
-            id: 'asm-heat-pump',
-            label: '热泵分装', 
-            type: NodeType.STATION,
-            status: NodeStatus.INACTIVE, // SET TO INACTIVE
-            meta: { colSpan: 1, description: '暂未投产' },
-            children: [] // CLEARED CHILDREN
-          },
-          {
-            id: 'asm-ip',
-            label: '仪表台分装', 
-            type: NodeType.STATION,
-            status: NodeStatus.INACTIVE, // SET TO INACTIVE
-            meta: { colSpan: 1, description: '暂未投产' },
-            children: [] // CLEARED CHILDREN
-          },
-          {
-            id: 'asm-windshield',
-            label: '风挡涂胶', 
+            id: 'asm-glue-line',
+            label: '涂胶线', 
             type: NodeType.STATION,
             status: NodeStatus.NORMAL,
-            meta: { colSpan: 1 },
+            meta: { colSpan: 2, description: '玻璃涂胶集成' }, // Combined colSpan 2
             children: [
                 {
-                    id: 'insp-wsg-primer',
-                    label: '玻璃底涂动作检测',
-                    type: NodeType.INSPECTION,
+                    id: 'asm-windshield',
+                    label: '风挡涂胶', 
+                    type: NodeType.STATION, // Inner
                     status: NodeStatus.NORMAL,
-                    meta: {
-                        description: '机械臂自动进行玻璃底涂涂抹动作监控与轨迹分析。',
-                        metrics: generateMockMetrics(20, 2),
-                        imgUrl: 'https://images.unsplash.com/photo-1621905252507-b35492cc7471?auto=format&fit=crop&w=800&q=80'
-                    }
+                    meta: { },
+                    children: [
+                        {
+                            id: 'insp-wsg-primer',
+                            label: '玻璃底涂动作检测',
+                            type: NodeType.INSPECTION,
+                            status: NodeStatus.NORMAL,
+                            meta: {
+                                description: '机械臂自动进行玻璃底涂涂抹动作监控与轨迹分析。',
+                                metrics: generateMockMetrics(20, 2)
+                            }
+                        }
+                    ]
+                },
+                {
+                    id: 'asm-roof',
+                    label: '天幕涂胶', 
+                    type: NodeType.STATION, // Inner
+                    status: NodeStatus.NORMAL,
+                    meta: { },
+                    children: [
+                        {
+                            id: 'insp-prf-primer',
+                            label: '玻璃底涂动作检测',
+                            type: NodeType.INSPECTION,
+                            status: NodeStatus.NORMAL,
+                            meta: {
+                                description: '天幕玻璃底涂动作执行情况实时监控。',
+                                metrics: generateMockMetrics(20, 2)
+                            }
+                        }
+                    ]
                 }
             ]
           },
-          {
-            id: 'asm-roof',
-            label: '天幕涂胶', 
-            type: NodeType.STATION,
-            status: NodeStatus.NORMAL,
-            meta: { colSpan: 1 },
-            children: [
-                {
-                    id: 'insp-prf-primer',
-                    label: '玻璃底涂动作检测',
-                    type: NodeType.INSPECTION,
-                    status: NodeStatus.NORMAL,
-                    meta: {
-                        description: '天幕玻璃底涂动作执行情况实时监控。',
-                        metrics: generateMockMetrics(20, 2),
-                        imgUrl: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=80'
-                    }
-                }
-            ]
-          },
-          // New Group Structure: Door Sub-assembly -> DR026, DR033 (ColSpan 2)
+          // 5. Door Sub-assembly (Col 2)
           {
             id: 'asm-door-sub',
             label: '门分装线', 
             type: NodeType.STATION,
             status: NodeStatus.NORMAL,
-            meta: { colSpan: 2, description: '门分装' }, // Width changed to 2
+            meta: { colSpan: 2, description: '门分装' },
             children: [
                 {
                     id: 'dr026',
@@ -508,7 +476,7 @@ export const MOCK_DATA: ProcessNode[] = [
             type: NodeType.STATION,
             status: NodeStatus.NORMAL,
             meta: {
-                colSpan: 1,
+                colSpan: 2, // Stretched
                 inspectionObject: '室内地板线束走向、卡扣',
                 inspectionMethod: '手机拍照检测'
             },
@@ -539,7 +507,7 @@ export const MOCK_DATA: ProcessNode[] = [
             type: NodeType.STATION,
             status: NodeStatus.NORMAL,
             meta: { 
-                colSpan: 1,
+                colSpan: 2, // Stretched
                 inspectionObject: '域控制器主体、散热背板、接地线',
                 inspectionMethod: '固定相机视觉检测'
             }, 
@@ -580,7 +548,7 @@ export const MOCK_DATA: ProcessNode[] = [
             type: NodeType.STATION,
             status: NodeStatus.NORMAL,
             meta: { 
-                colSpan: 1,
+                colSpan: 2, // Stretched
                 inspectionObject: '前舱主线束、大灯接口、ABS泵插头',
                 inspectionMethod: '固定相机拍照检测'
             }, 
@@ -602,7 +570,7 @@ export const MOCK_DATA: ProcessNode[] = [
             label: 'Z078', 
             type: NodeType.STATION,
             status: NodeStatus.INACTIVE,
-            meta: { colSpan: 1, description: '前装下线' },
+            meta: { colSpan: 2, description: '前装下线' }, // Stretched to align right (total 12)
             children: []
            },
         ]
@@ -770,7 +738,7 @@ export const MOCK_DATA: ProcessNode[] = [
             label: 'Z132',
             type: NodeType.STATION,
             status: NodeStatus.INACTIVE,
-            meta: { colSpan: 2, description: '流转至后装' }, // Changed to colSpan 2
+            meta: { colSpan: 1, description: '流转至后装' },
             children: [] 
            },
         ]
