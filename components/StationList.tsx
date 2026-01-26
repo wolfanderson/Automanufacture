@@ -259,7 +259,7 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
         observer.disconnect();
         clearTimeout(timer);
     };
-  }, [workshop, viewMode]); // Re-calculate when mode changes (though layout is same, maybe variants change?)
+  }, [workshop, viewMode]);
 
   // Helper to render a clickable station card or a group container
   const renderStationCard = (station: ProcessNode, index: number, isSubItem: boolean = false, compactMode: boolean = false) => {
@@ -280,7 +280,7 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
                      if(el) itemsRef.current.set(station.id, el);
                      else itemsRef.current.delete(station.id);
                 }}
-                className={`${spanClass} ${compactMode ? (isEol ? 'h-[90px]' : 'h-[110px]') : 'h-[130px]'} flex flex-col gap-1 p-2 rounded-lg border-2 border-dashed border-industrial-600 bg-industrial-800/20`}
+                className={`${spanClass} ${compactMode ? (isEol ? 'h-[140px]' : 'h-[160px]') : 'h-[130px]'} flex flex-col gap-1 p-2 rounded-lg border-2 border-dashed border-industrial-600 bg-industrial-800/20`}
             >
                 <div className="flex items-center gap-2 mb-0.5 pl-1 h-5 flex-shrink-0">
                     <Box size={14} className="text-gray-400" />
@@ -317,15 +317,16 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
     const isInactive = status === NodeStatus.INACTIVE;
 
     // Compact Mode Adjustments for EOL/Assembly View
-    // EOL cards are shorter (h-[64px]) to allow for larger vertical gaps
-    const cardHeight = compactMode ? (isEol ? 'h-[64px]' : 'h-[80px]') : 'h-[130px]';
-    const cardPadding = compactMode ? 'p-2' : (isSubItem ? 'p-2' : 'p-4');
-    const headerMb = compactMode ? 'mb-1' : (isSubItem ? 'mb-1' : 'mb-2');
+    // Increased heights significantly to fill space: EOL -> 100px, Assembly -> 120px
+    const cardHeight = compactMode ? (isEol ? 'h-[100px]' : 'h-[120px]') : 'h-[140px]';
+    const cardPadding = compactMode ? 'p-3' : (isSubItem ? 'p-2' : 'p-4');
+    const headerMb = compactMode ? 'mb-2' : (isSubItem ? 'mb-1' : 'mb-2');
     
     // Increased Font Sizes for Label
-    const labelSize = compactMode ? 'text-base leading-tight font-bold line-clamp-2' : (isSubItem 
+    // compactMode EOL/Assembly now uses text-lg/xl
+    const labelSize = compactMode ? 'text-lg leading-tight font-bold line-clamp-2' : (isSubItem 
         ? 'text-base font-bold line-clamp-2 leading-tight' 
-        : (colSpan > 1 ? 'text-3xl' : 'text-lg font-bold leading-snug line-clamp-3 break-words'));
+        : (colSpan > 1 ? 'text-4xl' : 'text-xl font-bold leading-snug line-clamp-3 break-words'));
 
     // Special Rendering for Placeholder
     if (isPlaceholder) {
@@ -335,8 +336,8 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
                 ref={(el) => { if(el) itemsRef.current.set(station.id, el); else itemsRef.current.delete(station.id); }}
                 className={`${spanClass} ${cardHeight} w-full flex flex-col items-center justify-center border-2 border-transparent rounded text-gray-400 select-none px-2`}
             >
-                <MoreHorizontal size={28} className="opacity-50 mb-1" />
-                <span className="text-sm font-mono font-bold text-center w-full break-words leading-tight opacity-90">{station.label}</span>
+                <MoreHorizontal size={32} className="opacity-40 mb-1" />
+                <span className="text-base font-mono font-bold text-center w-full break-words leading-tight opacity-70">{station.label}</span>
             </div>
         );
     }
@@ -377,20 +378,20 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
         >
             {/* Header */}
             <div className={`flex justify-between items-start w-full ${headerMb}`}>
-                {/* Increased Font Size for ID */}
-                <span className={`${compactMode ? 'text-xs' : (isSubItem ? 'text-xs' : 'text-sm')} font-mono tracking-wider uppercase truncate max-w-[80%] font-semibold ${isSelected ? 'text-neon-blue' : 'text-gray-400'}`}>
+                {/* Increased Font Size for ID: text-xs -> text-sm */}
+                <span className={`${compactMode ? 'text-sm' : (isSubItem ? 'text-xs' : 'text-sm')} font-mono tracking-wider uppercase truncate max-w-[80%] font-semibold ${isSelected ? 'text-neon-blue' : 'text-gray-400'}`}>
                     {station.id.replace('asm-', '').replace('front-','').replace('chassis-', '').replace('rear-', '').replace('door-sub-', '').replace('batt-', '').replace('st-eol-', '').replace('eol-', '').toUpperCase()}
                 </span>
                 
                 {/* Status Indicator or Vehicle Result Icon */}
                 {isVehicleMode && searchVin ? (
                     <div>
-                         {vehicleResult?.status === 'PASS' && <CheckCircle2 size={18} className="text-neon-green" />}
-                         {vehicleResult?.status === 'FAIL' && <XCircle size={18} className="text-neon-red animate-pulse" />}
-                         {vehicleResult?.status === 'PENDING' && <div className="h-3 w-3 rounded-full bg-gray-600"></div>}
+                         {vehicleResult?.status === 'PASS' && <CheckCircle2 size={20} className="text-neon-green" />}
+                         {vehicleResult?.status === 'FAIL' && <XCircle size={20} className="text-neon-red animate-pulse" />}
+                         {vehicleResult?.status === 'PENDING' && <div className="h-4 w-4 rounded-full bg-gray-600"></div>}
                     </div>
                 ) : (
-                    <div className={`${compactMode ? 'h-2.5 w-2.5' : (isSubItem ? 'h-2.5 w-2.5' : 'h-3 w-3')} rounded-full ${statusColor} shadow-sm flex-shrink-0`}></div>
+                    <div className={`${compactMode ? 'h-3 w-3' : (isSubItem ? 'h-2.5 w-2.5' : 'h-3 w-3')} rounded-full ${statusColor} shadow-sm flex-shrink-0`}></div>
                 )}
             </div>
 
@@ -403,12 +404,12 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
 
             {/* Footer/Progress (Or Timestamp in Vehicle Mode) */}
             {isVehicleMode && vehicleResult?.time ? (
-                <div className="flex items-center gap-1 mt-auto text-xs font-mono text-neon-blue opacity-90">
-                    <Clock size={12} />
+                <div className="flex items-center gap-1 mt-auto text-sm font-mono text-neon-blue opacity-90">
+                    <Clock size={14} />
                     {vehicleResult.time}
                 </div>
             ) : (
-                <div className="w-full h-[4px] bg-industrial-900 rounded-full overflow-hidden mt-auto border border-industrial-700/50">
+                <div className="w-full h-[5px] bg-industrial-900 rounded-full overflow-hidden mt-auto border border-industrial-700/50">
                     <div className={`h-full ${statusColor} w-full opacity-90`}></div>
                 </div>
             )}
@@ -477,7 +478,7 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
                 {workshop.children && workshop.children[0].type === NodeType.ZONE ? (
                      // COMPACT LAYOUT (EOL & ASSEMBLY DASHBOARD)
                      isCompactView ? (
-                         <div className={`grid max-w-full h-full ${isEol ? 'grid-cols-5 gap-x-4 gap-y-20 py-8' : 'grid-cols-12 gap-3'}`}>
+                         <div className={`grid max-w-full h-full ${isEol ? 'grid-cols-5 gap-x-6 gap-y-12 py-8' : 'grid-cols-12 gap-3'}`}>
                             {workshop.children.map((zone) => {
                                 // Dynamic Span Calculation
                                 let colSpan = 'col-span-1';
@@ -510,19 +511,19 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
                                     <div 
                                         key={zone.id}
                                         ref={(el) => { if(el) itemsRef.current.set(zone.id, el); else itemsRef.current.delete(zone.id); }}
-                                        className={`relative bg-industrial-800 border border-industrial-700 rounded-lg ${isEol ? 'p-2' : 'p-3'} ${colSpan}`}
+                                        className={`relative bg-industrial-800 border border-industrial-700 rounded-lg ${isEol ? 'p-3' : 'p-3'} ${colSpan}`}
                                     >
                                         {/* Inline Zone Header */}
-                                        <div className="flex items-center gap-2 mb-2 pb-1 border-b border-industrial-700/50">
-                                            <Box size={16} className="text-neon-blue" />
+                                        <div className="flex items-center gap-2 mb-3 pb-2 border-b border-industrial-700/50">
+                                            <Box size={20} className="text-neon-blue" />
                                             {/* Increased Zone Label Font Size */}
-                                            <span className="text-base font-bold text-gray-200 tracking-wide">{zone.label}</span>
+                                            <span className="text-xl font-bold text-gray-200 tracking-wide">{zone.label}</span>
                                             {/* Hide Zone Status warnings in Vehicle Mode */}
-                                            {viewMode === 'LINE' && zone.status === NodeStatus.WARNING && <AlertCircle size={16} className="text-neon-yellow" />}
-                                            {viewMode === 'LINE' && zone.status === NodeStatus.CRITICAL && <AlertCircle size={16} className="text-neon-red animate-pulse" />}
+                                            {viewMode === 'LINE' && zone.status === NodeStatus.WARNING && <AlertCircle size={20} className="text-neon-yellow" />}
+                                            {viewMode === 'LINE' && zone.status === NodeStatus.CRITICAL && <AlertCircle size={20} className="text-neon-red animate-pulse" />}
                                         </div>
                                         {/* Inner Grid */}
-                                        <div className={`grid gap-2 ${innerGrid}`}>
+                                        <div className={`grid gap-3 ${innerGrid}`}>
                                             {zone.children?.map(station => renderStationCard(station, 0, false, true))}
                                         </div>
                                     </div>
@@ -576,11 +577,11 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
             {/* SVG Circuit Layer */}
             <svg className="absolute top-0 left-0 w-full h-full pointer-events-none z-20 overflow-visible">
                 {paths.map((p, i) => {
-                    const isDimmed = viewMode === 'VEHICLE'; // Dim connections in vehicle mode
+                    const isDimmed = false; // Always bright connection lines, even in vehicle mode
                     const isBright = false;
-                    const baseOpacity = isDimmed ? 0.05 : 0.2; 
-                    const glowOpacity = isDimmed ? 0 : 0.3; 
-                    const coreOpacity = isDimmed ? 0.1 : 0.6;
+                    const baseOpacity = 0.2; 
+                    const glowOpacity = 0.3; 
+                    const coreOpacity = 0.6;
                     
                     return (
                         <g key={i}>
