@@ -12,6 +12,8 @@ export enum NodeStatus {
   INACTIVE = 'INACTIVE' // Gray/Dimmed
 }
 
+export type ViewMode = 'LINE' | 'VEHICLE';
+
 // Chart data point interface
 export interface MetricPoint {
   time: string;

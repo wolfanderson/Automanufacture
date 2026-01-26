@@ -1,11 +1,13 @@
 import React, { useMemo, useRef, useState, useLayoutEffect } from 'react';
-import { ProcessNode, NodeStatus, NodeType } from '../types';
-import { AlertCircle, CheckCircle, Ban, AlertTriangle, ChevronDown, Activity, Box, MoreHorizontal } from 'lucide-react';
+import { ProcessNode, NodeStatus, NodeType, ViewMode } from '../types';
+import { AlertCircle, CheckCircle, Ban, AlertTriangle, ChevronDown, Activity, Box, MoreHorizontal, Car, CheckCircle2, XCircle, Clock } from 'lucide-react';
 
 interface StationListProps {
   workshop: ProcessNode | undefined;
   selectedStationId: string | null;
   onSelect: (id: string) => void;
+  viewMode: ViewMode;
+  searchVin: string;
 }
 
 type PathVariant = 'default' | 'dimmed' | 'bright';
@@ -16,7 +18,29 @@ interface PathData {
     variant: PathVariant;
 }
 
-export const StationList: React.FC<StationListProps> = ({ workshop, selectedStationId, onSelect }) => {
+// Helper to deterministically simulate vehicle result based on VIN + StationID
+const getVehicleStatusForStation = (vin: string, stationId: string): { status: 'PASS' | 'FAIL' | 'PENDING', time?: string } => {
+    if (!vin) return { status: 'PENDING' };
+    
+    // Simple hash simulation
+    const str = vin + stationId;
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    
+    const rand = Math.abs(hash % 100);
+    
+    // Simulate flow: Some stations might not be reached yet based on some arbitrary order simulation? 
+    // For simplicity in this demo, we assume the car has passed through most, but maybe "future" ones are pending.
+    // Let's just randomize Status.
+    
+    if (rand > 90) return { status: 'FAIL', time: '10:42' };
+    if (rand > 85) return { status: 'PENDING' }; // 15% pending
+    return { status: 'PASS', time: '09:15' };
+};
+
+export const StationList: React.FC<StationListProps> = ({ workshop, selectedStationId, onSelect, viewMode, searchVin }) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const itemsRef = useRef<Map<string, HTMLElement>>(new Map());
@@ -235,7 +259,7 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
         observer.disconnect();
         clearTimeout(timer);
     };
-  }, [workshop]);
+  }, [workshop, viewMode]); // Re-calculate when mode changes (though layout is same, maybe variants change?)
 
   // Helper to render a clickable station card or a group container
   const renderStationCard = (station: ProcessNode, index: number, isSubItem: boolean = false, compactMode: boolean = false) => {
@@ -271,8 +295,26 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
 
     // RENDER STANDARD CARD
     const isSelected = selectedStationId === station.id;
-    const isInactive = station.status === NodeStatus.INACTIVE;
     const isPlaceholder = station.meta?.isPlaceholder;
+
+    // --- LOGIC: VIEW MODE HANDLING ---
+    let status = station.status;
+    let vehicleResult = null;
+    let isVehicleMode = viewMode === 'VEHICLE';
+
+    // If Vehicle Mode is active and we have a search string (even partial), calculate vehicle specific result
+    if (isVehicleMode) {
+        if (!searchVin) {
+            status = NodeStatus.INACTIVE; // Dim everything if no VIN
+        } else {
+            vehicleResult = getVehicleStatusForStation(searchVin, station.id);
+            if (vehicleResult.status === 'PASS') status = NodeStatus.NORMAL;
+            else if (vehicleResult.status === 'FAIL') status = NodeStatus.CRITICAL;
+            else status = NodeStatus.INACTIVE; // Pending
+        }
+    }
+    
+    const isInactive = status === NodeStatus.INACTIVE;
 
     // Compact Mode Adjustments for EOL/Assembly View
     // EOL cards are shorter (h-[64px]) to allow for larger vertical gaps
@@ -303,15 +345,15 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
     let borderColor = 'border-industrial-700';
     let shadowClass = '';
     
-    if (station.status === NodeStatus.NORMAL) {
+    if (status === NodeStatus.NORMAL) {
         statusColor = 'bg-neon-green';
         borderColor = isSelected ? 'border-neon-green' : 'border-industrial-600';
         shadowClass = isSelected ? 'shadow-[0_0_15px_rgba(10,255,0,0.3)]' : '';
-    } else if (station.status === NodeStatus.WARNING) {
+    } else if (status === NodeStatus.WARNING) {
         statusColor = 'bg-neon-yellow';
         borderColor = isSelected ? 'border-neon-yellow' : 'border-industrial-600';
         shadowClass = isSelected ? 'shadow-[0_0_15px_rgba(252,238,10,0.3)]' : '';
-    } else if (station.status === NodeStatus.CRITICAL) {
+    } else if (status === NodeStatus.CRITICAL) {
         statusColor = 'bg-neon-red';
         borderColor = isSelected ? 'border-neon-red' : 'border-industrial-600';
         shadowClass = isSelected ? 'shadow-[0_0_15px_rgba(255,42,42,0.4)]' : '';
@@ -329,7 +371,7 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
                 bg-industrial-800
                 ${cardPadding}
                 ${isSelected ? `scale-[1.02] -translate-y-1 ${shadowClass} z-20 bg-industrial-700` : 'hover:border-gray-500 hover:bg-industrial-700 hover:-translate-y-0.5'}
-                ${isInactive ? 'opacity-50 grayscale bg-industrial-900' : 'cursor-pointer'}
+                ${isInactive ? 'opacity-40 grayscale bg-industrial-900' : 'cursor-pointer'}
                 ${borderColor}
             `}
         >
@@ -339,7 +381,17 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
                 <span className={`${compactMode ? 'text-xs' : (isSubItem ? 'text-xs' : 'text-sm')} font-mono tracking-wider uppercase truncate max-w-[80%] font-semibold ${isSelected ? 'text-neon-blue' : 'text-gray-400'}`}>
                     {station.id.replace('asm-', '').replace('front-','').replace('chassis-', '').replace('rear-', '').replace('door-sub-', '').replace('batt-', '').replace('st-eol-', '').replace('eol-', '').toUpperCase()}
                 </span>
-                <div className={`${compactMode ? 'h-2.5 w-2.5' : (isSubItem ? 'h-2.5 w-2.5' : 'h-3 w-3')} rounded-full ${statusColor} shadow-sm flex-shrink-0`}></div>
+                
+                {/* Status Indicator or Vehicle Result Icon */}
+                {isVehicleMode && searchVin ? (
+                    <div>
+                         {vehicleResult?.status === 'PASS' && <CheckCircle2 size={18} className="text-neon-green" />}
+                         {vehicleResult?.status === 'FAIL' && <XCircle size={18} className="text-neon-red animate-pulse" />}
+                         {vehicleResult?.status === 'PENDING' && <div className="h-3 w-3 rounded-full bg-gray-600"></div>}
+                    </div>
+                ) : (
+                    <div className={`${compactMode ? 'h-2.5 w-2.5' : (isSubItem ? 'h-2.5 w-2.5' : 'h-3 w-3')} rounded-full ${statusColor} shadow-sm flex-shrink-0`}></div>
+                )}
             </div>
 
             {/* Label */}
@@ -349,10 +401,17 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
                     </h3>
             </div>
 
-            {/* Footer/Progress */}
-            <div className="w-full h-[4px] bg-industrial-900 rounded-full overflow-hidden mt-auto border border-industrial-700/50">
-                <div className={`h-full ${statusColor} w-full opacity-90`}></div>
-            </div>
+            {/* Footer/Progress (Or Timestamp in Vehicle Mode) */}
+            {isVehicleMode && vehicleResult?.time ? (
+                <div className="flex items-center gap-1 mt-auto text-xs font-mono text-neon-blue opacity-90">
+                    <Clock size={12} />
+                    {vehicleResult.time}
+                </div>
+            ) : (
+                <div className="w-full h-[4px] bg-industrial-900 rounded-full overflow-hidden mt-auto border border-industrial-700/50">
+                    <div className={`h-full ${statusColor} w-full opacity-90`}></div>
+                </div>
+            )}
         </button>
     );
   };
@@ -380,18 +439,34 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
            <h2 className="text-2xl font-bold text-white flex items-center gap-3 tracking-tight">
              <span className="text-neon-blue mr-1">#</span>
              {workshop.label}
+             {viewMode === 'VEHICLE' && <span className="text-sm bg-neon-blue/20 text-neon-blue px-2 py-0.5 rounded ml-2 border border-neon-blue/30 align-middle tracking-normal font-normal">车辆追踪</span>}
            </h2>
         </div>
-        <div className="flex gap-4">
-             <div className="flex items-center gap-2 px-5 py-2 bg-neon-green/10 rounded border border-neon-green/30">
-                <span className="w-3 h-3 rounded-full bg-neon-green animate-pulse"></span>
-                <span className="text-lg font-bold text-neon-green font-mono">{stats.normal} 正常</span>
+        
+        {/* Conditional Header Stats based on Mode */}
+        {viewMode === 'LINE' ? (
+            <div className="flex gap-4">
+                 <div className="flex items-center gap-2 px-5 py-2 bg-neon-green/10 rounded border border-neon-green/30">
+                    <span className="w-3 h-3 rounded-full bg-neon-green animate-pulse"></span>
+                    <span className="text-lg font-bold text-neon-green font-mono">{stats.normal} 正常</span>
+                </div>
+                 <div className="flex items-center gap-2 px-5 py-2 bg-neon-red/10 rounded border border-neon-red/30">
+                    <span className="w-3 h-3 rounded-full bg-neon-red animate-pulse"></span>
+                    <span className="text-lg font-bold text-neon-red font-mono">{stats.critical} 告警</span>
+                </div>
             </div>
-             <div className="flex items-center gap-2 px-5 py-2 bg-neon-red/10 rounded border border-neon-red/30">
-                <span className="w-3 h-3 rounded-full bg-neon-red animate-pulse"></span>
-                <span className="text-lg font-bold text-neon-red font-mono">{stats.critical} 告警</span>
+        ) : (
+            <div className="flex items-center text-gray-400 font-mono">
+                {searchVin ? (
+                    <>
+                        <span className="mr-2 text-sm">Target VIN:</span>
+                        <span className="text-xl font-bold text-neon-blue tracking-wider">{searchVin}</span>
+                    </>
+                ) : (
+                    <span>请输入 VIN 码查看轨迹</span>
+                )}
             </div>
-        </div>
+        )}
       </div>
 
       {/* Main Scrollable Area */}
@@ -425,8 +500,8 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
                                         case 'zone-eol-test-line': colSpan = 'col-span-3'; innerGrid = 'grid-cols-4'; break;
                                         case 'zone-eol-dark': colSpan = 'col-span-2'; innerGrid = 'grid-cols-3'; break;
                                         case 'zone-eol-shower': colSpan = 'col-span-2'; innerGrid = 'grid-cols-3'; break;
-                                        case 'zone-eol-cp89': colSpan = 'col-span-2'; innerGrid = 'grid-cols-3'; break; // Changed to span 2 (was 3)
-                                        case 'zone-eol-smell-lab': colSpan = 'col-span-1'; innerGrid = 'grid-cols-1'; break; // Changed to span 1 (was 2)
+                                        case 'zone-eol-cp89': colSpan = 'col-span-2'; innerGrid = 'grid-cols-3'; break; 
+                                        case 'zone-eol-smell-lab': colSpan = 'col-span-1'; innerGrid = 'grid-cols-1'; break; 
                                         default: colSpan = 'col-span-1'; innerGrid = 'grid-cols-1'; break;
                                     }
                                 }
@@ -442,8 +517,9 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
                                             <Box size={16} className="text-neon-blue" />
                                             {/* Increased Zone Label Font Size */}
                                             <span className="text-base font-bold text-gray-200 tracking-wide">{zone.label}</span>
-                                            {zone.status === NodeStatus.WARNING && <AlertCircle size={16} className="text-neon-yellow" />}
-                                            {zone.status === NodeStatus.CRITICAL && <AlertCircle size={16} className="text-neon-red animate-pulse" />}
+                                            {/* Hide Zone Status warnings in Vehicle Mode */}
+                                            {viewMode === 'LINE' && zone.status === NodeStatus.WARNING && <AlertCircle size={16} className="text-neon-yellow" />}
+                                            {viewMode === 'LINE' && zone.status === NodeStatus.CRITICAL && <AlertCircle size={16} className="text-neon-red animate-pulse" />}
                                         </div>
                                         {/* Inner Grid */}
                                         <div className={`grid gap-2 ${innerGrid}`}>
@@ -470,7 +546,7 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
                                         <Box size={24} className="text-neon-blue" />
                                         {/* Increased Font Size */}
                                         <span className="text-2xl font-bold text-white tracking-wide">{zone.label}</span>
-                                        {zone.status === NodeStatus.CRITICAL && <AlertCircle size={24} className="text-neon-red animate-pulse" />}
+                                        {viewMode === 'LINE' && zone.status === NodeStatus.CRITICAL && <AlertCircle size={24} className="text-neon-red animate-pulse" />}
                                     </div>
                                     
                                     {/* Zone Children Grid */}
@@ -500,18 +576,18 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
             {/* SVG Circuit Layer */}
             <svg className="absolute top-0 left-0 w-full h-full pointer-events-none z-20 overflow-visible">
                 {paths.map((p, i) => {
-                    const isDimmed = p.variant === 'dimmed';
-                    const isBright = p.variant === 'bright';
-                    const baseOpacity = isDimmed ? 0.1 : 0.2; 
-                    const glowOpacity = isDimmed ? 0 : (isBright ? 0.5 : 0.3); 
-                    const coreOpacity = isDimmed ? 0.1 : (isBright ? 0.9 : 0.6);
-                    const animClass = isDimmed ? 'flow-path-dim' : (isBright ? 'flow-path-bright' : 'flow-path');
+                    const isDimmed = viewMode === 'VEHICLE'; // Dim connections in vehicle mode
+                    const isBright = false;
+                    const baseOpacity = isDimmed ? 0.05 : 0.2; 
+                    const glowOpacity = isDimmed ? 0 : 0.3; 
+                    const coreOpacity = isDimmed ? 0.1 : 0.6;
+                    
                     return (
                         <g key={i}>
                             <path d={p.d} stroke="#0f172a" strokeWidth="8" fill="none" strokeLinecap="round" opacity={1}/>
                             {!isDimmed && <path d={p.d} stroke="#00f0ff" strokeWidth={isBright ? "20" : "12"} strokeOpacity={glowOpacity} fill="none" strokeLinecap="round" style={{ filter: 'blur(8px)' }}/>}
                              <path d={p.d} stroke="#334155" strokeWidth="2" fill="none" strokeLinecap="round" opacity={baseOpacity}/>
-                            <path d={p.d} stroke="#00f0ff" strokeWidth={isBright ? "3" : "2"} strokeDasharray={isDimmed ? "5 25" : "10 50"} strokeLinecap="round" fill="none" className={animClass} opacity={coreOpacity}/>
+                            <path d={p.d} stroke="#00f0ff" strokeWidth={isBright ? "3" : "2"} strokeDasharray={isDimmed ? "5 25" : "10 50"} strokeLinecap="round" fill="none" className="flow-path" opacity={coreOpacity}/>
                         </g>
                     );
                 })}

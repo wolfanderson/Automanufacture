@@ -1,15 +1,17 @@
 import React, { useState, useMemo } from 'react';
-import { ProcessNode, NodeStatus } from '../types';
+import { ProcessNode, NodeStatus, ViewMode } from '../types';
 import { StatusBadge } from './StatusBadge';
 import { 
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, AreaChart, Area 
 } from 'recharts';
 import { 
-  Activity, Search, Filter, CheckCircle2, XCircle, ArrowRight, Calendar, Hash, Ban, Box, ScanLine, Clock 
+  Activity, Search, Filter, CheckCircle2, XCircle, ArrowRight, Calendar, Hash, Ban, Box, ScanLine, Clock, Camera, FileText 
 } from 'lucide-react';
 
 interface InspectionDetailProps {
   station: ProcessNode | undefined;
+  viewMode: ViewMode;
+  searchVin: string;
 }
 
 // Mock Data Generators for the specific view requirements
@@ -83,7 +85,102 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
-export const InspectionDetail: React.FC<InspectionDetailProps> = ({ station }) => {
+// --- VEHICLE MODE COMPONENT ---
+const VehicleDetailView = ({ station, vin }: { station: ProcessNode, vin: string }) => {
+    // Mock Result generation based on VIN and Station
+    // In real app, this fetches from API
+    const isPass = !vin.includes('FAIL'); 
+    
+    return (
+        <div className="flex flex-col h-full bg-industrial-800">
+             {/* Header */}
+            <div className="px-8 py-8 border-b border-industrial-700 bg-industrial-800 flex-shrink-0">
+                <div className="flex items-center justify-between mb-4">
+                    <div className="text-base text-gray-400 font-mono border border-industrial-600 px-3 py-1 rounded bg-industrial-700 tracking-wider font-semibold">
+                         {station.id.replace('asm-', '').toUpperCase()}
+                    </div>
+                    {isPass ? (
+                        <div className="px-3 py-1 rounded-full bg-neon-green/10 border border-neon-green/30 text-neon-green font-bold flex items-center gap-2">
+                            <CheckCircle2 size={16} /> PASS
+                        </div>
+                    ) : (
+                        <div className="px-3 py-1 rounded-full bg-neon-red/10 border border-neon-red/30 text-neon-red font-bold flex items-center gap-2 animate-pulse">
+                            <XCircle size={16} /> FAIL
+                        </div>
+                    )}
+                </div>
+                <h2 className="text-4xl font-bold text-gray-200 tracking-tight leading-tight flex items-center gap-2">
+                    {station.label}
+                </h2>
+                <div className="mt-4 flex items-center gap-3 text-neon-blue font-mono text-xl font-bold bg-neon-blue/5 p-2 rounded border border-neon-blue/20">
+                    <Search size={20} />
+                    {vin}
+                </div>
+            </div>
+
+            {/* Content Body */}
+            <div className="flex-1 overflow-y-auto p-8 space-y-8">
+                
+                {/* 1. Photo Section */}
+                <div>
+                    <h3 className="text-lg font-bold text-white flex items-center gap-2 mb-4 border-l-4 border-neon-blue pl-3">
+                        <Camera size={20} className="text-gray-400" />
+                        检测快照
+                    </h3>
+                    <div className="w-full aspect-video bg-black rounded-lg border border-industrial-600 overflow-hidden relative group">
+                        <img 
+                            src={station.meta?.imgUrl || "https://images.unsplash.com/photo-1565043589221-1a6fd9ae45c7?auto=format&fit=crop&w=800&q=80"} 
+                            alt="Inspection"
+                            className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+                        />
+                        <div className="absolute bottom-2 right-2 bg-black/70 px-2 py-1 text-xs text-mono text-white rounded border border-white/20">
+                            CAM-01: 2024-05-20 10:42:15
+                        </div>
+                    </div>
+                </div>
+
+                {/* 2. Key Metrics for this Vehicle */}
+                <div>
+                     <h3 className="text-lg font-bold text-white flex items-center gap-2 mb-4 border-l-4 border-neon-green pl-3">
+                        <Activity size={20} className="text-gray-400" />
+                        关键指标
+                    </h3>
+                    <div className="grid grid-cols-1 gap-3">
+                        {station.meta?.metrics && station.meta.metrics.length > 0 ? (
+                            <div className="bg-industrial-700/30 p-4 rounded border border-industrial-600 flex justify-between items-center">
+                                <span className="text-gray-400">检测数值 (Value)</span>
+                                <span className="text-2xl font-mono font-bold text-white">82.5 <span className="text-sm text-gray-500 font-normal">/ 85.0 Exp</span></span>
+                            </div>
+                        ) : (
+                            <div className="text-gray-500 italic">无需数值化检测</div>
+                        )}
+                        
+                        <div className="bg-industrial-700/30 p-4 rounded border border-industrial-600 flex justify-between items-center">
+                             <span className="text-gray-400">执行时间 (Exec Time)</span>
+                             <span className="text-xl font-mono text-gray-200">1.2s</span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* 3. Report */}
+                <div>
+                     <h3 className="text-lg font-bold text-white flex items-center gap-2 mb-4 border-l-4 border-neon-yellow pl-3">
+                        <FileText size={20} className="text-gray-400" />
+                        检测结论
+                    </h3>
+                    <div className="bg-industrial-900/50 p-4 rounded border border-industrial-700 text-gray-300 leading-relaxed text-base">
+                        检测完成。{station.meta?.inspectionObject || '部件'} 特征识别成功。
+                        {isPass ? '各项指标符合工艺规范。' : '检测到异常：表面存在微小瑕疵，建议人工复核。'}
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    );
+};
+
+
+export const InspectionDetail: React.FC<InspectionDetailProps> = ({ station, viewMode, searchVin }) => {
   const [vinFilter, setVinFilter] = useState('');
 
   // Memoize data generation to avoid flicker on re-renders, updates when station changes
@@ -109,12 +206,26 @@ export const InspectionDetail: React.FC<InspectionDetailProps> = ({ station }) =
             <Activity size={56} className="text-gray-500" />
          </div>
          <h3 className="text-3xl font-bold text-gray-200 mb-3 tracking-wide">工位数据看板</h3>
-         <p className="text-lg text-gray-500 max-w-[320px]">请点击左侧工位图，查看实时合格率趋势与单车检测明细。</p>
+         <p className="text-lg text-gray-500 max-w-[320px]">请点击左侧工位图，查看{viewMode === 'VEHICLE' ? '车辆在该工位的详细检测报告' : '实时合格率趋势与单车检测明细'}。</p>
       </div>
     );
   }
 
-  // Handle No Data / Inactive State
+  // Handle Vehicle Mode
+  if (viewMode === 'VEHICLE') {
+      if (!searchVin) {
+           return (
+                <div className="h-full flex flex-col items-center justify-center bg-industrial-800 text-gray-400 px-8 text-center">
+                    <Search size={48} className="mb-4 opacity-50" />
+                    <h3 className="text-xl font-bold">等待输入 VIN 码</h3>
+                    <p className="text-sm mt-2 text-gray-500">请输入 VIN 码以查看车辆在各工位的详细信息。</p>
+                </div>
+           );
+      }
+      return <VehicleDetailView station={station} vin={searchVin} />;
+  }
+
+  // Handle No Data / Inactive State (LINE MODE)
   if (station.status === NodeStatus.INACTIVE) {
      return (
         <div className="h-full flex flex-col bg-industrial-800 border-l border-industrial-700 shadow-xl relative z-30">
@@ -143,6 +254,7 @@ export const InspectionDetail: React.FC<InspectionDetailProps> = ({ station }) =
      );
   }
 
+  // --- LINE MODE VIEW ---
   return (
     <div className="h-full flex flex-col bg-industrial-800 border-l border-industrial-700 shadow-2xl relative z-30">
       

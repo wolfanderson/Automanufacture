@@ -3,12 +3,16 @@ import { WorkshopNav } from './components/WorkshopNav';
 import { StationList } from './components/StationList';
 import { InspectionDetail } from './components/InspectionDetail';
 import { MOCK_DATA } from './data';
-import { ProcessNode } from './types';
+import { ProcessNode, ViewMode } from './types';
 
 const App: React.FC = () => {
   // --- State Management ---
   const [selectedWorkshopId, setSelectedWorkshopId] = useState<string | null>(MOCK_DATA[0].id);
   const [selectedStationId, setSelectedStationId] = useState<string | null>(null);
+  
+  // --- New Mode State ---
+  const [viewMode, setViewMode] = useState<ViewMode>('LINE');
+  const [searchVin, setSearchVin] = useState<string>('');
 
   // --- Derived State ---
   const selectedWorkshop = useMemo(() => 
@@ -50,7 +54,11 @@ const App: React.FC = () => {
       <WorkshopNav 
         workshops={MOCK_DATA} 
         selectedId={selectedWorkshopId} 
-        onSelect={handleWorkshopSelect} 
+        onSelect={handleWorkshopSelect}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        searchVin={searchVin}
+        onSearchVinChange={setSearchVin}
       />
 
       {/* Main Content: Flex Row (Left: L2 Grid, Right: L3 Sidebar) */}
@@ -61,7 +69,9 @@ const App: React.FC = () => {
           <StationList 
             workshop={selectedWorkshop} 
             selectedStationId={selectedStationId} 
-            onSelect={handleStationSelect} 
+            onSelect={handleStationSelect}
+            viewMode={viewMode}
+            searchVin={searchVin}
           />
         </main>
 
@@ -69,6 +79,8 @@ const App: React.FC = () => {
         <aside className="w-[450px] flex-shrink-0 z-20 transition-all duration-300 ease-in-out border-l border-industrial-700 bg-industrial-800">
            <InspectionDetail 
              station={selectedStation} 
+             viewMode={viewMode}
+             searchVin={searchVin}
            />
         </aside>
 
