@@ -958,7 +958,19 @@ export const MOCK_DATA: ProcessNode[] = [
             { id: 'eol-test-cam', label: '整车相机标定', type: NodeType.STATION, status: NodeStatus.NORMAL, meta: { inspectionObject: '环视/智驾摄像头参数', inspectionMethod: '标定房靶标识别' }, children: [] },
         ]
       },
-      // 3. 强化路试
+      // 3. 小黑屋 (Moved UP to share row with Test Line)
+      {
+        id: 'zone-eol-dark',
+        label: '小黑屋',
+        type: NodeType.ZONE,
+        status: NodeStatus.NORMAL,
+        children: [
+             { id: 'eol-dark-chassis', label: '底盘AI划伤检测', type: NodeType.STATION, status: NodeStatus.NORMAL, meta: { inspectionObject: '底盘护板、电池包底部', inspectionMethod: '线扫相机AI识别' }, children: [] },
+             { id: 'eol-dark-sound', label: '异响AI检测', type: NodeType.STATION, status: NodeStatus.NORMAL, meta: { inspectionObject: '整车动态异响', inspectionMethod: '声学阵列分析' }, children: [] },
+             { id: 'eol-dark-proj', label: '投影大灯检测', type: NodeType.STATION, status: NodeStatus.NORMAL, meta: { inspectionObject: 'DLP投影图案清晰度', inspectionMethod: '高动态工业相机' }, children: [] },
+        ]
+      },
+      // 4. 强化路试
       {
         id: 'zone-eol-road-intensive',
         label: '强化路试',
@@ -977,7 +989,7 @@ export const MOCK_DATA: ProcessNode[] = [
              }
         ]
       },
-      // 4. ORT
+      // 5. ORT
       {
         id: 'zone-eol-ort',
         label: 'ORT 测试',
@@ -996,7 +1008,7 @@ export const MOCK_DATA: ProcessNode[] = [
             }
         ]
       },
-      // 5. 老化/人工检
+      // 6. 老化/人工检
       {
         id: 'zone-eol-aging',
         label: '老化/人工检',
@@ -1015,7 +1027,7 @@ export const MOCK_DATA: ProcessNode[] = [
             }
         ]
       },
-      // 6. 动态路试
+      // 7. 动态路试
       {
         id: 'zone-eol-road-dyn',
         label: '动态路试',
@@ -1034,7 +1046,7 @@ export const MOCK_DATA: ProcessNode[] = [
              }
         ]
       },
-      // 7. 地沟检测
+      // 8. 地沟检测
       {
         id: 'zone-eol-pit',
         label: '地沟检测',
@@ -1051,18 +1063,6 @@ export const MOCK_DATA: ProcessNode[] = [
                     { id: 'insp-leak', label: '底盘防漏液检测', type: NodeType.INSPECTION, status: NodeStatus.NORMAL, meta: { metrics: generateMockMetrics(20, 1) } }
                 ]
             }
-        ]
-      },
-      // 8. 小黑屋
-      {
-        id: 'zone-eol-dark',
-        label: '小黑屋',
-        type: NodeType.ZONE,
-        status: NodeStatus.NORMAL,
-        children: [
-             { id: 'eol-dark-chassis', label: '底盘AI划伤检测', type: NodeType.STATION, status: NodeStatus.NORMAL, meta: { inspectionObject: '底盘护板、电池包底部', inspectionMethod: '线扫相机AI识别' }, children: [] },
-             { id: 'eol-dark-sound', label: '异响AI检测', type: NodeType.STATION, status: NodeStatus.NORMAL, meta: { inspectionObject: '整车动态异响', inspectionMethod: '声学阵列分析' }, children: [] },
-             { id: 'eol-dark-proj', label: '投影大灯检测', type: NodeType.STATION, status: NodeStatus.NORMAL, meta: { inspectionObject: 'DLP投影图案清晰度', inspectionMethod: '高动态工业相机' }, children: [] },
         ]
       },
       // 9. 淋雨线
@@ -1087,6 +1087,26 @@ export const MOCK_DATA: ProcessNode[] = [
             { id: 'eol-cp8-elec', label: '电检', type: NodeType.STATION, status: NodeStatus.NORMAL, meta: { inspectionObject: '休眠电流、故障码清除', inspectionMethod: '最终OBD检测' }, children: [] },
             { id: 'eol-cp8-final', label: '外饰内饰检测', type: NodeType.STATION, status: NodeStatus.NORMAL, meta: { inspectionObject: '最终整车外观/内饰状态', inspectionMethod: '人工检测' }, children: [] },
             { id: 'eol-cp8-cert', label: '合格证&随车卡', type: NodeType.STATION, status: NodeStatus.NORMAL, meta: { inspectionObject: '车辆一致性证书', inspectionMethod: '手机拍照检测' }, children: [] },
+        ]
+      },
+      // 11. 气味测评实验室
+      {
+        id: 'zone-eol-smell-lab',
+        label: '气味测评实验室',
+        type: NodeType.ZONE,
+        status: NodeStatus.NORMAL,
+        children: [
+            { 
+              id: 'eol-smell-ai', 
+              label: '气味AI检测', 
+              type: NodeType.STATION, 
+              status: NodeStatus.NORMAL, 
+              meta: { 
+                inspectionObject: '车内空气质量、VOCs', 
+                inspectionMethod: '电子鼻气味分析仪' 
+              }, 
+              children: [] 
+            }
         ]
       }
     ]

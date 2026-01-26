@@ -425,7 +425,8 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
                                         case 'zone-eol-test-line': colSpan = 'col-span-3'; innerGrid = 'grid-cols-4'; break;
                                         case 'zone-eol-dark': colSpan = 'col-span-2'; innerGrid = 'grid-cols-3'; break;
                                         case 'zone-eol-shower': colSpan = 'col-span-2'; innerGrid = 'grid-cols-3'; break;
-                                        case 'zone-eol-cp89': colSpan = 'col-span-3'; innerGrid = 'grid-cols-3'; break;
+                                        case 'zone-eol-cp89': colSpan = 'col-span-2'; innerGrid = 'grid-cols-3'; break; // Changed to span 2 (was 3)
+                                        case 'zone-eol-smell-lab': colSpan = 'col-span-1'; innerGrid = 'grid-cols-1'; break; // Changed to span 1 (was 2)
                                         default: colSpan = 'col-span-1'; innerGrid = 'grid-cols-1'; break;
                                     }
                                 }
