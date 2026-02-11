@@ -19,10 +19,11 @@ interface PathData {
 }
 
 // Helper to deterministically simulate vehicle result based on VIN + StationID
+// Now generates realistic sequential timestamps
 const getVehicleStatusForStation = (vin: string, stationId: string): { status: 'PASS' | 'FAIL' | 'PENDING', time?: string } => {
     if (!vin) return { status: 'PENDING' };
     
-    // Simple hash simulation
+    // Simple hash simulation for consistency
     const str = vin + stationId;
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
@@ -31,13 +32,94 @@ const getVehicleStatusForStation = (vin: string, stationId: string): { status: '
     
     const rand = Math.abs(hash % 100);
     
-    // Simulate flow: Some stations might not be reached yet based on some arbitrary order simulation? 
-    // For simplicity in this demo, we assume the car has passed through most, but maybe "future" ones are pending.
-    // Let's just randomize Status.
+    // Status Logic
+    let status: 'PASS' | 'FAIL' | 'PENDING' = 'PASS';
+    // Simulate typical pass rates
+    if (rand > 96) status = 'FAIL'; 
+    else if (rand > 85) status = 'PENDING'; // 15% probability of not reaching this station yet
+
+    // If pending, no time needed
+    if (status === 'PENDING') return { status };
+
+    // --- Timestamp Simulation Logic ---
+    // Goal: Create a realistic timeline starting from 08:00 AM today
+    // The time should increase based on the workshop/zone flow
     
-    if (rand > 90) return { status: 'FAIL', time: '10:42' };
-    if (rand > 85) return { status: 'PENDING' }; // 15% pending
-    return { status: 'PASS', time: '09:15' };
+    const date = new Date();
+    date.setHours(8, 0, 0, 0); // Base Start Time: 08:00:00
+
+    let minutesOffset = 0;
+    const sid = stationId.toLowerCase();
+
+    // 0. Casting (New Start)
+    if (sid.includes('cast')) {
+        minutesOffset = 0;
+    }
+    // 1. Stamping (Now second)
+    else if (sid.includes('stamp') || sid.includes('press') || sid.includes('metal')) {
+        minutesOffset = 60; 
+    }
+    // 2. Welding (+2 hours from stamping)
+    else if (sid.includes('weld') || sid.includes('door')) {
+        minutesOffset = 180;
+    }
+    // 3. Painting (+4 hours from stamping)
+    else if (sid.includes('paint') || sid.includes('primer')) {
+        minutesOffset = 300;
+    }
+    // 4. Assembly (+5 hours base)
+    else if (sid.includes('asm-')) {
+        minutesOffset = 420; 
+        
+        // Internal Assembly Flow
+        if (sid.includes('sub')) minutesOffset += 0;
+        if (sid.includes('front')) minutesOffset += 60;    // +1h inside assembly
+        if (sid.includes('chassis')) minutesOffset += 150; // +2.5h
+        if (sid.includes('rear')) minutesOffset += 240;    // +4h
+        if (sid.includes('batt')) minutesOffset += 300;    // +5h
+
+        // Smart Offset based on Z-number (e.g., z036) for fine-grained sequence
+        const zMatch = sid.match(/z(\d+)/);
+        if (zMatch) {
+            // Assume each "Z" station takes ~1.5 minutes
+            minutesOffset += parseInt(zMatch[1], 10) * 1.5;
+        } else {
+             // Random noise for non-Z stations
+             minutesOffset += (Math.abs(hash) % 45);
+        }
+    }
+    // 5. EOL (+10 hours base)
+    else if (sid.includes('eol-')) {
+        minutesOffset = 720; 
+        
+        // EOL Sequence
+        if (sid.includes('cp7')) minutesOffset += 10;
+        else if (sid.includes('test')) minutesOffset += 60;
+        else if (sid.includes('road')) minutesOffset += 120;
+        else if (sid.includes('ort')) minutesOffset += 150;
+        else if (sid.includes('dark')) minutesOffset += 180;
+        else if (sid.includes('shower')) minutesOffset += 210;
+        else if (sid.includes('cp8')) minutesOffset += 240;
+        else if (sid.includes('smell')) minutesOffset += 260;
+        
+        // Internal deterministic variation
+        minutesOffset += (Math.abs(hash) % 15);
+    } 
+    else {
+        // Fallback
+        minutesOffset += (Math.abs(hash) % 60);
+    }
+
+    // Apply calculated offset
+    date.setMinutes(date.getMinutes() + minutesOffset);
+    // Add seconds deterministically based on hash
+    date.setSeconds(Math.abs(hash) % 60);
+
+    // Format: YYYY-MM-DD HH:mm:ss
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    const timeStr = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+
+    return { status, time: timeStr };
 };
 
 export const StationList: React.FC<StationListProps> = ({ workshop, selectedStationId, onSelect, viewMode, searchVin }) => {
@@ -404,9 +486,9 @@ export const StationList: React.FC<StationListProps> = ({ workshop, selectedStat
 
             {/* Footer/Progress (Or Timestamp in Vehicle Mode) */}
             {isVehicleMode && vehicleResult?.time ? (
-                <div className="flex items-center gap-1 mt-auto text-sm font-mono text-neon-blue opacity-90">
-                    <Clock size={14} />
-                    {vehicleResult.time}
+                <div className="flex items-center gap-1 mt-auto text-[10px] xl:text-xs font-mono text-neon-blue opacity-90 truncate w-full" title={vehicleResult.time}>
+                    <Clock size={12} className="flex-shrink-0" />
+                    <span className="truncate">{vehicleResult.time}</span>
                 </div>
             ) : (
                 <div className="w-full h-[5px] bg-industrial-900 rounded-full overflow-hidden mt-auto border border-industrial-700/50">

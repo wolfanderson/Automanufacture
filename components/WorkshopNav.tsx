@@ -1,6 +1,6 @@
 import React from 'react';
 import { ProcessNode, NodeType, ViewMode } from '../types';
-import { Factory, Cog, SprayCan, Wrench, Activity, Search, LayoutGrid, Car } from 'lucide-react';
+import { Factory, Cog, SprayCan, Wrench, Activity, Search, LayoutGrid, Car, Layers } from 'lucide-react';
 
 interface WorkshopNavProps {
   workshops: ProcessNode[];
@@ -13,6 +13,7 @@ interface WorkshopNavProps {
 }
 
 const getIcon = (label: string) => {
+  if (label.includes('压铸')) return <Layers size={28} />;
   if (label.includes('冲压')) return <Factory size={28} />;
   if (label.includes('焊装')) return <Activity size={28} />;
   if (label.includes('涂装')) return <SprayCan size={28} />;
