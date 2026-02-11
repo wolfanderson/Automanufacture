@@ -85,18 +85,11 @@ export const MOCK_DATA: ProcessNode[] = [
         label: '一体化压铸岛',
         type: NodeType.STATION,
         status: NodeStatus.NORMAL,
+        meta: {
+            description: '9000T 超大型一体化压铸机群'
+        },
         children: [
-           {
-            id: 'insp-cast-param',
-            label: '压射参数监控',
-            type: NodeType.INSPECTION,
-            status: NodeStatus.NORMAL,
-            meta: {
-                description: '实时监控压射速度、压力、模温数据。',
-                metrics: generateMockMetrics(20, 5),
-                imgUrl: 'https://images.unsplash.com/photo-1625153283286-45bc812003c0?auto=format&fit=crop&w=800&q=80'
-            }
-           }
+           { id: 'insp-cast-param', label: '压射参数监控', type: NodeType.INSPECTION, status: NodeStatus.NORMAL, meta: { description: '实时监控压射速度、压力、模温数据。', metrics: generateMockMetrics(20, 5) } }
         ]
       },
       {
@@ -104,17 +97,11 @@ export const MOCK_DATA: ProcessNode[] = [
         label: '完整性检测',
         type: NodeType.STATION,
         status: NodeStatus.NORMAL,
+        meta: {
+             description: 'AI 辅助铸件完整性扫描'
+        },
         children: [
-             {
-            id: 'insp-cast-integrity',
-            label: '铸件完整性',
-            type: NodeType.INSPECTION,
-            status: NodeStatus.NORMAL,
-            meta: {
-              description: '铸件轮廓及溢流渣包完整性视觉检测。',
-              metrics: generateMockMetrics(20, 2)
-            }
-          }
+             { id: 'insp-cast-integrity', label: '铸件完整性', type: NodeType.INSPECTION, status: NodeStatus.NORMAL, meta: { description: '铸件轮廓及溢流渣包完整性视觉检测。', metrics: generateMockMetrics(20, 2) } }
         ]
       },
       {
@@ -122,17 +109,11 @@ export const MOCK_DATA: ProcessNode[] = [
         label: '视觉外观检测',
         type: NodeType.STATION,
         status: NodeStatus.NORMAL,
+        meta: {
+            description: '高精度机械臂视觉检测'
+        },
         children: [
-             {
-            id: 'insp-cast-visual-ai',
-            label: '外观缺陷AI',
-            type: NodeType.INSPECTION,
-            status: NodeStatus.NORMAL,
-            meta: {
-              description: 'AI识别裂纹、冷隔、气泡等表面缺陷。',
-              metrics: generateMockMetrics(20, 4)
-            }
-          }
+             { id: 'insp-cast-visual-ai', label: '外观缺陷AI', type: NodeType.INSPECTION, status: NodeStatus.NORMAL, meta: { description: 'AI识别裂纹、冷隔、气泡等表面缺陷。', metrics: generateMockMetrics(20, 4) } }
         ]
       },
       {
@@ -140,17 +121,11 @@ export const MOCK_DATA: ProcessNode[] = [
         label: '尺寸检测',
         type: NodeType.STATION,
         status: NodeStatus.NORMAL,
+        meta: {
+            description: '在线激光尺寸测量'
+        },
         children: [
-             {
-            id: 'insp-cast-dim-laser',
-            label: '激光在线测量',
-            type: NodeType.INSPECTION,
-            status: NodeStatus.NORMAL,
-            meta: {
-              description: '关键安装点及面轮廓度激光测量。',
-              metrics: generateMockMetrics(20, 1)
-            }
-          }
+             { id: 'insp-cast-dim-laser', label: '激光在线测量', type: NodeType.INSPECTION, status: NodeStatus.NORMAL, meta: { description: '关键安装点及面轮廓度激光测量。', metrics: generateMockMetrics(20, 1) } }
         ]
       },
       {
@@ -158,17 +133,11 @@ export const MOCK_DATA: ProcessNode[] = [
         label: '内部探伤检测',
         type: NodeType.STATION,
         status: NodeStatus.NORMAL,
+        meta: {
+            description: '工业 X-Ray 探伤柜'
+        },
         children: [
-             {
-            id: 'insp-cast-xray',
-            label: 'X-Ray探伤',
-            type: NodeType.INSPECTION,
-            status: NodeStatus.NORMAL,
-            meta: {
-              description: 'X射线透视检测内部缩孔、气孔缺陷。',
-              metrics: generateMockMetrics(20, 3)
-            }
-          }
+             { id: 'insp-cast-xray', label: 'X-Ray探伤', type: NodeType.INSPECTION, status: NodeStatus.NORMAL, meta: { description: 'X射线透视检测内部缩孔、气孔缺陷。', metrics: generateMockMetrics(20, 3) } }
         ]
       },
       {
@@ -176,17 +145,11 @@ export const MOCK_DATA: ProcessNode[] = [
         label: '机加工中心',
         type: NodeType.STATION,
         status: NodeStatus.WARNING,
+        meta: {
+            description: 'G-V1530B 精密加工中心'
+        },
         children: [
-             {
-            id: 'insp-cast-cnc-proc',
-            label: '加工精度监控',
-            type: NodeType.INSPECTION,
-            status: NodeStatus.WARNING,
-            meta: {
-              description: '机加工尺寸精度及刀具状态实时监控。',
-              metrics: generateMockMetrics(20, 12)
-            }
-          }
+             { id: 'insp-cast-cnc-proc', label: '加工精度监控', type: NodeType.INSPECTION, status: NodeStatus.WARNING, meta: { description: '机加工尺寸精度及刀具状态实时监控。', metrics: generateMockMetrics(20, 12) } }
         ]
       },
       {
@@ -194,17 +157,11 @@ export const MOCK_DATA: ProcessNode[] = [
         label: '视觉错漏装检测',
         type: NodeType.STATION,
         status: NodeStatus.NORMAL,
+        meta: {
+            description: '嵌件安装视觉复核'
+        },
         children: [
-             {
-            id: 'insp-cast-assembly',
-            label: '嵌件检测',
-            type: NodeType.INSPECTION,
-            status: NodeStatus.NORMAL,
-            meta: {
-              description: '螺柱、螺母等嵌件错漏装视觉复核。',
-              metrics: generateMockMetrics(20, 0)
-            }
-          }
+             { id: 'insp-cast-assembly', label: '嵌件检测', type: NodeType.INSPECTION, status: NodeStatus.NORMAL, meta: { description: '螺柱、螺母等嵌件错漏装视觉复核。', metrics: generateMockMetrics(20, 0) } }
         ]
       }
     ]
