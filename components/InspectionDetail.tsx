@@ -5,7 +5,7 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, AreaChart, Area 
 } from 'recharts';
 import { 
-  Activity, Search, Filter, CheckCircle2, XCircle, ArrowRight, Calendar, Hash, Ban, Box, ScanLine, Clock, Camera, FileText 
+  Activity, Search, Filter, CheckCircle2, XCircle, ArrowRight, Calendar, Hash, Ban, Box, ScanLine, Clock, Camera, Cloud, ShieldCheck, Cpu, AlertTriangle, ChevronLeft, ChevronRight
 } from 'lucide-react';
 
 interface InspectionDetailProps {
@@ -47,8 +47,7 @@ const generateTableData = (station: ProcessNode): VehicleRecord[] => {
     const vinSuffix = (5000 + i).toString(); 
     const vin = `LHPV2024${vinSuffix}`;
     
-    // Generate a time sequence (descending broadly if we reverse later, or just random today)
-    // Let's make them somewhat sequential for realism
+    // Generate a time sequence
     const h = 9 + Math.floor(i / 4);
     const m = (i * 15) % 60;
     const timeStr = `2024-05-20 ${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${Math.floor(Math.random()*59).toString().padStart(2,'0')}`;
@@ -88,9 +87,69 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 // --- VEHICLE MODE COMPONENT ---
 const VehicleDetailView = ({ station, vin }: { station: ProcessNode, vin: string }) => {
     // Mock Result generation based on VIN and Station
-    // In real app, this fetches from API
     const isPass = !vin.includes('FAIL'); 
+    const [currentSnapshotIndex, setCurrentSnapshotIndex] = useState(0);
     
+    // Helper to generate specific checklist items based on station type
+    const getDetailMetrics = (id: string) => {
+        const lowerId = id.toLowerCase();
+        
+        // Specific logic for Door Assembly (As requested)
+        if (lowerId.includes('door') || lowerId.includes('dr0') || lowerId.includes('trim')) {
+            return [
+                { label: '关键螺钉力矩 (Torque)', status: 'OK', value: '45.2 Nm' },
+                { label: '堵件完整性 (Plugs)', status: 'OK', value: 'Present' },
+                { label: '缓冲块位置 (Buffer)', status: 'OK', value: 'Aligned' },
+                { label: '装饰板卡扣 (Clips)', status: 'OK', value: 'All Locked' },
+                { label: '上缝线轨迹 (Stitch)', status: 'OK', value: 'Uniform' },
+            ];
+        }
+        
+        // Logic for Casting/Stamping
+        if (lowerId.includes('cast') || lowerId.includes('stamp')) {
+            return [
+                { label: '表面平整度 (Flatness)', status: 'OK', value: '0.02mm' },
+                { label: '裂纹检测 (Crack)', status: 'OK', value: 'None' },
+                { label: '孔径尺寸 (Diameter)', status: 'OK', value: '12.05mm' },
+            ];
+        }
+
+        // Logic for Welding
+        if (lowerId.includes('weld')) {
+            return [
+                { label: '焊点数量 (Count)', status: 'OK', value: '24/24' },
+                { label: '熔深 (Penetration)', status: 'OK', value: 'PASS' },
+                { label: '飞溅残留 (Spatter)', status: 'OK', value: '< 1%' },
+            ];
+        }
+
+        // Default Generic
+        return [
+            { label: '特征识别 (Feature)', status: 'OK', value: 'Matched' },
+            { label: '尺寸公差 (Tolerance)', status: 'OK', value: 'In Spec' },
+            { label: '外观缺陷 (Visual)', status: 'OK', value: 'Clean' },
+        ];
+    };
+
+    const metrics = getDetailMetrics(station.id);
+
+    // Mock Snapshots (Multi-view) - Using high-reliability placeholders
+    const snapshots = [
+        { label: '主视图 (Main View)', url: "https://placehold.co/800x450/1e293b/00f0ff.png?text=Main+View+(RGB)&font=roboto" },
+        { label: '局部特写 (ROI Zoom)', url: "https://placehold.co/800x450/1e293b/0aff00.png?text=ROI+Detail&font=roboto" },
+        { label: '深度图 (Depth Map)', url: "https://placehold.co/800x450/1e293b/ff2a2a.png?text=Depth+Map+(3D)&font=roboto" }
+    ];
+
+    const handlePrevSnapshot = () => {
+        setCurrentSnapshotIndex((prev) => (prev === 0 ? snapshots.length - 1 : prev - 1));
+    };
+
+    const handleNextSnapshot = () => {
+        setCurrentSnapshotIndex((prev) => (prev === snapshots.length - 1 ? 0 : prev + 1));
+    };
+
+    const currentImage = snapshots[currentSnapshotIndex];
+
     return (
         <div className="flex flex-col h-full bg-industrial-800">
              {/* Header */}
@@ -119,58 +178,116 @@ const VehicleDetailView = ({ station, vin }: { station: ProcessNode, vin: string
             </div>
 
             {/* Content Body */}
-            <div className="flex-1 overflow-y-auto p-8 space-y-8">
+            <div className="flex-1 overflow-y-auto p-8 space-y-8 custom-scrollbar">
                 
-                {/* 1. Photo Section */}
+                {/* 1. Photo Section (Single Carousel) */}
                 <div>
                     <h3 className="text-lg font-bold text-white flex items-center gap-2 mb-4 border-l-4 border-neon-blue pl-3">
                         <Camera size={20} className="text-gray-400" />
-                        检测快照
+                        检测快照 (Snapshots)
                     </h3>
-                    <div className="w-full aspect-video bg-black rounded-lg border border-industrial-600 overflow-hidden relative group">
+                    
+                    <div className="relative w-full aspect-video bg-black rounded-lg border border-industrial-600 overflow-hidden group">
+                        {/* Image */}
                         <img 
-                            src={station.meta?.imgUrl || "https://images.unsplash.com/photo-1565043589221-1a6fd9ae45c7?auto=format&fit=crop&w=800&q=80"} 
-                            alt="Inspection"
-                            className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+                            src={currentImage.url} 
+                            alt={currentImage.label}
+                            className="w-full h-full object-cover opacity-90 transition-opacity duration-300"
                         />
-                        <div className="absolute bottom-2 right-2 bg-black/70 px-2 py-1 text-xs text-mono text-white rounded border border-white/20">
-                            CAM-01: 2024-05-20 10:42:15
+                        
+                        {/* Overlay Controls */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-100 transition-opacity">
+                             {/* Top Left Label */}
+                             <div className="absolute top-3 left-3 bg-black/60 backdrop-blur-sm px-3 py-1 rounded border border-white/10 text-sm text-gray-200 font-mono">
+                                 {currentImage.label}
+                             </div>
+
+                             {/* Bottom Right Counter */}
+                             <div className="absolute bottom-3 right-3 bg-neon-blue/20 backdrop-blur-sm px-3 py-1 rounded border border-neon-blue/30 text-sm text-neon-blue font-mono font-bold">
+                                 {currentSnapshotIndex + 1} / {snapshots.length}
+                             </div>
+
+                             {/* Nav Buttons */}
+                             <button 
+                                onClick={handlePrevSnapshot}
+                                className="absolute left-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/40 hover:bg-neon-blue/20 text-gray-300 hover:text-neon-blue transition-all border border-transparent hover:border-neon-blue/50"
+                             >
+                                <ChevronLeft size={24} />
+                             </button>
+                             <button 
+                                onClick={handleNextSnapshot}
+                                className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/40 hover:bg-neon-blue/20 text-gray-300 hover:text-neon-blue transition-all border border-transparent hover:border-neon-blue/50"
+                             >
+                                <ChevronRight size={24} />
+                             </button>
                         </div>
                     </div>
                 </div>
 
-                {/* 2. Key Metrics for this Vehicle */}
+                {/* 2. Key Metrics (Specific Checklist) */}
                 <div>
                      <h3 className="text-lg font-bold text-white flex items-center gap-2 mb-4 border-l-4 border-neon-green pl-3">
                         <Activity size={20} className="text-gray-400" />
-                        关键指标
+                        关键指标 (Key Metrics)
                     </h3>
-                    <div className="grid grid-cols-1 gap-3">
-                        {station.meta?.metrics && station.meta.metrics.length > 0 ? (
-                            <div className="bg-industrial-700/30 p-4 rounded border border-industrial-600 flex justify-between items-center">
-                                <span className="text-gray-400">检测数值 (Value)</span>
-                                <span className="text-2xl font-mono font-bold text-white">82.5 <span className="text-sm text-gray-500 font-normal">/ 85.0 Exp</span></span>
+                    <div className="bg-industrial-700/20 rounded-lg border border-industrial-600/50 p-1">
+                        {metrics.map((item, idx) => (
+                            <div key={idx} className={`flex items-center justify-between p-3 ${idx !== metrics.length -1 ? 'border-b border-industrial-700/50' : ''} hover:bg-industrial-700/40 transition-colors`}>
+                                <div className="flex flex-col">
+                                    <span className="text-gray-300 font-medium text-sm">{item.label}</span>
+                                    <span className="text-xs text-gray-500 font-mono mt-0.5">Val: {item.value}</span>
+                                </div>
+                                <div className="flex items-center gap-2 px-3 py-1 rounded bg-neon-green/10 border border-neon-green/20">
+                                    <span className="w-2 h-2 rounded-full bg-neon-green"></span>
+                                    <span className="text-neon-green font-bold text-xs font-mono">OK</span>
+                                </div>
                             </div>
-                        ) : (
-                            <div className="text-gray-500 italic">无需数值化检测</div>
-                        )}
-                        
-                        <div className="bg-industrial-700/30 p-4 rounded border border-industrial-600 flex justify-between items-center">
-                             <span className="text-gray-400">执行时间 (Exec Time)</span>
-                             <span className="text-xl font-mono text-gray-200">1.2s</span>
-                        </div>
+                        ))}
                     </div>
                 </div>
 
-                {/* 3. Report */}
+                {/* 3. Cloud AI Analysis (New) */}
                 <div>
-                     <h3 className="text-lg font-bold text-white flex items-center gap-2 mb-4 border-l-4 border-neon-yellow pl-3">
-                        <FileText size={20} className="text-gray-400" />
-                        检测结论
+                     <h3 className="text-lg font-bold text-white flex items-center gap-2 mb-4 border-l-4 border-purple-500 pl-3">
+                        <Cloud size={20} className="text-purple-400" />
+                        云端 AI 分析 (Cloud Analysis)
                     </h3>
-                    <div className="bg-industrial-900/50 p-4 rounded border border-industrial-700 text-gray-300 leading-relaxed text-base">
-                        检测完成。{station.meta?.inspectionObject || '部件'} 特征识别成功。
-                        {isPass ? '各项指标符合工艺规范。' : '检测到异常：表面存在微小瑕疵，建议人工复核。'}
+                    <div className="bg-gradient-to-br from-industrial-800 to-purple-900/20 p-5 rounded-lg border border-purple-500/30 relative overflow-hidden">
+                        
+                        <div className="flex items-start justify-between mb-4 relative z-10">
+                            <div>
+                                <div className="text-gray-400 text-xs font-mono uppercase tracking-wider mb-1">Risk Assessment</div>
+                                <div className="text-2xl font-bold text-white flex items-center gap-2">
+                                    <ShieldCheck className="text-neon-green" size={24} />
+                                    低风险 (Low Risk)
+                                </div>
+                            </div>
+                            <div className="text-right">
+                                <div className="text-gray-400 text-xs font-mono uppercase tracking-wider mb-1">Consistency Score</div>
+                                <div className="text-2xl font-mono font-bold text-purple-300">
+                                    99.8%
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="space-y-3 relative z-10">
+                            <div className="flex items-center gap-3 bg-industrial-900/60 p-3 rounded border border-industrial-600/50">
+                                <Cpu size={18} className="text-purple-400 flex-shrink-0" />
+                                <div className="text-sm text-gray-300 leading-snug">
+                                    <span className="text-purple-300 font-bold">端云校验:</span> 边缘端 AI 推理结果与云端大模型复核结果高度一致，未发现漏检特征。
+                                </div>
+                            </div>
+                            
+                            <div className="flex items-center gap-3 bg-industrial-900/60 p-3 rounded border border-industrial-600/50">
+                                <AlertTriangle size={18} className="text-gray-500 flex-shrink-0" />
+                                <div className="text-sm text-gray-400 leading-snug">
+                                    <span className="font-bold">趋势预警:</span> 螺钉拧紧力矩处于正态分布中心，无偏移趋势，工艺稳定性良好。
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Background Decor */}
+                        <Cloud className="absolute -bottom-4 -right-4 text-purple-600/10 w-48 h-48 rotate-12" />
                     </div>
                 </div>
 
